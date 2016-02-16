@@ -7,24 +7,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
-import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -62,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this, RequestGet.class);
+        Intent intent = new Intent(this, Update_Server.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         IntentFilter filter = new IntentFilter("miss_temps");
@@ -82,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v("Activity:", "Getting ready");
-                    Message msg = Message.obtain(null, RequestGet.MSG_GET_DATA);
+                    Message msg = Message.obtain(null, Update_Server.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
 
 

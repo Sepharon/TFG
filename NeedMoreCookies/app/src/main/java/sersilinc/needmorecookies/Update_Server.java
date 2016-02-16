@@ -29,7 +29,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 
-public class RequestGet extends Service {
+public class Update_Server extends Service {
     JSONObject DATA = null;
     JSONObject DATA2 = null;
     JSONObject mainData = null;
@@ -45,9 +45,9 @@ public class RequestGet extends Service {
     boolean first=true;
 
     public class LocalBinder extends Binder {
-        RequestGet getService() {
+        Update_Server getService() {
             // Return this instance of LocalService so clients can call public methods
-            return RequestGet.this;
+            return Update_Server.this;
         }
     }
 
