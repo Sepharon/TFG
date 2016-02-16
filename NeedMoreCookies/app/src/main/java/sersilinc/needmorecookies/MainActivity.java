@@ -20,7 +20,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.gms.auth.api.signin.GoogleSignInOptions.Builder;
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+
+
 
 public class MainActivity extends AppCompatActivity {
     // call functions from service usuing data.function_name()
@@ -29,8 +34,10 @@ public class MainActivity extends AppCompatActivity {
     boolean is_bound = false;
 
 
+
     TextView Data1;
     TextView Data2;
+
 
 
     String data1="";
@@ -50,36 +57,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected void onCreate(Bundle saveInstanceState){
 
-       // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.sign_in_button:
-                        signIn();
-                        break;
-                    // ...
-                }
-
-            }
-        });
+        super.onCreate(saveInstanceState);
 
         Intent intent = new Intent(this, RequestGet.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -87,12 +68,12 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter("miss_temps");
         this.registerReceiver(new MyReceiver(), filter);
 
-        Data1 = (TextView)findViewById(R.id.data1);
-        Data2 = (TextView)findViewById(R.id.data2);
+        //Data1 = (TextView)findViewById(R.id.data1);
+        //Data2 = (TextView)findViewById(R.id.data2);
 
 
         // Sending data to Service
-        Log.v("Activity:", "Sending message");
+        /*Log.v("Activity:", "Sending message");
         b = (Button) findViewById(R.id.button);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 start();
             }
         }.start();
-
+*/
     }
 
 
@@ -207,34 +188,11 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-    }
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-            updateUI(true);
-        } else {
-            // Signed out, show unauthenticated UI.
-            updateUI(false);
-        }
-    }
+
+
 
 
 }
