@@ -4,7 +4,8 @@
     <PreferenceScreen
         android:key="contacts"
         android:title="@string/invite_friends"
-        android:persistent="false">
+        android:persistent="false"
+        android:icon="@drawable/ic_menu_invite">
         <!--<intent android:action=""></intent>-->
     </PreferenceScreen>
 </PreferenceScreen>
