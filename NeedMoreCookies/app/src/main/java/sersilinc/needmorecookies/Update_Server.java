@@ -29,7 +29,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 
-public class Update_Server extends Service {
+public class RequestGet extends Service {
     JSONObject DATA = null;
     JSONObject DATA2 = null;
     JSONObject mainData = null;
@@ -37,17 +37,20 @@ public class Update_Server extends Service {
 
     static final int MSG_GET_DATA = 1;
     static final String url = "https://www.tfg.centrethailam.com";
-    static final String request = " ";
 
     private final IBinder mBinder = new LocalBinder();
     private Messenger msg = new Messenger(new IncomingHandler());
 
+    String result_city="";
+    String result_country="";
+    String temp_units="";
+
     boolean first=true;
 
     public class LocalBinder extends Binder {
-        Update_Server getService() {
+        RequestGet getService() {
             // Return this instance of LocalService so clients can call public methods
-            return Update_Server.this;
+            return RequestGet.this;
         }
     }
 
@@ -70,24 +73,24 @@ public class Update_Server extends Service {
             Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
         }
         else {
-            get_data();
             Log.v("Service: ", "Started countdown");
-            new CountDownTimer(300000, 1) { //5min
+            new CountDownTimer(18000, 1000) {
                 public void onTick(long millisUntilFinished) {
-            }
-            public void onFinish() {
-                //Write function to be called
-                get_data();
-                start();
                 }
-            }.start();
+
+                public void onFinish() {
+                   //Write function to be called
+                    get_data();
+                    start();
+                }
+                }.start();
+            }
         }
-    }
 
     public void get_data(){
         int responseCode;
 
-        String full_url = url+request;
+        String full_url = url;
         Log.v("Service:", "full url = " + full_url);
 
         try{
@@ -106,32 +109,35 @@ public class Update_Server extends Service {
                 Log.v("Service:" , "Reading stream");
                 // Read data
                 BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+
                 String json = reader.readLine();
                 Log.v("Service: ", json);
                 // Put the data in a JSONObject
                 DATA2 = new JSONObject(json);
-                data_array = DATA2.getJSONArray("first_name");
-                //DATA = DATA2.getJSONObject("wind");
+                mainData = DATA2.getJSONObject("main");
+                DATA = DATA2.getJSONObject("wind");
 
-                //data_array = DATA.getJSONArray("weather");
-                Log.v("Service: ", data_array.toString());
-                Log.v("Service: ", data_array.getString(0));
-                /*Intent broadcast = new Intent();
+                Log.v("Services:", mainData.getString("temp"));
+                Log.v("Service: ", mainData.getString("temp_min"));
+                Log.v("Services:", mainData.getString("temp_max"));
+                Log.v("Services:", mainData.getString("pressure"));
+                Log.v("Services:", mainData.getString("humidity"));
+
+                data_array = DATA.getJSONArray("weather");
+                Log.v("Service: ", data_array.getJSONObject(0).getString("main"));
+
+                Intent broadcast = new Intent();
                 broadcast.setAction("miss_temps");
-                broadcast.putExtra("temp", mainData.getString("temp"));
-                broadcast.putExtra("temp_min", mainData.getString("temp_min"));
-                broadcast.putExtra("temp_max", mainData.getString("temp_max"));
-                broadcast.putExtra("pressure", mainData.getString("pressure"));
-                broadcast.putExtra("humidity", mainData.getString("humidity"));
-                broadcast.putExtra("weather", data_array.getJSONObject(0).getString("main"));
-                broadcast.putExtra("units", temp_units);
-                sendBroadcast(broadcast);*/
+                broadcast.putExtra("data1", mainData.getString("temp"));
+                broadcast.putExtra("data2", mainData.getString("temp_min"));
+
+                sendBroadcast(broadcast);
 
 
             }
             else {
-                Log.w("Service: ", "List does not exisit");
-                Toast.makeText(getBaseContext(),"List does not exist",Toast.LENGTH_LONG).show();
+                Log.v("Service: ", "city does not exist");
+                Toast.makeText(getBaseContext(),"The city does not exist",Toast.LENGTH_LONG).show();
             }
         } catch (MalformedURLException e){
             e.printStackTrace();
@@ -159,10 +165,10 @@ public class Update_Server extends Service {
                 case MSG_GET_DATA:
 
                     Log.v("Service:", "Got data");
-                    //result_city = msg.getData().getString("city");
-                    //result_country = msg.getData().getString("country_code");
-                    //temp_units = msg.getData().getString("unit");
-                    //Toast.makeText(getApplicationContext(), "Requesting weather's data", Toast.LENGTH_SHORT).show();
+                    result_city = msg.getData().getString("city");
+                    result_country = msg.getData().getString("country_code");
+                    temp_units = msg.getData().getString("unit");
+                    Toast.makeText(getApplicationContext(), "Requesting weather's data", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     super.handleMessage(msg);
