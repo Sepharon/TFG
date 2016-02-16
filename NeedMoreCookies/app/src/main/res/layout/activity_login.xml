@@ -66,8 +66,8 @@
             android:layout_width="212dp"
             android:layout_height="150dp"
             android:id="@+id/cookie_image"
-            android:src="@drawable/cookie_icon"
-            android:layout_marginTop="30dp"
+            android:src="@drawable/cookie_icon2"
+            android:layout_marginTop="20dp"
             android:layout_weight="0.18"
             android:contentDescription="@string/cookie_desciption_login"
             android:visibility="visible" />
