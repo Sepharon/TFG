@@ -21,6 +21,7 @@ import com.google.android.gms.common.api.Status;
 
 /**
  * Created by sergi on 15/02/16.
+ * Forked from
  */
 public class Login extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
