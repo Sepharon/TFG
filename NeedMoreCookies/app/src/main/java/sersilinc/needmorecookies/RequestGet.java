@@ -36,15 +36,11 @@ public class RequestGet extends Service {
     JSONArray data_array = null;
 
     static final int MSG_GET_DATA = 1;
-    static final String url = "http://www.tfgcentrethailam.com";
-    static final String request = "/data/2.5/weather?";
+    static final String url = "https://www.tfg.centrethailam.com";
+    static final String request = " ";
 
     private final IBinder mBinder = new LocalBinder();
     private Messenger msg = new Messenger(new IncomingHandler());
-
-    String result_city="";
-    String result_country="";
-    String temp_units="";
 
     boolean first=true;
 
@@ -74,40 +70,24 @@ public class RequestGet extends Service {
             Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
         }
         else {
-            if (first) {
-                first=false;
-                Log.v("Service: ", "Started countdown");
-                new CountDownTimer(18000, 1000) {
-                    public void onTick(long millisUntilFinished) {
-                    }
-
-                    public void onFinish() {
-                        //Write function to be called
-                        get_weather_data();
-                        start();
-                    }
-                }.start();
-            } else {
-                Log.v("Service: ", "Started countdown");
-                new CountDownTimer(300000, 1) { //5min
-                    public void onTick(long millisUntilFinished) {
-                    }
-
-                    public void onFinish() {
-                        //Write function to be called
-                        get_weather_data();
-                        start();
-                    }
-                }.start();
+            get_data();
+            Log.v("Service: ", "Started countdown");
+            new CountDownTimer(300000, 1) { //5min
+                public void onTick(long millisUntilFinished) {
             }
+            public void onFinish() {
+                //Write function to be called
+                get_data();
+                start();
+                }
+            }.start();
         }
     }
 
-    public void get_weather_data(){
+    public void get_data(){
         int responseCode;
-        Log.v("temp_unit", ""+temp_units);
 
-        String full_url = url+request+"q="+result_city+","+result_country+"&units="+temp_units+"&APPID=3e16d61afeec2d2b55c477eaf523cb20";
+        String full_url = url+request;
         Log.v("Service:", "full url = " + full_url);
 
         try{
@@ -130,19 +110,13 @@ public class RequestGet extends Service {
                 Log.v("Service: ", json);
                 // Put the data in a JSONObject
                 DATA2 = new JSONObject(json);
-                mainData = DATA2.getJSONObject("main");
-                DATA = DATA2.getJSONObject("wind");
+                data_array = DATA2.getJSONArray("first_name");
+                //DATA = DATA2.getJSONObject("wind");
 
-                Log.v("Services:", mainData.getString("temp"));
-                Log.v("Service: ", mainData.getString("temp_min"));
-                Log.v("Services:", mainData.getString("temp_max"));
-                Log.v("Services:", mainData.getString("pressure"));
-                Log.v("Services:", mainData.getString("humidity"));
-
-                data_array = DATA.getJSONArray("weather");
-                Log.v("Service: ", data_array.getJSONObject(0).getString("main"));
-
-                Intent broadcast = new Intent();
+                //data_array = DATA.getJSONArray("weather");
+                Log.v("Service: ", data_array.toString());
+                Log.v("Service: ", data_array.getString(0));
+                /*Intent broadcast = new Intent();
                 broadcast.setAction("miss_temps");
                 broadcast.putExtra("temp", mainData.getString("temp"));
                 broadcast.putExtra("temp_min", mainData.getString("temp_min"));
@@ -151,13 +125,13 @@ public class RequestGet extends Service {
                 broadcast.putExtra("humidity", mainData.getString("humidity"));
                 broadcast.putExtra("weather", data_array.getJSONObject(0).getString("main"));
                 broadcast.putExtra("units", temp_units);
-                sendBroadcast(broadcast);
+                sendBroadcast(broadcast);*/
 
 
             }
             else {
-                Log.v("Service: ", "city does not exist");
-                Toast.makeText(getBaseContext(),"The city does not exist",Toast.LENGTH_LONG).show();
+                Log.w("Service: ", "List does not exisit");
+                Toast.makeText(getBaseContext(),"List does not exist",Toast.LENGTH_LONG).show();
             }
         } catch (MalformedURLException e){
             e.printStackTrace();
@@ -185,10 +159,10 @@ public class RequestGet extends Service {
                 case MSG_GET_DATA:
 
                     Log.v("Service:", "Got data");
-                    result_city = msg.getData().getString("city");
-                    result_country = msg.getData().getString("country_code");
-                    temp_units = msg.getData().getString("unit");
-                    Toast.makeText(getApplicationContext(), "Requesting weather's data", Toast.LENGTH_SHORT).show();
+                    //result_city = msg.getData().getString("city");
+                    //result_country = msg.getData().getString("country_code");
+                    //temp_units = msg.getData().getString("unit");
+                    //Toast.makeText(getApplicationContext(), "Requesting weather's data", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     super.handleMessage(msg);
