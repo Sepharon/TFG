@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle saveInstanceState){
 
         super.onCreate(saveInstanceState);
-
+        setContentView(R.layout.activity_main);
         Intent intent = new Intent(this, RequestGet.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 

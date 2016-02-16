@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">Need More Cookies</string>
-
+    <string name="app_name">Need More Cookies!</string>
+    <string name="title_activity_main">"MainActivity"</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="Request">Request</string>
+    <string name="Status_SignedOut">"To start using this app first you need to Log In to your Google account"</string>
+    <string name="Sign_Title">"Welcome to \n Need More Cookies!"</string>
+
     <string name="server_client_id">428986930300-6p5aokuc8rjh4unijhi3a5hcimilo4mt.apps.googleusercontent.com</string>
+    <string name="cookie_desciption_login">cookie_image_login</string>
 </resources>
