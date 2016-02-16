@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
 
         if (id == R.id.action_settings) {
-            //openAbout();
+            openSettings();
             return true;
         }
 
@@ -177,6 +177,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    public void openSettings(){
+        Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+        startActivity(i);
     }
 
 
