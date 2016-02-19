@@ -21,6 +21,7 @@ import com.google.android.gms.common.api.ResultCallback;
 /**
  * Created by sergi on 15/02/16.
  * Forked from https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java
+ * FINISHED ON 17/02/2016
  */
 public class Login extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,

@@ -24,19 +24,13 @@ public class MainActivity extends AppCompatActivity {
     Messenger mService = null;
     boolean is_bound = false;
 
-
-
     TextView Data1;
     TextView Data2;
-
-
 
     String data1="";
     String data2="";
 
-
     Button b;
-
 
     @Override
     protected void onDestroy() {
@@ -56,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Update_Server.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-        IntentFilter filter = new IntentFilter("miss_temps");
-        this.registerReceiver(new MyReceiver(), filter);
+//        IntentFilter filter = new IntentFilter("miss_temps");
+//        this.registerReceiver(new MyReceiver(), filter);
 
         //Data1 = (TextView)findViewById(R.id.data1);
         //Data2 = (TextView)findViewById(R.id.data2);

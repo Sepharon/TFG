@@ -31,24 +31,17 @@ import java.net.URLConnection;
 
 public class Update_Server extends Service {
     JSONObject DATA = null;
-    JSONObject DATA2 = null;
-    JSONObject mainData = null;
     JSONArray data_array = null;
 
     static final int MSG_GET_DATA = 1;
     static final String url = "https://www.tfg.centrethailam.com";
 
     private final IBinder mBinder = new LocalBinder();
-    private Messenger msg = new Messenger(new IncomingHandler());
 
-    String result_city="";
-    String result_country="";
-    String temp_units="";
-
-    boolean first=true;
+    private String TAG = "Service: ";
 
     public class LocalBinder extends Binder {
-        Update_Server getService() {
+        public Update_Server getService() {
             // Return this instance of LocalService so clients can call public methods
             return Update_Server.this;
         }
@@ -58,7 +51,7 @@ public class Update_Server extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.v("Service:", "Binding");
-        return msg.getBinder();
+        return mBinder;
     }
 
     @Override
@@ -112,28 +105,19 @@ public class Update_Server extends Service {
 
                 String json = reader.readLine();
                 Log.v("Service: ", json);
+                DATA = new JSONObject(json);
                 // Put the data in a JSONObject
-                DATA2 = new JSONObject(json);
-                mainData = DATA2.getJSONObject("main");
-                DATA = DATA2.getJSONObject("wind");
+                data_array = DATA.getJSONArray("first_name");
+                Log.v("Service: ",data_array.toString());
+                Log.v("Service: ", data_array.getString(0));
 
-                Log.v("Services:", mainData.getString("temp"));
-                Log.v("Service: ", mainData.getString("temp_min"));
-                Log.v("Services:", mainData.getString("temp_max"));
-                Log.v("Services:", mainData.getString("pressure"));
-                Log.v("Services:", mainData.getString("humidity"));
-
-                data_array = DATA.getJSONArray("weather");
-                Log.v("Service: ", data_array.getJSONObject(0).getString("main"));
-
-                Intent broadcast = new Intent();
+                /*Intent broadcast = new Intent();
                 broadcast.setAction("miss_temps");
                 broadcast.putExtra("data1", mainData.getString("temp"));
                 broadcast.putExtra("data2", mainData.getString("temp_min"));
 
                 sendBroadcast(broadcast);
-
-
+                */
             }
             else {
                 Log.v("Service: ", "city does not exist");
@@ -165,9 +149,9 @@ public class Update_Server extends Service {
                 case MSG_GET_DATA:
 
                     Log.v("Service:", "Got data");
-                    result_city = msg.getData().getString("city");
-                    result_country = msg.getData().getString("country_code");
-                    temp_units = msg.getData().getString("unit");
+                    //result_city = msg.getData().getString("city");
+                    //result_country = msg.getData().getString("country_code");
+                    //temp_units = msg.getData().getString("unit");
                     Toast.makeText(getApplicationContext(), "Requesting weather's data", Toast.LENGTH_SHORT).show();
                     break;
                 default:
