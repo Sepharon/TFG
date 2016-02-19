@@ -46,6 +46,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
 
+    //UserInfo userinfo;
+
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -127,8 +129,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //userinfo = UserInfo.getInstance();
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
-                setupActionBar();
+        setupActionBar();
     }
 
     /**
@@ -237,7 +240,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     /**
      * This fragment shows help.
-    */
+     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class HelpPreferenceFragment extends PreferenceFragment {
         @Override
@@ -304,7 +307,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class LogoutPreferenceFragment extends PreferenceFragment {
-        GoogleApiClient mGoogleApiClient;
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -323,8 +325,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    signOut();
-                    revokeAccess();
+                    //signOut();
+                    //revokeAccess();
                     return true;
                 }
             });
@@ -339,9 +341,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+    }
+}
 
+/*
         public void signOut(){
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+            Auth.GoogleSignInApi.signOut(userinfo.getmAPIClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
 
@@ -350,7 +355,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
         public void revokeAccess(){
-            Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+            Auth.GoogleSignInApi.revokeAccess(userinfo.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
 
@@ -358,7 +363,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             });
         }
     }
-
+*/
 
 
 
@@ -393,4 +398,3 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }*/
-}
