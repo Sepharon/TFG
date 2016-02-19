@@ -30,9 +30,6 @@ public class Login extends AppCompatActivity implements
 
     private static final String TAG = "LogInActivity";
     private static final int RC_SIGN_IN = 9001;
-    private boolean mResolvingConnectionFailure = false;
-    private boolean mAutoStartSignInflow = true;
-    private boolean mSignInClicked = false;
 
 
     User_Info usr_inf;
@@ -128,7 +125,7 @@ public class Login extends AppCompatActivity implements
             usr_inf.setEmail(acct.getEmail());
             usr_inf.setName(acct.getDisplayName());
             usr_inf.setmAPIClient(mGoogleApiClient);
-            Log.v(TAG,usr_inf.toFormat());
+            Log.v(TAG, usr_inf.toFormat());
             launch_next_activity(acct);
             // I do not think is necessary to update the UI
             //updateUI(true);
@@ -196,7 +193,7 @@ public class Login extends AppCompatActivity implements
 
     private void launch_next_activity (GoogleSignInAccount account){
         // Start new activity
-        Intent intent = new Intent(Login.this,MapsActivity.class);
+        Intent intent = new Intent(Login.this,MainActivity.class);
         // Might need to add things in the intent
         Log.v(TAG,"Launching next activity");
         // Start next activity

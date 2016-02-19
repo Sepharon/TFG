@@ -19,6 +19,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.gms.auth.api.Auth;
@@ -46,7 +47,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
 
-    //UserInfo userinfo;
+    User_Info userinfo;
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -129,7 +130,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //userinfo = UserInfo.getInstance();
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
         setupActionBar();
     }
@@ -313,7 +313,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_logout);
             setHasOptionsMenu(true);
 
-
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
@@ -326,7 +325,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     //signOut();
-                    //revokeAccess();
+                    revokeAccess();
                     return true;
                 }
             });
@@ -341,29 +340,34 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+        public void signOut() {
+            User_Info usr_inf;
+            usr_inf = User_Info.getInstance();
+            Log.v("GOAPICLIENT", "" + usr_inf.getmAPIClient());
+            Auth.GoogleSignInApi.signOut(usr_inf.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+
+                }
+            });
+        }
+
+        public void revokeAccess() {
+            User_Info usr_inf;
+            usr_inf = User_Info.getInstance();
+            Log.v("GOAPICLIENT",""+usr_inf.getmAPIClient());
+            Auth.GoogleSignInApi.revokeAccess(usr_inf.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+
+                }
+            });
+        }
     }
 }
 
-/*
-        public void signOut(){
-            Auth.GoogleSignInApi.signOut(userinfo.getmAPIClient).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(Status status) {
 
-                }
-            });
-        }
-
-        public void revokeAccess(){
-            Auth.GoogleSignInApi.revokeAccess(userinfo.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(Status status) {
-
-                }
-            });
-        }
-    }
-*/
 
 
 

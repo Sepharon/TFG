@@ -14,8 +14,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.Plus;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -31,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     String data2="";
 
     Button b;
+
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onDestroy() {
@@ -49,6 +59,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Intent intent = new Intent(this, Update_Server.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+
+
+        b = (Button)findViewById(R.id.button);
+
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signOut();
+            }
+        });
 
 //        IntentFilter filter = new IntentFilter("miss_temps");
 //        this.registerReceiver(new MyReceiver(), filter);
@@ -94,6 +122,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }.start();
 */
+    }
+
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    public void signOut() {
+        User_Info usr_inf;
+        usr_inf = User_Info.getInstance();
+        Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+                Intent intent = new Intent(MainActivity.this,Login.class);
+                // Start next activity
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
 

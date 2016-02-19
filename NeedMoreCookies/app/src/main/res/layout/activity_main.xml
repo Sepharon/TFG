@@ -6,9 +6,16 @@
 
     <TextView
         android:layout_width="147dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="POUIDWSYGAFVUADBSIOFHASDIYGPVIFBADS"
         android:id="@+id/textView"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.47" />
+        android:layout_weight="0.17" />
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:id="@+id/button"
+        android:text="Tap to Log out"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
