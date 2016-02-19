@@ -14,7 +14,20 @@
           "package_name": "sersilinc.needmorecookies"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "428986930300-95h0ke9nm1o59ifn3kf6bijb9iv79nc9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sersilinc.needmorecookies",
+            "certificate_hash": "FD741DC4F98BBBEBE8EBFFC0E694E676272E4240"
+          }
+        },
+        {
+          "client_id": "428986930300-4t6krvqmf8drj6c3fkvbq2ahvba94urg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [],
       "services": {
         "analytics_service": {
@@ -29,7 +42,7 @@
           "other_platform_oauth_client": []
         },
         "google_signin_service": {
-          "status": 1
+          "status": 2
         },
         "ads_service": {
           "status": 1

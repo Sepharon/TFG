@@ -30,6 +30,11 @@ public class Login extends AppCompatActivity implements
 
     private static final String TAG = "LogInActivity";
     private static final int RC_SIGN_IN = 9001;
+    private boolean mResolvingConnectionFailure = false;
+    private boolean mAutoStartSignInflow = true;
+    private boolean mSignInClicked = false;
+
+
     User_Info usr_inf;
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
