@@ -21,7 +21,13 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+
 import java.util.List;
+
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -39,6 +45,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
+
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -297,6 +304,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class LogoutPreferenceFragment extends PreferenceFragment {
+        GoogleApiClient mGoogleApiClient;
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -311,6 +319,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             //bindPreferenceSummaryToValue(findPreference("example_text"));
             //bindPreferenceSummaryToValue(findPreference("contact"));
             //bindPreferenceSummaryToValue(findPreference("about"));
+            Preference myPref = findPreference("logout");
+            myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    signOut();
+                    revokeAccess();
+                    return true;
+                }
+            });
         }
 
         @Override
@@ -322,7 +339,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+        public void signOut(){
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+
+                }
+            });
+        }
+
+        public void revokeAccess(){
+            Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+
+                }
+            });
+        }
     }
+
+
 
 
 
