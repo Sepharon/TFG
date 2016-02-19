@@ -141,4 +141,8 @@ public class User_Info {
         }
         return buf.toString();
     }
+
+    public String toFormat(){
+        return "User: " + getName() + " " + getEmail();
+    }
 }

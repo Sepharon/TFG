@@ -23,13 +23,14 @@ import com.google.android.gms.common.api.ResultCallback;
  * Forked from https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java
  * FINISHED ON 17/02/2016
  */
+
 public class Login extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
     private static final String TAG = "LogInActivity";
     private static final int RC_SIGN_IN = 9001;
-
+    User_Info usr_inf;
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
@@ -46,7 +47,8 @@ public class Login extends AppCompatActivity implements
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         //findViewById(R.id.sign_out_button).setOnClickListener(this);
         //findViewById(R.id.disconnect_button).setOnClickListener(this);
-
+        // Get User Info class
+        usr_inf = User_Info.getInstance();
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -117,6 +119,11 @@ public class Login extends AppCompatActivity implements
             // acct stores data from the user (email,name...)
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());
+            // Set email and name for user
+            usr_inf.setEmail(acct.getEmail());
+            usr_inf.setName(acct.getDisplayName());
+            usr_inf.setmAPIClient(mGoogleApiClient);
+            Log.v(TAG,usr_inf.toFormat());
             launch_next_activity(acct);
             // I do not think is necessary to update the UI
             //updateUI(true);

@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             //Weather_Data.LocalBinder binder = (Weather_Data.LocalBinder) service;
             //data = binder.getService();
-            mService = new Messenger(service);
+            //mService = new Messenger(service);
             is_bound = true;
         }
 
@@ -177,12 +177,4 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(MainActivity.this, SettingsActivity.class);
         startActivity(i);
     }
-
-
-
-
-
-
-
-
 }
