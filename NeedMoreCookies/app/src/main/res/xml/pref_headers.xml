@@ -22,10 +22,5 @@
         android:icon="@android:drawable/ic_menu_help"
         android:title="@string/pref_header_help" />
 
-    <header
-        android:fragment="sersilinc.needmorecookies.SettingsActivity$LogoutPreferenceFragment"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        android:title="@string/pref_header_logout" />
-
 
 </preference-headers>

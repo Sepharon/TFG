@@ -171,9 +171,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || HelpPreferenceFragment.class.getName().equals(fragmentName)
-                || ContactPreferenceFragment.class.getName().equals(fragmentName)
-                || LogoutPreferenceFragment.class.getName().equals(fragmentName);
+                || ContactPreferenceFragment.class.getName().equals(fragmentName);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(SettingsActivity.this,MainActivity.class);
+        // Start next activity
+        startActivity(intent);
+    }
+
+
+
 
     /**
      * This fragment shows general preferences only. It is used when the
@@ -301,104 +311,4 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-
-    /**
-     * This fragment allows the user log out.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class LogoutPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_logout);
-            setHasOptionsMenu(true);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("example_text"));
-            //bindPreferenceSummaryToValue(findPreference("contact"));
-            //bindPreferenceSummaryToValue(findPreference("about"));
-            Preference myPref = findPreference("logout");
-            myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    //signOut();
-                    revokeAccess();
-                    return true;
-                }
-            });
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-
-        public void signOut() {
-            User_Info usr_inf;
-            usr_inf = User_Info.getInstance();
-            Log.v("GOAPICLIENT", "" + usr_inf.getmAPIClient());
-            Auth.GoogleSignInApi.signOut(usr_inf.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(Status status) {
-
-                }
-            });
-        }
-
-        public void revokeAccess() {
-            User_Info usr_inf;
-            usr_inf = User_Info.getInstance();
-            Log.v("GOAPICLIENT",""+usr_inf.getmAPIClient());
-            Auth.GoogleSignInApi.revokeAccess(usr_inf.getmAPIClient()).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(Status status) {
-
-                }
-            });
-        }
-    }
 }
-
-
-
-
-
-
-
-    /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    /*@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DataSyncPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_data_sync);
-            setHasOptionsMenu(true);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-    }*/

@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity
     String data1="";
     String data2="";
 
-    Button b;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -100,15 +99,6 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        /*b = (Button)findViewById(R.id.button);
-
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signOut();
-            }
-        });*/
-
 //        IntentFilter filter = new IntentFilter("miss_temps");
 //        this.registerReceiver(new MyReceiver(), filter);
 
@@ -160,22 +150,8 @@ public class MainActivity extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
-    public void signOut() {
-        User_Info usr_inf;
-        usr_inf = User_Info.getInstance();
-        Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(Status status) {
-                Intent intent = new Intent(MainActivity.this,Login.class);
-                // Start next activity
-                startActivity(intent);
-                finish();
-            }
-        });
-    }
 
-
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -199,13 +175,7 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
-    /*
-    public void openAbout() {
-        Intent intent = new Intent(MainActivity.this, About.class);
-        startActivity(intent);
-    }
-*/
+    */
 
     // Binding function
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -252,10 +222,6 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
     }
 
-    public void openSettings(){
-        Intent i = new Intent(MainActivity.this, SettingsActivity.class);
-        startActivity(i);
-    }
 
     @Override
     public void onBackPressed() {
@@ -274,23 +240,43 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
+        if (id == R.id.nav_locations) {
+            Intent intent = new Intent(MainActivity.this,MapsActivity.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
         } else if (id == R.id.nav_manage) {
-
+            Intent intent = new Intent(MainActivity.this,SettingsActivity.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
         } else if (id == R.id.nav_share) {
+            //share();
 
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_logout) {
+            signOut();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    //Sign Out from Google Account
+    public void signOut() {
+        User_Info usr_inf;
+        usr_inf = User_Info.getInstance();
+        Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+                Intent intent = new Intent(MainActivity.this, Login.class);
+                // Start next activity
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
 }
