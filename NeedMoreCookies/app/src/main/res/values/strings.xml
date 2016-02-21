@@ -12,8 +12,6 @@
 
 
     <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
 
@@ -63,5 +61,9 @@
 
     <string name="logout">Log out</string>
     <string name="title_activity_maps">Map</string>
+
+    <!--Navigation-->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
 </resources>
