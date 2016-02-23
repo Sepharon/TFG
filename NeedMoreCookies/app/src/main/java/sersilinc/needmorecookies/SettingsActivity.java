@@ -134,17 +134,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         //setupActionBar();
         //getActionBar().setDisplayHomeAsUpEnabled(false);
     }
-
+    /*
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
+
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             // Show the Up button in the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(false);
         }
-    }
+    }*/
 
     /**
      * {@inheritDoc}
@@ -260,6 +260,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_help);
             setHasOptionsMenu(true);
 
+            Preference pref = findPreference("about");
+            pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), About.class);
+                    startActivity(i);
+                    return true;
+                }
+            });
+
+            Preference pref2 = findPreference("contact");
+            pref2.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), ContactUs.class);
+                    startActivity(i);
+                    return true;
+                }
+            });
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
