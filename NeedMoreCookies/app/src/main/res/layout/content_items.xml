@@ -9,95 +9,174 @@
     tools:context="sersilinc.needmorecookies.Item"
     tools:showIn="@layout/app_bar_items">
     <LinearLayout
-        android:id="@+id/firstLayout"
-        android:layout_width="0px"
-        android:layout_weight="1"
-        android:layout_height="45dp"
-        android:orientation="vertical"
-        android:background="@color/material_deep_teal_500"
-        android:visibility="visible">
-        <Button
-            style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="45dp">
+        <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="All"
-            android:id="@+id/all"
-            android:background="@null"
-            android:textColor="#ffffff" />
-        <View android:id="@+id/separator"
-            android:background="#ffffff"
-            android:layout_width = "fill_parent"
-            android:layout_height="2dip"
-            android:visibility="invisible" />
-    </LinearLayout>
+            android:scrollbars="none"
+            android:layout_height="45dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp">
+                <LinearLayout
+                    android:id="@+id/firstLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500"
+                    android:visibility="visible">
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="All"
+                        android:id="@+id/all"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
 
 
-    <LinearLayout
-        android:id="@+id/thirdLayout"
-        android:layout_width="0px"
-        android:layout_weight="1"
-        android:layout_height="45dp"
-        android:orientation="vertical"
-        android:background="@color/material_deep_teal_500">
+                <LinearLayout
+                    android:id="@+id/thirdLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
 
-        <Button
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="Meat"
-            android:id="@+id/meat"
-            android:background="@null"
-            android:textColor="#ffffff" />
-        <View android:id="@+id/separator2"
-            android:background="#ffffff"
-            android:layout_width = "fill_parent"
-            android:layout_height="2dip"
-            android:visibility="visible" />
-    </LinearLayout>
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Meat"
+                        android:id="@+id/meat"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator2"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="visible" />
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/forthLayout"
-        android:layout_width="0px"
-        android:layout_weight="1"
-        android:layout_height="45dp"
-        android:orientation="vertical"
-        android:background="@color/material_deep_teal_500">
+                <LinearLayout
+                    android:id="@+id/forthLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
 
-        <Button
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="Vegetables"
-            android:id="@+id/vegetables"
-            android:background="@null"
-            android:textColor="#ffffff" />
-        <View android:id="@+id/separator3"
-            android:background="#ffffff"
-            android:layout_width = "fill_parent"
-            android:layout_height="2dip"
-            android:visibility="invisible" />
-    </LinearLayout>
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Vegetables"
+                        android:id="@+id/vegetables"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator3"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/fifhtLayout"
-        android:layout_width="0px"
-        android:layout_weight="1"
-        android:layout_height="45dp"
-        android:orientation="vertical"
-        android:background="@color/material_deep_teal_500">
+                <LinearLayout
+                    android:id="@+id/fifhtLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
 
-        <Button
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="Milk"
-            android:id="@+id/milk"
-            android:background="@null"
-            android:textColor="#ffffff" />
-        <View android:id="@+id/separator4"
-            android:background="#ffffff"
-            android:layout_width = "fill_parent"
-            android:layout_height="2dip"
-            android:visibility="invisible" />
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Cereals"
+                        android:id="@+id/cereals"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator4"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/sixthLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
+
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Dairy"
+                        android:id="@+id/dairy"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator5"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/sevenhtLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
+
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Sweet"
+                        android:id="@+id/sweet"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator6"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/eigthhtLayout"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="45dp"
+                    android:orientation="vertical"
+                    android:background="@color/material_deep_teal_500">
+
+                    <Button
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="Others"
+                        android:id="@+id/others"
+                        android:background="@null"
+                        android:textColor="#ffffff" />
+                    <View android:id="@+id/separator7"
+                        android:background="#ffffff"
+                        android:layout_width = "fill_parent"
+                        android:layout_height="2dip"
+                        android:visibility="invisible" />
+                </LinearLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
     </LinearLayout>
 </LinearLayout>
