@@ -5,9 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="sersilinc.needmorecookies.MainActivity"
     tools:showIn="@layout/app_bar_main">
@@ -15,5 +12,73 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NEED TO IMPLEMENT A NAV MENU" />
+        android:text="NEED TO IMPLEMENT A NAV MENU"
+        android:layout_marginTop="27dp"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/firstLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <LinearLayout
+        android:id="@+id/firstLayout"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:orientation="vertical"
+        android:layout_alignRight="@+id/secondView"
+        android:layout_alignEnd="@+id/secondView"
+        android:background="@color/material_deep_teal_500"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:visibility="visible"
+        android:layout_alignBottom="@+id/thirdLayout">
+        <Button
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Private"
+            android:id="@+id/private_lists"
+            android:background="@null"
+            android:textColor="#ffffff" />
+        <View android:id="@+id/separator"
+            android:background="#ffffff"
+            android:layout_width = "fill_parent"
+            android:layout_height="2dip"
+            android:layout_centerVertical ="true"
+            android:layout_alignParentTop="true"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/secondView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:id="@+id/thirdLayout"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_toRightOf="@+id/secondView"
+        android:orientation="vertical"
+        android:background="@color/material_deep_teal_500">
+
+        <Button
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Public"
+            android:id="@+id/public_lists"
+            android:background="@null"
+            android:textColor="#ffffff" />
+        <View android:id="@+id/separator2"
+            android:background="#ffffff"
+            android:layout_width = "fill_parent"
+            android:layout_height="2dip"
+            android:layout_centerVertical ="true"
+            android:layout_alignParentTop="true"
+            android:visibility="visible" />
+    </LinearLayout>
+
+
 </RelativeLayout>

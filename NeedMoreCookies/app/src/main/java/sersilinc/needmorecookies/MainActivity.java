@@ -38,6 +38,11 @@ public class MainActivity extends AppCompatActivity
     Messenger mService = null;
     boolean is_bound = false;
 
+    private Button private_lists;
+    private Button public_lists;
+    private View separator1;
+    private View separator2;
+
     TextView Data1;
     TextView Data2;
 
@@ -63,9 +68,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_main);
 
+        private_lists = (Button) findViewById(R.id.private_lists);
+        public_lists = (Button) findViewById(R.id.public_lists);
+        separator1 = findViewById(R.id.separator);
+        separator2 = findViewById(R.id.separator2);
         //Navigation + floating action button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setElevation(0);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -143,6 +153,23 @@ public class MainActivity extends AppCompatActivity
             }
         }.start();
 */
+        private_lists.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Do things here
+                separator1.setVisibility(View.VISIBLE);
+                separator2.setVisibility(View.INVISIBLE);
+            }
+        });
+        public_lists.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Do things here
+                separator2.setVisibility(View.VISIBLE);
+                separator1.setVisibility(View.INVISIBLE);
+            }
+        });
+
     }
 
     protected void onStart() {
