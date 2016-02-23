@@ -131,7 +131,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
-        setupActionBar();
+        //setupActionBar();
+        //getActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     /**

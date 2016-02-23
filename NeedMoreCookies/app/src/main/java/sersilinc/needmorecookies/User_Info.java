@@ -14,6 +14,8 @@ import java.util.Random;
 /**
  * Created by sergi on 19/02/16.
  */
+
+//TODO: We cannot save the GoogleApiClient because each time you change of Activity, the GoogleApiClient has to be generated again in order to make the SignOut, if you use the previous GoogleApiClient is says that this one is not connected
 public class User_Info {
     private final String TAG = "User Info: ";
     // Global variables for class

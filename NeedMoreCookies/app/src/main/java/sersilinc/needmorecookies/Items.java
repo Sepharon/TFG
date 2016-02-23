@@ -90,6 +90,12 @@ public class Items extends AppCompatActivity
             // Start next activity
             startActivity(intent);
             finish();
+        }
+        else if (id == R.id.nav_home) {
+            Intent intent = new Intent(Items.this,MainActivity.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(Items.this,SettingsActivity.class);
             // Start next activity

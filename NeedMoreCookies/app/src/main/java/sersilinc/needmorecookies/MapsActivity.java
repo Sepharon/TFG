@@ -135,6 +135,12 @@ public class MapsActivity extends AppCompatActivity
             // Start next activity
             startActivity(intent);
             finish();
+        }
+        else if (id == R.id.nav_home) {
+            Intent intent = new Intent(MapsActivity.this,MainActivity.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(MapsActivity.this,SettingsActivity.class);
             // Start next activity
