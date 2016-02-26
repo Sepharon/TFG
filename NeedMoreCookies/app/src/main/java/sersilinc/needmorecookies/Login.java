@@ -193,7 +193,7 @@ public class Login extends AppCompatActivity implements
 
     private void launch_next_activity (GoogleSignInAccount account){
         // Start new activity
-        Intent intent = new Intent(Login.this,Items.class);
+        Intent intent = new Intent(Login.this,MainActivity.class);
         // Might need to add things in the intent
         Log.v(TAG,"Launching next activity");
         // Start next activity
