@@ -79,4 +79,6 @@
     <string name="title_activity_contact_us">ContactUs</string>
     <string name="contact">If you want to contact us, you can send an email pressing the button below</string>
     <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roomates...\n</string>
+    <string name="title_activity_add_list">AddList</string>
+    <string name="title_activity_add_item">AddItem</string>
 </resources>

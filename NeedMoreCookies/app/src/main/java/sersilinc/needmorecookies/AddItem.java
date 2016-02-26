@@ -1,5 +1,6 @@
 package sersilinc.needmorecookies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,7 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -21,9 +21,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-//For now it is called when you press Share on the MainActivity
-
-public class Items extends AppCompatActivity
+public class AddItem extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleApiClient mGoogleApiClient;
@@ -31,29 +29,18 @@ public class Items extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_items);
-        //Navigation + floating action button
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        setContentView(R.layout.activity_add_item);
+        //Navigation
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_item);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab2);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Items.this,AddItem.class);
-                // Start next activity
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout2);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view2);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_item);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -70,9 +57,11 @@ public class Items extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
+
+
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout2);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -88,29 +77,33 @@ public class Items extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_locations) {
-            Intent intent = new Intent(Items.this,MapsActivity.class);
+            Intent intent = new Intent(AddItem.this,MapsActivity.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
+        } else if (id == R.id.nav_manage) {
+            Intent intent = new Intent(AddItem.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
             finish();
         }
         else if (id == R.id.nav_home) {
-            Intent intent = new Intent(Items.this,MainActivity.class);
-            // Start next activity
-            startActivity(intent);
-            finish();
-        } else if (id == R.id.nav_manage) {
-            Intent intent = new Intent(Items.this,SettingsActivity.class);
+            Intent intent = new Intent(AddItem.this,MainActivity.class);
             // Start next activity
             startActivity(intent);
             finish();
         } else if (id == R.id.nav_share) {
+            Intent intent = new Intent(AddItem.this,Items.class);
+            // Start next activity
+            startActivity(intent);
+            finish();
             //share();
 
         } else if (id == R.id.nav_logout) {
             signOut();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout2);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -124,7 +117,7 @@ public class Items extends AppCompatActivity
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
-                Intent intent = new Intent(Items.this, Login.class);
+                Intent intent = new Intent(AddItem.this, Login.class);
                 // Start next activity
                 startActivity(intent);
                 finish();
