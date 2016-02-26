@@ -10,6 +10,68 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="sersilinc.needmorecookies.AddList"
-    tools:showIn="@layout/activity_add_list">
+    tools:showIn="@layout/app_bar_addlist"
+    android:background="@color/material_deep_teal_500">
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_name"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="53dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="@null"
+        android:textColor="#ffffff"
+        android:textColorHint="#ffffff"
+        android:hint="@string/hint_list_name"
+        android:textSize="20dp" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/public_name"
+        android:id="@+id/public_checkBox"
+        android:layout_below="@+id/list_name"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="91dp"
+        android:checked="false"
+        android:textColor="#ffffff"
+        android:textSize="20dp" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/private_name"
+        android:id="@+id/private_checkBox2"
+        android:textColor="#ffffff"
+        android:checked="false"
+        android:textSize="20dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Friends"
+        android:id="@+id/add_friends"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="49dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/save"
+        android:layout_alignTop="@+id/add_friends"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

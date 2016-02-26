@@ -13,22 +13,40 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+/**
+ * CHange Public for shared?
+ */
 
 public class AddList extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleApiClient mGoogleApiClient;
 
+    Button add_friend,save;
+    EditText list_name;
+    CheckBox pub,priv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_list);
+        //Items on Layout
+        list_name = (EditText) findViewById(R.id.list_name);
+        priv = (CheckBox) findViewById(R.id.private_checkBox2);
+        pub = (CheckBox) findViewById(R.id.public_checkBox);
+        add_friend = (Button) findViewById(R.id.add_friends);
+        save = (Button) findViewById(R.id.save);
+
         //Navigation
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_list);
         setSupportActionBar(toolbar);
@@ -49,7 +67,46 @@ public class AddList extends AppCompatActivity
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+        // TODO: check checkboxes status
+        // If this is clicked start new activity displaying a listview of all current friends
+        add_friend.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // TODO : START NEW ACTIVITY
+        }
+    });
+        // If save is clicked save data to server and return it
+        save.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // Save list name, and if its public or private
+            if (pub.isChecked() || priv.isChecked()) {
+                Intent result_data = new Intent();
+                result_data.putExtra("List_Name", list_name.getText().toString());
+                result_data.putExtra("Type", priv.isChecked());
+                setResult(MainActivity.RESULT_OK, result_data);
+                finish();
+                // TODO: SEND DATA TOT SERVER
+            }
+            else Toast.makeText(AddList.this,"You must choose a public or private list", Toast.LENGTH_LONG).show();
+        }
+        });
+
+        pub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (pub.isChecked() && priv.isChecked()) priv.toggle();
+            }
+        });
+
+        priv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (priv.isChecked() && pub.isChecked()) pub.toggle();
+            }
+        });
     }
+
 
     protected void onStart() {
         super.onStart();

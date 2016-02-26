@@ -6,10 +6,12 @@
     <string name="Request">Request</string>
     <string name="Status_SignedOut">"To start using this app, first you need to Log In to your Google account"</string>
     <string name="Sign_Title">"Welcome to \n Need More Cookies!"</string>
-
+    <string name="hint_list_name">Write the name of the list here</string>
+    <string name="public_name">Public</string>
+    <string name="private_name">Private</string>
     <string name="server_client_id">428986930300-6p5aokuc8rjh4unijhi3a5hcimilo4mt.apps.googleusercontent.com</string>
     <string name="cookie_desciption_login">cookie_image_login</string>
-
+    <string name="title_activity_list__contacts">Conteacts List</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General</string>

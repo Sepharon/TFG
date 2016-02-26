@@ -28,6 +28,30 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ *  JSON FORMAT ->
+ *  {
+    "main":{
+        "status":"Private",
+         "id":"Sergi",
+         "list_name":"Rommie",
+         "Hash":"1234"
+    },
+    "objects":{
+        "meat":[
+            "x",
+            "y",
+            "z"
+        ],
+        "vegetables":[
+            "d",
+            "f",
+            "g"
+        ]
+    }
+    }
+ *  }
+ */
 
 public class Update_Server extends Service {
     JSONObject DATA = null;
