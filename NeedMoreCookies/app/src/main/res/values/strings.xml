@@ -73,6 +73,9 @@
     <string name="permission_required_toast">Location permission is required for this application.</string>
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_enable">Please, turn on the Location</string>
+
+
+
     <string name="title_activity_items">Items</string>
     <string name="title_activity_about">About</string>
     <string name="title_activity_help">Help</string>
@@ -81,4 +84,10 @@
     <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roomates...\n</string>
     <string name="title_activity_add_list">AddList</string>
     <string name="title_activity_add_item">AddItem</string>
+
+    <!--Add item-->
+    <string name="price">Price</string>
+    <string name="quantity">Quantity</string>
+    <string name="product">Product</string>
+    <string name="add_item_textview">Please, write the name of the product,\n the quantity and the price,\n if applicable.</string>
 </resources>

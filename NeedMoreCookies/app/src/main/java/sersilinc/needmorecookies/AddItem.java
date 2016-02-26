@@ -11,9 +11,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -25,6 +29,15 @@ public class AddItem extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleApiClient mGoogleApiClient;
+
+    EditText Product;
+    EditText Quantity;
+    EditText Price;
+
+    Button Save;
+
+    boolean product_added = false;
+    boolean quantity_added = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +63,77 @@ public class AddItem extends AppCompatActivity
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+
+        Product = (EditText)findViewById(R.id.product);
+        Quantity = (EditText)findViewById(R.id.quantity);
+        Price = (EditText)findViewById(R.id.price);
+        Save = (Button)findViewById(R.id.save_item);
+
+        Save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Send to server?
+                Intent intent = new Intent(AddItem.this, Items.class);
+                // Start next activity
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        Save.setEnabled(false);
+
+        Product.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (Product.getText().toString().equals("")) {
+                    product_added=false;
+                    Save.setEnabled(false);
+                } else {
+                    product_added=true;
+                }
+                if (product_added && quantity_added){
+                    Save.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        Quantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (Quantity.getText().toString().equals("")){
+                    quantity_added=false;
+                    Save.setEnabled(false);
+                } else {
+                    quantity_added = true;
+                }
+
+                if (product_added && quantity_added){
+                    Save.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
     }
 
     protected void onStart() {

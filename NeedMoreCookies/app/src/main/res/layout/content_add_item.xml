@@ -12,4 +12,55 @@
     tools:context="sersilinc.needmorecookies.AddItem"
     tools:showIn="@layout/activity_add_item">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:id="@+id/add_item"
+        android:text="@string/add_item_textview"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp"
+        android:textAlignment="center" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:hint="@string/product"
+        android:id="@+id/product"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/add_item"
+        android:inputType="textCapSentences"
+        android:textAlignment="center" />
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:hint="@string/quantity"
+        android:id="@+id/quantity"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/product"
+        android:layout_marginTop="50dp"
+        android:inputType="numberDecimal"
+        android:textAlignment="center" />
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:hint="@string/price"
+        android:id="@+id/price"
+        android:layout_below="@+id/quantity"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:inputType="numberDecimal"
+        android:textAlignment="center" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/save_item"
+        android:layout_below="@+id/price"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/price"
+        android:layout_toEndOf="@+id/price"
+        android:drawableTop="@android:drawable/ic_menu_save"
+        android:layout_marginTop="50dp"
+        android:background="#00ffffff" />
 </RelativeLayout>
