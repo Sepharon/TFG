@@ -11,11 +11,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.google.android.gms.auth.api.Auth;
@@ -29,25 +30,118 @@ public class AddItem extends AppCompatActivity
 
     private GoogleApiClient mGoogleApiClient;
 
-    EditText List_name;
-    CheckBox priv,pub;
-    Button   add_friends,save;
+    EditText Product;
+    EditText Quantity;
+    EditText Price;
+
+    Button Save;
+
+    boolean product_added = false;
+    boolean quantity_added = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
+        //Navigation
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_item);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_item);
+        navigationView.setNavigationItemSelectedListener(this);
+
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+
+        Product = (EditText)findViewById(R.id.product);
+        Quantity = (EditText)findViewById(R.id.quantity);
+        Price = (EditText)findViewById(R.id.price);
+        Save = (Button)findViewById(R.id.save_item);
+
+        Save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Send to server?
+                Intent intent = new Intent(AddItem.this, Items.class);
+                // Start next activity
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        Save.setEnabled(false);
+
+        Product.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (Product.getText().toString().equals("")) {
+                    product_added=false;
+                    Save.setEnabled(false);
+                } else {
+                    product_added=true;
+                }
+                if (product_added && quantity_added){
+                    Save.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        Quantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (Quantity.getText().toString().equals("")){
+                    quantity_added=false;
+                    Save.setEnabled(false);
+                } else {
+                    quantity_added = true;
+                }
+
+                if (product_added && quantity_added){
+                    Save.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
     }
-
-
-
-
-
 
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
+
+
 
     @Override
     public void onBackPressed() {
