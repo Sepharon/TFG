@@ -31,7 +31,7 @@ public class AddList extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleApiClient mGoogleApiClient;
-
+    static final int PICK_CONTACT_REQUEST = 1;
     Button add_friend,save;
     EditText list_name;
     CheckBox pub,priv;
@@ -67,12 +67,14 @@ public class AddList extends AppCompatActivity
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        // TODO: check checkboxes status
         // If this is clicked start new activity displaying a listview of all current friends
         add_friend.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             // TODO : START NEW ACTIVITY
+            Intent in = new Intent(AddList.this,List_Contacts.class);
+            Log.v("Add new list: ","Starting list_contacts");
+            startActivityForResult(in,PICK_CONTACT_REQUEST);
         }
     });
         // If save is clicked save data to server and return it
@@ -81,6 +83,7 @@ public class AddList extends AppCompatActivity
         public void onClick(View v) {
             // Save list name, and if its public or private
             if (pub.isChecked() || priv.isChecked()) {
+                Log.v("AddList: ","Returning data");
                 Intent result_data = new Intent();
                 result_data.putExtra("List_Name", list_name.getText().toString());
                 result_data.putExtra("Type", priv.isChecked());
@@ -96,6 +99,7 @@ public class AddList extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (pub.isChecked() && priv.isChecked()) priv.toggle();
+                add_friend.setEnabled(true);
             }
         });
 
@@ -103,6 +107,7 @@ public class AddList extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (priv.isChecked() && pub.isChecked()) pub.toggle();
+                add_friend.setEnabled(false);
             }
         });
     }
@@ -180,5 +185,17 @@ public class AddList extends AppCompatActivity
             }
         });
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == PICK_CONTACT_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
 
+                // Do something with the contact here (bigger example below)
+            }
+        }
+    }
 }

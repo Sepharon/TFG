@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -19,6 +20,8 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,11 +34,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+// TODO : need to talk about this. How do we get friends? gmail? phone number? name? or put a password?
 
 public class List_Contacts extends AppCompatActivity {
     List<String> name1 = new ArrayList<String>();
@@ -64,23 +66,15 @@ public class List_Contacts extends AppCompatActivity {
             public void onClick(View v) {
                 StringBuilder checkedcontacts= new StringBuilder();
                 System.out.println(".............."+ma.mCheckStates.size());
-                for(int i = 0; i < name1.size(); i++)
-
-                {
-                    if(ma.mCheckStates.get(i)==true)
-                    {
+                for(int i = 0; i < name1.size(); i++) {
+                    if(ma.mCheckStates.get(i)==true) {
                         checkedcontacts.append(name1.get(i).toString());
                         checkedcontacts.append("\n");
-
                     }
-                    else
-                    {
+                    else {
                         System.out.println("Not Checked......"+name1.get(i).toString());
                     }
-
-
                 }
-
                 Toast.makeText(List_Contacts.this, checkedcontacts, Toast.LENGTH_LONG).show();
             }
         });
@@ -95,7 +89,7 @@ public class List_Contacts extends AppCompatActivity {
 
     public  void getAllContacts(ContentResolver cr) {
 
-        Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
+        Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         while (phones.moveToNext())
         {
             String name=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
@@ -103,6 +97,7 @@ public class List_Contacts extends AppCompatActivity {
             //int id = phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
             String photo_uri =phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
             System.out.println(".................." + phoneNumber);
+            Log.v("asdas","" + photo_uri);
             name1.add(name);
             phno1.add(phoneNumber);
             photos.add(photo_uri);
@@ -146,21 +141,19 @@ public class List_Contacts extends AppCompatActivity {
             View vi=convertView;
             if(convertView==null)
                 vi = mInflater.inflate(R.layout.row, null);
-            //ImageView imgViewer = (ImageView) findViewById(R.id.char_image);
+            ImageView imgViewer = (ImageView) findViewById(R.id.char_image);
             TextView tv= (TextView) vi.findViewById(R.id.textView1);
             tv1= (TextView) vi.findViewById(R.id.textView2);
             cb = (CheckBox) vi.findViewById(R.id.checkBox1);
             if (photos.get(position) != null) {
                 Uri u = Uri.parse(photos.get(position));
                 if (u != null) {
-                  //  imgViewer.setImageURI(u);
+                    imgViewer.setImageURI(u);
                 }
             }
-            else {
-                //imgViewer.setImageResource(R.drawable.ic_contact_picture);
-            }
-            tv.setText("Name :"+ name1.get(position));
-            tv1.setText("Phone No :"+ phno1.get(position));
+
+            tv.setText("Name: "+ name1.get(position));
+            tv1.setText("Phone No: "+ phno1.get(position));
             cb.setTag(position);
             cb.setChecked(mCheckStates.get(position, false));
             cb.setOnCheckedChangeListener(this);
@@ -188,25 +181,11 @@ public class List_Contacts extends AppCompatActivity {
             mCheckStates.put((Integer) buttonView.getTag(), isChecked);
         }
     }
-    public InputStream openPhoto(long contactId) {
-        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
-        Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
-        Cursor cursor = getContentResolver().query(photoUri,
-                new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
-        if (cursor == null) {
-            return null;
-        }
-        try {
-            if (cursor.moveToFirst()) {
-                byte[] data = cursor.getBlob(0);
-                if (data != null) {
-                    return new ByteArrayInputStream(data);
-                }
-            }
-        } finally {
-            cursor.close();
-        }
-        return null;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
     }
-
 }

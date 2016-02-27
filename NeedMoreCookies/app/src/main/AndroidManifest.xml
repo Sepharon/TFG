@@ -90,8 +90,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".List_Contacts"
-            android:label="@string/title_activity_list__contacts"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="@string/title_activity_list__contacts"/>
     </application>
 
 </manifest>

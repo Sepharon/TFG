@@ -9,9 +9,10 @@
     <string name="hint_list_name">Write the name of the list here</string>
     <string name="public_name">Public</string>
     <string name="private_name">Private</string>
+    <string name="chose_public_priv">Choose between a private or public list</string>
     <string name="server_client_id">428986930300-6p5aokuc8rjh4unijhi3a5hcimilo4mt.apps.googleusercontent.com</string>
     <string name="cookie_desciption_login">cookie_image_login</string>
-    <string name="title_activity_list__contacts">Conteacts List</string>
+    <string name="title_activity_list__contacts">Contacts List</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General</string>
