@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,9 +8,19 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="sersilinc.needmorecookies.Item"
     tools:showIn="@layout/app_bar_items">
+
+    <ListView
+        android:id="@+id/list_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/firstLayout_items">
+
+    </ListView>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp">
+        android:layout_height="45dp"
+        android:id="@+id/firstLayout_items">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:scrollbars="none"
@@ -34,7 +44,7 @@
                         android:id="@+id/all"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator"
+                    <View android:id="@+id/separator_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -58,7 +68,7 @@
                         android:id="@+id/meat"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator2"
+                    <View android:id="@+id/separator2_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -81,7 +91,7 @@
                         android:id="@+id/vegetables"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator3"
+                    <View android:id="@+id/separator3_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -104,7 +114,7 @@
                         android:id="@+id/cereals"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator4"
+                    <View android:id="@+id/separator4_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -126,7 +136,7 @@
                         android:id="@+id/dairy"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator5"
+                    <View android:id="@+id/separator5_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -148,7 +158,7 @@
                         android:id="@+id/sweet"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator6"
+                    <View android:id="@+id/separator6_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -170,7 +180,7 @@
                         android:id="@+id/others"
                         android:background="@null"
                         android:textColor="#ffffff" />
-                    <View android:id="@+id/separator7"
+                    <View android:id="@+id/separator7_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
                         android:layout_height="2dip"
@@ -179,4 +189,4 @@
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

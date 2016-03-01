@@ -21,10 +21,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 import android.support.annotation.NonNull;
-import android.widget.Toast;
-;
 
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -37,7 +34,9 @@ public class MapsActivity extends AppCompatActivity
 
     //Places
     //TODO: Implement Google API Places to show nearby supermarkets
-    private static final int PLACE_PICKER_REQUEST = 1;
+    //private static final int PLACE_PICKER_REQUEST = 1;
+
+
     private GoogleApiClient mGoogleApiClient;
 
     //Location
@@ -117,7 +116,7 @@ public class MapsActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-        Intent intent = new Intent(MapsActivity.this,MainActivity.class);
+        Intent intent = new Intent(MapsActivity.this, MainActivity.class);
         // Start next activity
         startActivity(intent);
     }
@@ -131,18 +130,17 @@ public class MapsActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_locations) {
-            Intent intent = new Intent(MapsActivity.this,MapsActivity.class);
+            Intent intent = new Intent(MapsActivity.this, MapsActivity.class);
             // Start next activity
             startActivity(intent);
             finish();
-        }
-        else if (id == R.id.nav_home) {
-            Intent intent = new Intent(MapsActivity.this,MainActivity.class);
+        } else if (id == R.id.nav_home) {
+            Intent intent = new Intent(MapsActivity.this, MainActivity.class);
             // Start next activity
             startActivity(intent);
             finish();
         } else if (id == R.id.nav_manage) {
-            Intent intent = new Intent(MapsActivity.this,SettingsActivity.class);
+            Intent intent = new Intent(MapsActivity.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
             finish();
@@ -190,8 +188,8 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
-
     //[Location]
+
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
@@ -209,11 +207,12 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-       // Toast.makeText(this, R.string.location_enable, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, R.string.location_enable, Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -250,5 +249,6 @@ public class MapsActivity extends AppCompatActivity
     }
 
     //[END Location]
+
 }
 
