@@ -86,7 +86,7 @@ public class AddList extends AppCompatActivity
                 Log.v("AddList: ","Returning data");
                 Intent result_data = new Intent();
                 result_data.putExtra("List_Name", list_name.getText().toString());
-                result_data.putExtra("Type", priv.isChecked());
+                result_data.putExtra("Type","" + priv.isChecked());
                 setResult(MainActivity.RESULT_OK, result_data);
                 finish();
                 // TODO: SEND DATA TOT SERVER

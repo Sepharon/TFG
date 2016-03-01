@@ -9,15 +9,13 @@
     tools:context="sersilinc.needmorecookies.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="NEED TO IMPLEMENT A NAV MENU"
-        android:layout_marginTop="27dp"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/firstLayout"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/firstLayout">
+
+    </ListView>
 
 
     <LinearLayout
@@ -46,7 +44,7 @@
             android:layout_height="2dip"
             android:layout_centerVertical ="true"
             android:layout_alignParentTop="true"
-            android:visibility="invisible" />
+            android:visibility="visible" />
     </LinearLayout>
 
     <View
@@ -77,7 +75,7 @@
             android:layout_height="2dip"
             android:layout_centerVertical ="true"
             android:layout_alignParentTop="true"
-            android:visibility="visible" />
+            android:visibility="invisible" />
     </LinearLayout>
 
 

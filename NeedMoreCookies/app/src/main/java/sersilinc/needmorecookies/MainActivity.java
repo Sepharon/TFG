@@ -21,7 +21,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -30,14 +32,20 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     // call functions from service usuing data.function_name()
-    //Weather_Data data;
+    // Main tag for Logs
+    private final String TAG = "Main Activity: ";
+    // Service elements
     Messenger mService = null;
     boolean is_bound = false;
-
+    // UI elements
     private Button private_lists;
     private Button public_lists;
     private View separator1;
@@ -45,22 +53,20 @@ public class MainActivity extends AppCompatActivity
 
     TextView Data1;
     TextView Data2;
-
     String data1="";
     String data2="";
 
-
+    // ListView
+    private ListView listview;
+    // Private and public list names
+    List<String> public_list = new ArrayList<>();
+    List<String> private_list = new ArrayList<>();
+    // Adapter
+    ArrayAdapter<String> adapter;
+    //Google API client
     private GoogleApiClient mGoogleApiClient;
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Unbind from the service
-        if (is_bound) {
-            unbindService(mConnection);
-            is_bound = false;
-        }
-    }
+    // Current state of UI true = private ; false = public
+    boolean private_or_public = true;
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
@@ -72,6 +78,16 @@ public class MainActivity extends AppCompatActivity
         public_lists = (Button) findViewById(R.id.public_lists);
         separator1 = findViewById(R.id.separator);
         separator2 = findViewById(R.id.separator2);
+        listview = (ListView) findViewById(R.id.list);
+        // Create array with all the pacients
+        private_list.add("Test");
+        Log.v(TAG, private_list.size() + "");
+
+        adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1,private_list);
+        // Create listview
+        listview.setAdapter(adapter);
+
         //Navigation + floating action button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -83,8 +99,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,AddList.class);
                 // Start next activity
-                startActivity(intent);
-                finish();
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -159,16 +174,20 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 // Do things here
-                separator1.setVisibility(View.VISIBLE);
-                separator2.setVisibility(View.INVISIBLE);
+                if (separator1.getVisibility() != View.VISIBLE) {
+                    // Set Adapted for private lists
+                    reload_ui(true);
+                }
             }
         });
         public_lists.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Do things here
-                separator2.setVisibility(View.VISIBLE);
-                separator1.setVisibility(View.INVISIBLE);
+                if (separator2.getVisibility() != View.VISIBLE) {
+                    // Set Adapted for private lists
+                    reload_ui(false);
+                }
             }
         });
 
@@ -180,31 +199,15 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    /*
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-
-        if (id == R.id.action_settings) {
-            openSettings();
-            return true;
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unbind from the service
+        if (is_bound) {
+            unbindService(mConnection);
+            is_bound = false;
         }
-
-        return super.onOptionsItemSelected(item);
     }
-    */
 
     // Binding function
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -317,5 +320,43 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        Log.v(TAG, "Received result");
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Log.v(TAG,"Result OK");
+                Log.v(TAG,"" + data.getStringExtra("Type"));
+                switch (data.getStringExtra("Type")){
+                    case "true":
+                        private_list.add(data.getStringExtra("List_Name"));
+                        reload_ui(true);
+                        break;
+                    case "false":
+                        public_list.add(data.getStringExtra("List_Name"));
+                        reload_ui(false);
+                        break;
+                }
+            }
+        }
+    }
+    private void reload_ui(Boolean type){
+        Log.v(TAG, "Updating UI");
+        if (type){
+            adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,private_list);
+            private_or_public = true;
+            separator1.setVisibility(View.VISIBLE);
+            separator2.setVisibility(View.INVISIBLE);
+        }
+        else {
+            adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,public_list);
+            private_or_public = false;
+            separator2.setVisibility(View.VISIBLE);
+            separator1.setVisibility(View.INVISIBLE);
+        }
+        // Create listview
+        listview.setAdapter(adapter);
+    }
 }
