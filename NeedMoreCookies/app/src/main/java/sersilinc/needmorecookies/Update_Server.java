@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -90,6 +92,7 @@ public class Update_Server extends Service {
             Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
         }
         else {
+            send_post_request();
             Log.v("Service: ", "Started countdown");
             new CountDownTimer(18000, 1000) {
                 public void onTick(long millisUntilFinished) {
@@ -98,12 +101,13 @@ public class Update_Server extends Service {
                 public void onFinish() {
                    //Write function to be called
                     get_data();
+                    send_post_request();
                     start();
                 }
                 }.start();
             }
         }
-
+    // TODO: This shoudl go to the other service
     public void get_data(){
         int responseCode;
 
@@ -154,6 +158,33 @@ public class Update_Server extends Service {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+    }
+    private void send_post_request(){
+        final String query = "name = Sergi+&id=12345";
+        Log.v(TAG, "full url = " + url);
+        // Create new thread so not to block URL
+        Log.v(TAG,"Creating thread to send data");
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL link_url = new URL(url);
+                    HttpURLConnection connection = (HttpURLConnection)link_url.openConnection();
+                    //Set to POST
+                    connection.setDoOutput(true);
+                    connection.setRequestMethod("POST");
+                    connection.setReadTimeout(10000);
+                    Writer writer = new OutputStreamWriter(connection.getOutputStream());
+                    writer.write(query);
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
 
     }
 
