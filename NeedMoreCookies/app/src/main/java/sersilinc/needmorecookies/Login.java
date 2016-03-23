@@ -124,7 +124,7 @@ public class Login extends AppCompatActivity implements
             // Set email and name for user
             usr_inf.setEmail(acct.getEmail());
             usr_inf.setName(acct.getDisplayName());
-            usr_inf.setmAPIClient(mGoogleApiClient);
+            //usr_inf.setmAPIClient(mGoogleApiClient);
             Log.v(TAG, usr_inf.toFormat());
             launch_next_activity(acct);
             // I do not think is necessary to update the UI

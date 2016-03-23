@@ -197,7 +197,7 @@ public class AddItem extends AppCompatActivity
     public void signOut() {
         User_Info usr_inf;
         usr_inf = User_Info.getInstance();
-        Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {

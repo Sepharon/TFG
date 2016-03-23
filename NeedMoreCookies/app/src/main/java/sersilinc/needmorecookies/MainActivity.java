@@ -124,52 +124,6 @@ public class MainActivity extends AppCompatActivity
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-
-
-//        IntentFilter filter = new IntentFilter("miss_temps");
-//        this.registerReceiver(new MyReceiver(), filter);
-
-        //Data1 = (TextView)findViewById(R.id.data1);
-        //Data2 = (TextView)findViewById(R.id.data2);
-
-
-        // Sending data to Service
-        /*Log.v("Activity:", "Sending message");
-        b = (Button) findViewById(R.id.button);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (is_bound) {
-                    //if (!is_bound) return;
-                    // Create and send a message to the service, using a supported 'what' value
-                    Log.v("Activity:", "Getting ready");
-                    Message msg = Message.obtain(null, Update_Server.MSG_GET_DATA);
-                    Bundle bundle = new Bundle();
-
-
-                    msg.setData(bundle);
-                    try {
-                        mService.send(msg);
-                        Log.v("Activity:", "Message sent");
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Done sending data
-                }
-            }
-        });
-
-
-        new CountDownTimer(300000, 1000) { //5min
-            public void onTick(long millisUntilFinished) {}
-            public void onFinish() {
-                //Write function to be called
-                reload();
-                start();
-            }
-        }.start();
-*/
         private_lists.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,6 +144,10 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
+        //bind Service
+        Intent in = new Intent(this, Update_List.class);
+        bindService(in, mConnection, Context.BIND_AUTO_CREATE);
 
     }
 
@@ -309,7 +267,7 @@ public class MainActivity extends AppCompatActivity
     public void signOut() {
         User_Info usr_inf;
         usr_inf = User_Info.getInstance();
-        Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {

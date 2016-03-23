@@ -15,7 +15,6 @@ import java.util.Random;
  * Created by sergi on 19/02/16.
  */
 
-//TODO: We cannot save the GoogleApiClient because each time you change of Activity, the GoogleApiClient has to be generated again in order to make the SignOut, if you use the previous GoogleApiClient is says that this one is not connected
 public class User_Info {
     private final String TAG = "User Info: ";
     // Global variables for class
@@ -32,7 +31,7 @@ public class User_Info {
     List<List<String>> public_lists = new ArrayList<>();
     List<List<String>> private_lists = new ArrayList<>();
     // GoogleAPICLient
-    private GoogleApiClient mAPIClient;
+    //private GoogleApiClient mAPIClient;
 
     // Instantiate
     private static User_Info user_info = new User_Info();
@@ -50,7 +49,7 @@ public class User_Info {
         this.ID = ID;
         this.name = name;
         this.email = email;
-        this.mAPIClient = mAPIClient;
+        //this.mAPIClient = mAPIClient;
         Log.v(TAG,"User Info added for " + name);
     }
 
@@ -70,9 +69,9 @@ public class User_Info {
     public List<List<String>> getPublic_lists() {
         return public_lists;
     }
-    public GoogleApiClient getmAPIClient() {
+    /*public GoogleApiClient getmAPIClient() {
         return mAPIClient;
-    }
+    }*/
 
     // Set values
     public void setID(int ID) {
@@ -95,9 +94,9 @@ public class User_Info {
         this.public_lists.add(public_list);
 
     }
-    public void setmAPIClient(GoogleApiClient mAPIClient) {
+    /*public void setmAPIClient(GoogleApiClient mAPIClient) {
         this.mAPIClient = mAPIClient;
-    }
+    }*/
 
 
 
