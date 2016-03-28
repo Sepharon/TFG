@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this,AddList.class);
+                Intent intent = new Intent(MainActivity.this, AddList.class);
                 // Start next activity
                 startActivityForResult(intent, 1);
             }
@@ -112,10 +112,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-
-        Intent intent = new Intent(this, Update_Server.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
@@ -146,9 +142,11 @@ public class MainActivity extends AppCompatActivity
         });
 
         //bind Service
-        Intent in = new Intent(this, Update_List.class);
+        Log.v(TAG,"Starting Update Server");
+        Intent in = new Intent(this, Update_Server.class);
         bindService(in, mConnection, Context.BIND_AUTO_CREATE);
-
+        //Intent intent = new Intent(this, Update_Server.class);
+        //bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     protected void onStart() {
