@@ -1,24 +1,24 @@
 package sersilinc.needmorecookies;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.StrictMode;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import com.google.android.gms.analytics.ecommerce.Product;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -26,7 +26,6 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
 
 
 public class Update_Server extends Service {
@@ -35,9 +34,15 @@ public class Update_Server extends Service {
     static final String url = "https://www.tfg.centrethailam.com";
     JSONEncoder jsonEncoderClass = new JSONEncoder();
     private final IBinder mBinder = new LocalBinder();
-
+    IntentFilter filter;
+    private MyReceiver receiver;
     private final String TAG = "Update_Server: ";
+
+    private final String [] keys = {"Objective","Code","list_name","Hash","Update","GoogleAccount","status"};
+    private String [] values = new String[7];
+    private String [] items = new String[4];
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
+
     public class LocalBinder extends Binder {
         public Update_Server getService() {
             // Return this instance of LocalService so clients can call public methods
@@ -54,13 +59,17 @@ public class Update_Server extends Service {
     @Override
     public void onCreate (){
         super.onCreate();
-        String [] keys = {"Objective","Code","list_name","Hash","Update","GoogleAccount"};
-        String [] values = {"new_name","rommie_list","Rommie","1234","True","jaime.escuer93@gmail.com"};
-        String [] items = {"Vegetables","Ham","11","2"};
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        filter = new IntentFilter("Update_Server_Thread");
+        receiver = new MyReceiver();
+        this.registerReceiver(receiver, filter);
         Log.v(TAG, " Update Server started");
         jsonEncoderClass.create_template();
+        // Set values
+        set_values(3,"private_sergi","Private Sergi","abc","True","0");
+        set_items("Meat","Beef","6","1");
+        // Create JSON
         set_json(keys, values, 0);
         set_json(keys, items, 1);
         Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
@@ -69,7 +78,7 @@ public class Update_Server extends Service {
         else
             send_post_request(jsonEncoderClass.return_json());
     }
-
+    // Creates the apropiate JSON based if the values need to go in the main or in Values
     private boolean set_json(String [] key, String[] value,int update_main){
 
         if (jsonEncoderClass.return_json() == null) return false;
@@ -83,6 +92,26 @@ public class Update_Server extends Service {
 
         return true;
     }
+    // Sets the values for the values array
+    private boolean set_values(int objective_code,String list_code,String list_name,String hash,String update,String status){
+        if (objective_code > 10) return false;
+        values[0] = objectives[objective_code];
+        values[1] = list_code;
+        values[2] = list_name;
+        values[3] = hash;
+        values[4] = update;
+        values[5] = User_Info.getInstance().getEmail();
+        values[6] = status;
+
+        return true;
+    }
+    // Sets values for the item array
+    private void set_items(String Type, String Product_name, String Price, String Quantity){
+        items[0] = Type;
+        items[1] = Product_name;
+        items[2] = Price;
+        items[3] = Quantity;
+    }
 
     private void send_post_request(final JSONObject o){
 
@@ -92,9 +121,11 @@ public class Update_Server extends Service {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+                String response = "";
+                HttpURLConnection connection = null;
                 try {
                     URL link_url = new URL(url);
-                    HttpURLConnection connection = (HttpURLConnection)link_url.openConnection();
+                    connection = (HttpURLConnection)link_url.openConnection();
                     //Set to POST
                     connection.setDoOutput(true);
                     connection.setRequestMethod("POST");
@@ -106,20 +137,25 @@ public class Update_Server extends Service {
                     writer.close();
                     Reader in = new InputStreamReader(connection.getInputStream(), "UTF-8");
                     Log.v("Thread", "Sended");
-                    int c = in.read();
-                    in.close();
-                    /*StringBuilder sb = new StringBuilder();
-                    /for (int c; (c = in.read()) >= 0;) {
+                    //in.close();
+                    StringBuilder sb = new StringBuilder();
+                    for (int c; (c = in.read()) >= 0;) {
                         sb.append((char) c);
                     }
                     in.close();
-                    String response = sb.toString();
-//                    Log.v("Thread","dascdac");
-//                    Log.v("Thread response: ", response);*/
+                    response = sb.toString();
+                    Log.v("Thread response: ", response);
                     connection.disconnect();
                 } catch (Exception e) {
-                    Log.v("Thread: ","new url failed");
                     e.printStackTrace();
+                }
+                finally {
+                    if (connection != null) connection.disconnect();
+                    Intent intent = new Intent();
+                    intent.putExtra("message",response);
+                    intent.setAction("Update_Server_Thread");
+                    Log.d("Thread ", "Sending response");
+                    sendBroadcast(intent);
                 }
             }
         });
@@ -133,7 +169,19 @@ public class Update_Server extends Service {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    public class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            String message = intent.getStringExtra("message");
+            Log.d(TAG, "Got message: " + message);
+        }
+    };
 }
+
+
+
 
 class JSONEncoder{
     String TAG = "JSONEncoder";
@@ -142,7 +190,7 @@ class JSONEncoder{
     public JSONObject create_template(){
         Log.v(TAG, " Started");
         try {
-            obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Hash\":\"0000\",\"Update\":\"True\",\"GoogleAccount\" : \"default\", \"Objective\":\"default\"},\"Values\":{}}");
+            obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Hash\":\"0000\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
         } catch (JSONException e) {
             e.printStackTrace();
         }
