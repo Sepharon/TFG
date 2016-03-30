@@ -10,12 +10,8 @@ import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.google.android.gms.analytics.ecommerce.Product;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,18 +26,21 @@ import java.net.URL;
 
 public class Update_Server extends Service {
 
-    static final int MSG_GET_DATA = 1;
     static final String url = "https://www.tfg.centrethailam.com";
+    private final String TAG = "Update_Server: ";
+
     JSONEncoder jsonEncoderClass = new JSONEncoder();
+
     private final IBinder mBinder = new LocalBinder();
+
     IntentFilter filter;
     private MyReceiver receiver;
-    private final String TAG = "Update_Server: ";
 
     private final String [] keys = {"Objective","Code","list_name","Hash","Update","GoogleAccount","status"};
     private String [] values = new String[7];
     private String [] items = new String[4];
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
+    private String request_result;
 
     public class LocalBinder extends Binder {
         public Update_Server getService() {
@@ -61,39 +60,35 @@ public class Update_Server extends Service {
         super.onCreate();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
         filter = new IntentFilter("Update_Server_Thread");
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
+
         Log.v(TAG, " Update Server started");
         jsonEncoderClass.create_template();
         // Set values
-        set_values(3,"private_sergi","Private Sergi","abc","True","0");
-        set_items("Meat","Beef","6","1");
+        //set_values(3,"private_sergi","Private Sergi","abc","True","0");
+        //set_items("Meat","Beef","6","1");
         // Create JSON
-        set_json(keys, values, 0);
-        set_json(keys, items, 1);
-        Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
-        if (!is_network_available())
-            Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
-        else
-            send_post_request(jsonEncoderClass.return_json());
+        //set_json(keys, values, 0);
+        //set_json(keys, items, 1);
+        //Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
+
     }
     // Creates the apropiate JSON based if the values need to go in the main or in Values
-    private boolean set_json(String [] key, String[] value,int update_main){
+    public boolean set_json(String [] key, String[] value,int update_main){
 
         if (jsonEncoderClass.return_json() == null) return false;
         if (update_main == 0) {
             if (key.length != value.length) return false;
             jsonEncoderClass.set_values(key, value, update_main);
         }
-        else{
-            jsonEncoderClass.set_values(key, value, update_main);
-        }
-
+        else jsonEncoderClass.set_values(key, value, update_main);
         return true;
     }
     // Sets the values for the values array
-    private boolean set_values(int objective_code,String list_code,String list_name,String hash,String update,String status){
+    public boolean set_values(int objective_code,String list_code,String list_name,String hash,String update,String status){
         if (objective_code > 10) return false;
         values[0] = objectives[objective_code];
         values[1] = list_code;
@@ -106,11 +101,18 @@ public class Update_Server extends Service {
         return true;
     }
     // Sets values for the item array
-    private void set_items(String Type, String Product_name, String Price, String Quantity){
+    public void set_items(String Type, String Product_name, String Price, String Quantity){
         items[0] = Type;
         items[1] = Product_name;
         items[2] = Price;
         items[3] = Quantity;
+    }
+
+    public void send_request (){
+        if (!is_network_available())
+            Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
+        else
+            send_post_request(jsonEncoderClass.return_json());
     }
 
     private void send_post_request(final JSONObject o){
@@ -139,9 +141,7 @@ public class Update_Server extends Service {
                     Log.v("Thread", "Sended");
                     //in.close();
                     StringBuilder sb = new StringBuilder();
-                    for (int c; (c = in.read()) >= 0;) {
-                        sb.append((char) c);
-                    }
+                    for (int c; (c = in.read()) >= 0;) sb.append((char) c);
                     in.close();
                     response = sb.toString();
                     Log.v("Thread response: ", response);
@@ -160,14 +160,36 @@ public class Update_Server extends Service {
             }
         });
         t.start();
-
     }
 
+    public String return_result(){
+        return request_result;
+    }
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private String process_message(String response){
+
+        try {
+            JSONObject rsp = new JSONObject(response);
+            String usr_email = rsp.getJSONObject("main").getString("GoogleAccount");
+            String result = rsp.getJSONObject("Result").getString("result");
+            if (usr_email.equals(User_Info.getInstance().getEmail())) {
+                request_result = result;
+                return result;
+            }
+            else return "False";
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.v(TAG, "Unable to create JSON from string");
+            Log.v(TAG, "Received JSON: " + response);
+            return "False";
+        }
     }
 
     public class MyReceiver extends BroadcastReceiver {
@@ -176,12 +198,10 @@ public class Update_Server extends Service {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
             Log.d(TAG, "Got message: " + message);
+            process_message(message);
         }
-    };
+    }
 }
-
-
-
 
 class JSONEncoder{
     String TAG = "JSONEncoder";
