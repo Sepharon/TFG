@@ -24,7 +24,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 //For now it is called when you press Share on the MainActivity
@@ -91,7 +96,7 @@ public class Items extends AppCompatActivity
 
         listview_items = (ListView) findViewById(R.id.list_item);
 
-        meat_items_l.add("HOLA");
+        //meat_items_l.add("HOLA");
 
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,all_items_l);
@@ -209,7 +214,16 @@ public class Items extends AppCompatActivity
         reload_ui(1);
 
 
+        Bundle extras = getIntent().getExtras();
+        try {
+            String main = extras.get("Main").toString();
+            String list = extras.get("List").toString();
+            Log.v(TAG, main+list+"");
 
+            update_ShoppingList(list);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
 
     }
 
@@ -359,5 +373,100 @@ public class Items extends AppCompatActivity
         }
         // Create listview
         listview_items.setAdapter(adapter);
+    }
+
+
+    public void update_ShoppingList(String list){
+        try{
+            int i = 0;
+            JSONObject json_obj = new JSONObject(list);
+            Iterator<String> keys = json_obj.keys();
+            while (keys.hasNext()) {
+                String type = String.valueOf(keys.next());
+                switch (type){
+                    case "Everything":
+                        JSONArray products = json_obj.getJSONArray(type);
+                        while (i<products.length()){
+                            JSONArray rec = products.getJSONArray(i);
+                            all_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        break;
+                    case "Meat and Fish":
+                        JSONArray products2 = json_obj.getJSONArray(type);
+                        while (i<products2.length()){
+                            JSONArray rec = products2.getJSONArray(i);
+                            meat_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                    case "Vegetables":
+                        JSONArray products3 = json_obj.getJSONArray(type);
+                        while (i<products3.length()){
+                            JSONArray rec = products3.getJSONArray(i);
+                            vegetables_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                    case "Cereal":
+                        JSONArray products4 = json_obj.getJSONArray(type);
+                        while (i<products4.length()){
+                            JSONArray rec = products4.getJSONArray(i);
+                            cereals_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                    case "Dairy":
+                        JSONArray products5 = json_obj.getJSONArray(type);
+                        while (i<products5.length()){
+                            JSONArray rec = products5.getJSONArray(i);
+                            dairy_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                    case "Sweet":
+                        JSONArray products6 = json_obj.getJSONArray(type);
+                        while (i<products6.length()){
+                            JSONArray rec = products6.getJSONArray(i);
+                            sweet_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                    case "Others":
+                        JSONArray products7 = json_obj.getJSONArray(type);
+                        while (i<products7.length()){
+                            JSONArray rec = products7.getJSONArray(i);
+                            others_items_l.add(rec.toString());
+                            i = i+1;
+                            Log.v(TAG, "" + rec.toString());
+                        }
+                        i=0;
+                        //Log.v(TAG, "" + products.toString());
+                        break;
+                }
+            }
+
+
+        } catch (JSONException e){
+            Log.v(TAG, "Error JSON");
+            e.printStackTrace();
+        }
     }
 }

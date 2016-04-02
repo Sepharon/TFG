@@ -16,12 +16,14 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import android.os.Handler;
 import android.os.Message;
@@ -31,17 +33,18 @@ public class Update_List extends Service {
 
     //URL
     static final String url = "https://www.tfg.centrethailam.com";
+    //static final String url = "10.192.129.34";
+
 
     //JSON objects and arrays
     JSONObject mainData = null;
     JSONObject JSONData = null;
     JSONArray data_array = null;
 
+
     //Handle incoming messages
     static final int MSG_GET_DATA = 1;
-    static int responseCode;
     static HttpURLConnection urlConnection;
-    static String result = null;
 
     //TAG for Log
     private final String TAG = "Update List Service: ";
@@ -63,7 +66,7 @@ public class Update_List extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "Binding");
-        return mBinder;
+        return msg.getBinder();
     }
 
     @Override
@@ -73,9 +76,11 @@ public class Update_List extends Service {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-        send_post_request();
+
+
+
         Log.v(TAG, "Started countdown");
-        new CountDownTimer(18000, 1000) {
+        /*new CountDownTimer(18000, 1000) {
             public void onTick(long millisUntilFinished) {
             }
 
@@ -84,7 +89,7 @@ public class Update_List extends Service {
                 send_post_request();
                 start();
             }
-        }.start();
+        }.start();*/
     }
 
     @Override
@@ -95,75 +100,186 @@ public class Update_List extends Service {
     }
 
     //It gets the JSON data from the API
-    public void get_data_json(JSONObject json_obj) throws JSONException{
-        mainData = json_obj.getJSONObject("main");
-        Log.v(TAG, mainData.getString("id"));
+    public void get_data_json(JSONObject json_obj, String request) throws JSONException{
+        JSONObject mainJSON = json_obj.getJSONObject("main");
+        Intent broadcast = new Intent();
+        broadcast.setAction("broadcast_service");
+
+        broadcast.putExtra("Main", mainJSON.toString());
+
+        switch (request){
+            case "all":
+                JSONObject listsJSON = json_obj.getJSONObject("lists");
+                broadcast.putExtra("all", listsJSON.toString());
+                break;
+            case "one_list":
+                JSONObject listJSON = json_obj.getJSONObject("list");
+                //JSONArray meat = listJSON.getJSONArray("Meat and Fish");
+                //broadcast.putExtra("MeatAndFish", meat.toString());
+                broadcast.putExtra("One_list", listJSON.toString());
+                break;
+            case "shared_list":
+                JSONObject shared_list = json_obj.getJSONObject("list");
+                //JSONArray meat = listJSON.getJSONArray("Meat and Fish");
+                //broadcast.putExtra("MeatAndFish", meat.toString());
+                broadcast.putExtra("shared_list", shared_list.toString());
+                break;
+        }
+        broadcast.putExtra("Request", request);
+        //broadcast.putExtra("GoogleAccount", mainJSON.getString("GoogleAccount"));
+        sendBroadcast(broadcast);
     }
 
 
-    private void send_post_request() {
-        final String request = "{'main': {'id': 'quercusroses@gmail.com', 'Update': 'False', 'shared_list': 'False', 'all': 'True'}}";
+    private void send_post_request(String request, String GoogleAccount, String code_name, String hash_list) {
         Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
         Log.v(TAG, "Creating thread to send data");
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JSONObject json_obj = new JSONObject();
-                    json_obj.put("main", "id");
-                    // Opening connection
-                    //Connect
-                    urlConnection = (HttpURLConnection) ((new URL(url).openConnection()));
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setRequestProperty("Content-Type", "application/json");
-                    urlConnection.setRequestProperty("Accept", "application/json");
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.connect();
-                    //Write
-                    OutputStream outputStream = urlConnection.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-                    writer.write(json_obj.toString());
-                    writer.close();
-                    outputStream.close();
-/*
-                    //Read
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+        //Thread t = new Thread(new Runnable() {
+        //    @Override
+        //   public void run() {
+        try {
+            String result;
+            JSONObject json_obj = new JSONObject();
 
-                    String line = null;
-                    StringBuilder sb = new StringBuilder();
-
-                    while ((line = bufferedReader.readLine()) != null) {
-                        sb.append(line);
-                    }
-
-                    bufferedReader.close();
-                    result = sb.toString();
-                    Log.v(TAG, result+"");
-*/
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            switch (request) {
+                case "all":
+                    json_obj.put("Update", "False");
+                    json_obj.put("shared_list", "False");
+                    json_obj.put("request_code", "False");
+                    json_obj.put("all", "True");
+                    json_obj.put("GoogleAccount", GoogleAccount);
+                    break;
+                case "shared_list":
+                    json_obj.put("Update", "False");
+                    json_obj.put("shared_list", "True");
+                    json_obj.put("request_code", "False");
+                    json_obj.put("all", "False");
+                    json_obj.put("Code", code_name);
+                    json_obj.put("GoogleAccount", GoogleAccount);
+                    break;
+                case "code":
+                    json_obj.put("Update", "False");
+                    json_obj.put("shared_list", "True");
+                    json_obj.put("request_code", "True");
+                    json_obj.put("all", "False");
+                    json_obj.put("list_name", code_name);
+                    json_obj.put("Hash", hash_list);
+                    json_obj.put("GoogleAccount", GoogleAccount);
+                    break;
+                case "one_list":
+                    json_obj.put("Update", "False");
+                    json_obj.put("shared_list", "False");
+                    json_obj.put("request_code", "False");
+                    json_obj.put("all", "False");
+                    json_obj.put("Code", code_name);
+                    json_obj.put("Hash", hash_list);
+                    json_obj.put("GoogleAccount", GoogleAccount);
+                    break;
             }
-        });
-        t.start();
+
+            JSONObject mainObj = new JSONObject();
+            mainObj.put("main", json_obj);
+
+            Log.v(TAG, mainObj.toString());
+
+            URL link_url = new URL(url);
+            urlConnection = (HttpURLConnection) link_url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            //urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setReadTimeout(5000);
+            urlConnection.connect();
+            Log.v(TAG, "Connected");
+
+            //Write
+            OutputStream outputStream = urlConnection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+            writer.write(mainObj.toString());
+            writer.flush();
+            writer.close();
+            outputStream.close();
+            Log.v(TAG, "Sent");
+
+            //Read
+            InputStream stream = urlConnection.getInputStream();
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+
+            String line = null;
+            StringBuilder sb = new StringBuilder();
+
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+
+            bufferedReader.close();
+            result = sb.toString();
+            Log.v(TAG, result+"");
+
+            try{
+                mainData = new JSONObject(result);
+                get_data_json(mainData, request);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+
+
+        } catch (MalformedURLException e){
+            Log.v(TAG, "Malformed");
+            e.printStackTrace();
+        } catch (IOException e){
+            Log.v(TAG, "IOException");
+            e.printStackTrace();
+        } catch (JSONException e){
+            Log.v(TAG, "JSONException");
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null){
+                urlConnection.disconnect();
+                Log.v(TAG, "Disconnected");
+            }
+        }
     }
+    //});
+    //t.start();
+    //}
 
 
     //It handles incoming messages
-    static class IncomingHandler extends Handler {
+    class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            // Here write code for messages from activity (eg: city to get data from,
-            // units desired celius or farenheid)
             switch (msg.what) {
                 case MSG_GET_DATA:
                     Log.v("Service:", "Got data");
-                    String msg_data = msg.getData().getString("city");
-                    Log.v("Service:", msg_data);
-                    //Toast.makeText(getApplicationContext(), "Requesting main data", Toast.LENGTH_SHORT).show();
-                    //send_post_request();
+                    String request = msg.getData().getString("request");
+                    String GoogleAccount = msg.getData().getString("GoogleAccount");
+                    Log.v("Service:", request);
+                    try {
+                        switch (request) {
+                            case "one_list":
+                                String code_list = msg.getData().getString("code_list");
+                                String hash_list = msg.getData().getString("hash_list");
+                                send_post_request(request, GoogleAccount, code_list, hash_list);
+                                break;
+                            case "shared_list":
+                                String code_list2 = msg.getData().getString("code_list");
+                                send_post_request(request, GoogleAccount, code_list2, null);
+                                break;
+                            case "code":
+                                String list_name = msg.getData().getString("list_name");
+                                String hash_list3 = msg.getData().getString("hash_list");
+                                send_post_request(request, GoogleAccount, list_name, hash_list3);
+                                break;
+                            case "all":
+                                send_post_request(request, GoogleAccount, null, null);
+                                break;
+                        }
+                    } catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
                     break;
                 default:
                     super.handleMessage(msg);

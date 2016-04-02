@@ -4,10 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -21,6 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -32,8 +36,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 // TODO : CREATE BIND SERVICE IMPLEMENTATION
@@ -45,9 +53,18 @@ public class MainActivity extends AppCompatActivity
     // Service elements
     Messenger mService = null;
     boolean is_bound = false;
+    boolean is_bound_server = false;
+
+    //Receiver
+    String GoogleAccount;
+    String request_type;
+    String list;
+    String main;
+    MyReceiver receiver;
+
     // UI elements
-    private Button private_lists;
-    private Button public_lists;
+    Button private_lists;
+    Button public_lists;
     private View separator1;
     private View separator2;
 
@@ -68,11 +85,28 @@ public class MainActivity extends AppCompatActivity
     // Current state of UI true = private ; false = public
     boolean private_or_public = true;
 
+    //User info
+    User_Info usr_inf;
+
     @Override
     protected void onCreate(Bundle saveInstanceState){
-
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Intent-filter for receiving Broadcast
+        IntentFilter filter = new IntentFilter("broadcast_service");
+        receiver = new MyReceiver();
+        this.registerReceiver(receiver, filter);
+
+        //Bind service Update List
+        Intent intent = new Intent(this, Update_List.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        //Bind service Update Server
+        //Log.v(TAG, "Starting Update Server");
+        Intent in = new Intent(this, Update_Server.class);
+        bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
+
 
         private_lists = (Button) findViewById(R.id.private_lists);
         public_lists = (Button) findViewById(R.id.public_lists);
@@ -80,8 +114,8 @@ public class MainActivity extends AppCompatActivity
         separator2 = findViewById(R.id.separator2);
         listview = (ListView) findViewById(R.id.list);
         // Create array with all the pacients
-        private_list.add("Test");
-        Log.v(TAG, private_list.size() + "");
+        //private_list.add("Test");
+        //Log.v(TAG, private_list.size() + "");
 
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,private_list);
@@ -141,12 +175,36 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //bind Service
-        Log.v(TAG,"Starting Update Server");
-        Intent in = new Intent(this, Update_Server.class);
-        bindService(in, mConnection, Context.BIND_AUTO_CREATE);
-        //Intent intent = new Intent(this, Update_Server.class);
-        //bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selected = listview.getItemAtPosition(position).toString();
+                if (is_bound) {
+                    Log.v(TAG, selected);
+                    //if (!is_bound) return;
+                    // Create and send a message to the service, using a supported 'what' value
+                    Log.v(TAG, "Getting ready");
+                    Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("request", "one_list");
+                    bundle.putString("code_list", "private_silvia");
+                    bundle.putString("hash_list", "xyz");
+                    bundle.putString("GoogleAccount", usr_inf.getEmail());
+                    msg.setData(bundle);
+                    try {
+                        mService.send(msg);
+                        Log.v(TAG, "Message sent");
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Done sending data
+                }
+            }
+        });
+
+        //Get User info
+        usr_inf = User_Info.getInstance();
     }
 
     protected void onStart() {
@@ -163,23 +221,26 @@ public class MainActivity extends AppCompatActivity
             unbindService(mConnection);
             is_bound = false;
         }
+        if (is_bound_server) {
+            unbindService(mConnection2);
+            is_bound_server = false;
+        }
     }
 
-    // Binding function
+    // Binding Update List
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            Log.v("Main Activity:", "Binding service");
+            Log.v(TAG, "Binding service");
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            //Weather_Data.LocalBinder binder = (Weather_Data.LocalBinder) service;
-            //data = binder.getService();
-            //mService = new Messenger(service);
+            //Update_List.LocalBinder binder = (Update_List.LocalBinder) service;
+            //binder.getService();
+            mService = new Messenger(service);
             is_bound = true;
+            getAll_ShoppingLists(usr_inf.getEmail());
         }
-
-
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mService = null;
@@ -187,23 +248,59 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    // Binding Update Server
+    private ServiceConnection mConnection2 = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Log.v(TAG, "Binding service");
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            //Update_List.LocalBinder binder = (Update_List.LocalBinder) service;
+            //binder.getService();
+            //mService = new Messenger(service);
+            is_bound_server = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            //mService = null;
+            is_bound_server = false;
+        }
+    };
+
+
+
+    //Receiver from Service
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            data1 = intent.getStringExtra("data1");
-            data2 = intent.getStringExtra("data2");
-
-            Data1.setText(data1);
-            Data2.setText(data2);
-
-            Log.v("Activity One result", data1);
+            //text.setText("");
+            request_type = intent.getStringExtra("Request");
+            main = intent.getStringExtra("Main");
+            GoogleAccount = intent.getStringExtra("GoogleAccount");
+            switch(request_type){
+                case "one_list":
+                    list = intent.getStringExtra("One_list");
+                    changeActivity(main, list);
+                    break;
+                case "all":
+                    list = intent.getStringExtra("all");
+                    updateUI(list);
+                    break;
+                case "shared_list":
+                    list = intent.getStringExtra("shared_list");
+                    changeActivity(main, list);
+                    break;
+                case "code":
+                    list = "";
+                    changeActivity(main, list);
+                    break;
+            }
+            Log.v(TAG, "Main: " + main + "\r\n"+"Shopping_list: "+list);
+            //text.setText("Main: "+main+"\r\n"+"Shopping_list: "+list);
         }
     }
 
-    public void reload(){
-        Data1.setText(data1);
-        Data2.setText(data2);
-    }
 
     @Override
     protected void onResume() {
@@ -314,5 +411,66 @@ public class MainActivity extends AppCompatActivity
         }
         // Create listview
         listview.setAdapter(adapter);
+    }
+
+
+
+
+    public void changeActivity(String main, String list){
+        Intent intent = new Intent(this, Items.class);
+        intent.putExtra("Main", main);
+        intent.putExtra("List", list);
+        startActivity(intent);
+    }
+
+    public void getAll_ShoppingLists(String GoogleAccount){
+        if (is_bound) {
+            //if (!is_bound) return;
+            // Create and send a message to the service, using a supported 'what' value
+            Log.v(TAG, "Getting ready");
+            Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+            Bundle bundle = new Bundle();
+            bundle.putString("request", "all");
+            bundle.putString("GoogleAccount", GoogleAccount);
+            msg.setData(bundle);
+            try {
+                mService.send(msg);
+                Log.v(TAG, "Message sent");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            // Done sending data
+        }
+    }
+
+    public void updateUI(String result){
+        try {
+            JSONObject json_obj = new JSONObject(result);
+            Log.v(TAG, "length: " + json_obj.length());
+            Iterator<String> keys = json_obj.keys();
+            while (keys.hasNext()){
+                //JSONObject list1 = json_obj.getJSONObject(String.valueOf(keys.next()));
+                String list_name = String.valueOf(keys.next());
+                JSONObject list1 = json_obj.getJSONObject(list_name);
+                switch (list1.getInt("TypeList")){
+                    case 0:
+                        public_list.add(list_name);
+                        reload_ui(Boolean.TRUE);
+                        break;
+                    case 1:
+                        private_list.add(list_name);
+                        reload_ui(Boolean.TRUE);
+                        break;
+                }
+                //Log.v(TAG, "OBJECT: "+list1+ "LIST: "+list_name+" TYPE: "+list1.getInt("TypeList"));
+                //Log.v(TAG, "keys: "+String.valueOf(keys.next()));
+            }
+        } catch (JSONException e){
+            Log.v(TAG, "Error_JSON");
+            e.printStackTrace();
+        }
+
+
     }
 }

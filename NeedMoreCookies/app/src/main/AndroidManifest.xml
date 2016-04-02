@@ -38,12 +38,23 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="broadcast_service" />
+            </intent-filter>
+
+            </activity>
+
 
         <service
             android:name=".Update_Server"
             android:enabled="true"
             android:exported="true"/>
+        <service
+            android:name=".Update_List"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
 
         <activity
             android:name=".SettingsActivity"
