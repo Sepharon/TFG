@@ -38,8 +38,6 @@ public class Update_List extends Service {
 
     //JSON objects and arrays
     JSONObject mainData = null;
-    JSONObject JSONData = null;
-    JSONArray data_array = null;
 
 
     //Handle incoming messages
@@ -131,120 +129,120 @@ public class Update_List extends Service {
     }
 
 
-    private void send_post_request(String request, String GoogleAccount, String code_name, String hash_list) {
+    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String hash_list) {
         Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
         Log.v(TAG, "Creating thread to send data");
-        //Thread t = new Thread(new Runnable() {
-        //    @Override
-        //   public void run() {
-        try {
-            String result;
-            JSONObject json_obj = new JSONObject();
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String result;
+                    JSONObject json_obj = new JSONObject();
 
-            switch (request) {
-                case "all":
-                    json_obj.put("Update", "False");
-                    json_obj.put("shared_list", "False");
-                    json_obj.put("request_code", "False");
-                    json_obj.put("all", "True");
-                    json_obj.put("GoogleAccount", GoogleAccount);
-                    break;
-                case "shared_list":
-                    json_obj.put("Update", "False");
-                    json_obj.put("shared_list", "True");
-                    json_obj.put("request_code", "False");
-                    json_obj.put("all", "False");
-                    json_obj.put("Code", code_name);
-                    json_obj.put("GoogleAccount", GoogleAccount);
-                    break;
-                case "code":
-                    json_obj.put("Update", "False");
-                    json_obj.put("shared_list", "True");
-                    json_obj.put("request_code", "True");
-                    json_obj.put("all", "False");
-                    json_obj.put("list_name", code_name);
-                    json_obj.put("Hash", hash_list);
-                    json_obj.put("GoogleAccount", GoogleAccount);
-                    break;
-                case "one_list":
-                    json_obj.put("Update", "False");
-                    json_obj.put("shared_list", "False");
-                    json_obj.put("request_code", "False");
-                    json_obj.put("all", "False");
-                    json_obj.put("Code", code_name);
-                    json_obj.put("Hash", hash_list);
-                    json_obj.put("GoogleAccount", GoogleAccount);
-                    break;
+                    switch (request) {
+                        case "all":
+                            json_obj.put("Update", "False");
+                            json_obj.put("shared_list", "False");
+                            json_obj.put("request_code", "False");
+                            json_obj.put("all", "True");
+                            json_obj.put("GoogleAccount", GoogleAccount);
+                            break;
+                        case "shared_list":
+                            json_obj.put("Update", "False");
+                            json_obj.put("shared_list", "True");
+                            json_obj.put("request_code", "False");
+                            json_obj.put("all", "False");
+                            json_obj.put("Code", code_name);
+                            json_obj.put("GoogleAccount", GoogleAccount);
+                            break;
+                        case "code":
+                            json_obj.put("Update", "False");
+                            json_obj.put("shared_list", "True");
+                            json_obj.put("request_code", "True");
+                            json_obj.put("all", "False");
+                            json_obj.put("list_name", code_name);
+                            json_obj.put("Hash", hash_list);
+                            json_obj.put("GoogleAccount", GoogleAccount);
+                            break;
+                        case "one_list":
+                            json_obj.put("Update", "False");
+                            json_obj.put("shared_list", "False");
+                            json_obj.put("request_code", "False");
+                            json_obj.put("all", "False");
+                            json_obj.put("Code", code_name);
+                            json_obj.put("Hash", hash_list);
+                            json_obj.put("GoogleAccount", GoogleAccount);
+                            break;
+                    }
+
+                    JSONObject mainObj = new JSONObject();
+                    mainObj.put("main", json_obj);
+
+                    Log.v(TAG, mainObj.toString());
+
+                    URL link_url = new URL(url);
+                    urlConnection = (HttpURLConnection) link_url.openConnection();
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.setRequestProperty("Content-Type", "application/json");
+                    //urlConnection.setRequestProperty("Accept", "application/json");
+                    urlConnection.setReadTimeout(5000);
+                    urlConnection.connect();
+                    Log.v(TAG, "Connected");
+
+                    //Write
+                    OutputStream outputStream = urlConnection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+                    writer.write(mainObj.toString());
+                    writer.flush();
+                    writer.close();
+                    outputStream.close();
+                    Log.v(TAG, "Sent");
+
+                    //Read
+                    InputStream stream = urlConnection.getInputStream();
+
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+
+                    String line;
+                    StringBuilder sb = new StringBuilder();
+
+                    while ((line = bufferedReader.readLine()) != null) {
+                        sb.append(line);
+                    }
+
+                    bufferedReader.close();
+                    result = sb.toString();
+                    Log.v(TAG, result + "");
+
+                    try {
+                        mainData = new JSONObject(result);
+                        get_data_json(mainData, request);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                } catch (MalformedURLException e) {
+                    Log.v(TAG, "Malformed");
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    Log.v(TAG, "IOException");
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    Log.v(TAG, "JSONException");
+                    e.printStackTrace();
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                        Log.v(TAG, "Disconnected");
+                    }
+                }
             }
-
-            JSONObject mainObj = new JSONObject();
-            mainObj.put("main", json_obj);
-
-            Log.v(TAG, mainObj.toString());
-
-            URL link_url = new URL(url);
-            urlConnection = (HttpURLConnection) link_url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            //urlConnection.setRequestProperty("Accept", "application/json");
-            urlConnection.setReadTimeout(5000);
-            urlConnection.connect();
-            Log.v(TAG, "Connected");
-
-            //Write
-            OutputStream outputStream = urlConnection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-            writer.write(mainObj.toString());
-            writer.flush();
-            writer.close();
-            outputStream.close();
-            Log.v(TAG, "Sent");
-
-            //Read
-            InputStream stream = urlConnection.getInputStream();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-
-            String line = null;
-            StringBuilder sb = new StringBuilder();
-
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            bufferedReader.close();
-            result = sb.toString();
-            Log.v(TAG, result+"");
-
-            try{
-                mainData = new JSONObject(result);
-                get_data_json(mainData, request);
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-
-
-        } catch (MalformedURLException e){
-            Log.v(TAG, "Malformed");
-            e.printStackTrace();
-        } catch (IOException e){
-            Log.v(TAG, "IOException");
-            e.printStackTrace();
-        } catch (JSONException e){
-            Log.v(TAG, "JSONException");
-            e.printStackTrace();
-        } finally {
-            if (urlConnection != null){
-                urlConnection.disconnect();
-                Log.v(TAG, "Disconnected");
-            }
-        }
+        });
+        t.start();
     }
-    //});
-    //t.start();
-    //}
 
 
     //It handles incoming messages
