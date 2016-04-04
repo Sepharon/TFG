@@ -89,7 +89,6 @@ public class AddList extends AppCompatActivity
                 result_data.putExtra("Type","" + priv.isChecked());
                 setResult(MainActivity.RESULT_OK, result_data);
                 finish();
-                // TODO: SEND DATA TOT SERVER
             }
             else Toast.makeText(AddList.this,"You must choose a public or private list", Toast.LENGTH_LONG).show();
         }

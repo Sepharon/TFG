@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     // Service elements
     Messenger mService = null;
     boolean is_bound = false;
+    Update_Server server_service;
     boolean is_bound_server = false;
 
     //Receiver
@@ -68,9 +70,11 @@ public class MainActivity extends AppCompatActivity
     private View separator1;
     private View separator2;
 
-    List<List<String>> private_l;
-    List<List<String>> public_l;
-
+    TextView Data1;
+    TextView Data2;
+    String data1="";
+    String data2="";
+    String [] last_list = new String[2];
     // ListView
     private ListView listview;
     // Private and public list names
@@ -178,31 +182,15 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listview.getItemAtPosition(position).toString();
                 if (is_bound) {
-                    Log.v(TAG, "SELECTED: "+selected);
+                    Log.v(TAG, selected);
                     //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
-
                     Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
-
-                    private_l = usr_inf.getPrivate_lists();
-                    public_l = usr_inf.getPublic_lists();
-                    for (int i= 0; i<private_l.size(); i++){
-                        Log.v(TAG, "LIST: " + private_l.get(i));
-                        if (private_l.get(i).get(0).equals(selected)){
-                            bundle.putString("code_list", private_l.get(i).get(2));
-                        }
-                    }
-
-                    for (int i= 0; i<public_l.size(); i++){
-                        Log.v(TAG, "LIST: " + public_l.get(i));
-                        if (public_l.get(i).get(0).equals(selected)){
-                            bundle.putString("code_list", public_l.get(i).get(2));
-                        }
-                    }
-
+                    bundle.putString("code_list", "private_silvia");
+                    bundle.putString("hash_list", "xyz");
                     bundle.putString("GoogleAccount", usr_inf.getEmail());
                     msg.setData(bundle);
                     try {
@@ -309,6 +297,23 @@ public class MainActivity extends AppCompatActivity
                     list = "";
                     changeActivity(main, list);
                     break;
+                case "result":
+                    if (GoogleAccount.equals(usr_inf.getEmail())) {
+                        String objective = intent.getStringExtra("objective");
+                        List<String> list_arrays = new ArrayList<String>();
+                        if (objective.equals("new_list")) {
+                            list_arrays.add(last_list[0]);
+                            list_arrays.add(last_list[1]);
+                            list_arrays.add(main);
+                            if (last_list[1].equals("0"))
+                                User_Info.getInstance().setPublic_lists(list_arrays);
+                            else if (last_list[1].equals("1"))
+                                User_Info.getInstance().setPrivate_lists(list_arrays);
+                        } else if (objective.equals("delete_list")) {
+                            if (main.equals("True"))
+                                Toast.makeText(MainActivity.this, "Shopping List deleted", Toast.LENGTH_LONG).show();
+                        }
+                    }
             }
             Log.v(TAG, "Main: " + main + "\r\n"+"Shopping_list: "+list);
             //text.setText("Main: "+main+"\r\n"+"Shopping_list: "+list);
@@ -374,6 +379,9 @@ public class MainActivity extends AppCompatActivity
 
     //Sign Out from Google Account
     public void signOut() {
+        User_Info usr_inf;
+        usr_inf = User_Info.getInstance();
+        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -405,6 +413,34 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+    }
+    private void send_request_server(String list_name,String status){
+        server_service.set_values(5, "_", list_name, "gh", "True", status);
+        Log.v(TAG,server_service.get_json_object().toString());
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                server_service.send_request();
+                while (!server_service.return_response_status());
+                String response = server_service.return_result();
+                Intent intent = new Intent();
+                try {
+                    JSONObject rsp = new JSONObject(response);
+                    String acc = rsp.getJSONObject("main").getString("GoogleAccount");
+                    String objective = rsp.getJSONObject("main").getString("Objective");
+                    String result = rsp.getJSONObject("Result").getString("result");
+                    intent.setAction("broadcast_service");
+                    intent.putExtra("GoogleAccount",acc);
+                    intent.putExtra("main",result);
+                    intent.putExtra("request_type",objective);
+                    Log.d("Thread ", "Sending response");
+                    sendBroadcast(intent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
     }
     private void reload_ui(Boolean type){
         Log.v(TAG, "Updating UI");

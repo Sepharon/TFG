@@ -22,8 +22,6 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
-
 public class Update_Server extends Service {
 
     static final String url = "https://www.tfg.centrethailam.com";
@@ -42,8 +40,10 @@ public class Update_Server extends Service {
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
     private String request_result;
 
+    private boolean got_response = false;
+
     public class LocalBinder extends Binder {
-        public Update_Server getService() {
+        Update_Server getService() {
             // Return this instance of LocalService so clients can call public methods
             return Update_Server.this;
         }
@@ -65,7 +65,7 @@ public class Update_Server extends Service {
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
 
-        Log.v(TAG, " Update Server started");
+        Log.v(TAG, " Update Server Created");
         jsonEncoderClass.create_template();
         // Set values
         //set_values(3,"private_sergi","Private Sergi","abc","True","0");
@@ -74,8 +74,15 @@ public class Update_Server extends Service {
         //set_json(keys, values, 0);
         //set_json(keys, items, 1);
         //Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
-
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //return super.onStartCommand(intent, flags, startId);
+        Log.v(TAG, " Update Server started");
+        return START_STICKY;
+    }
+
     // Creates the apropiate JSON based if the values need to go in the main or in Values
     public boolean set_json(String [] key, String[] value,int update_main){
 
@@ -97,7 +104,7 @@ public class Update_Server extends Service {
         values[4] = update;
         values[5] = User_Info.getInstance().getEmail();
         values[6] = status;
-
+        Log.v(TAG,values.toString());
         return true;
     }
     // Sets values for the item array
@@ -109,6 +116,7 @@ public class Update_Server extends Service {
     }
 
     public void send_request (){
+        got_response = false;
         if (!is_network_available())
             Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
         else
@@ -165,6 +173,11 @@ public class Update_Server extends Service {
     public String return_result(){
         return request_result;
     }
+
+    public boolean return_response_status() {return got_response;}
+
+    public JSONObject get_json_object() {return jsonEncoderClass.return_json();}
+
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -172,7 +185,7 @@ public class Update_Server extends Service {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private String process_message(String response){
+    private void process_message(String response){
 
         try {
             JSONObject rsp = new JSONObject(response);
@@ -180,15 +193,16 @@ public class Update_Server extends Service {
             String result = rsp.getJSONObject("Result").getString("result");
             if (usr_email.equals(User_Info.getInstance().getEmail())) {
                 request_result = result;
-                return result;
+                got_response = true;
+
             }
-            else return "False";
+            else request_result = null;
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.v(TAG, "Unable to create JSON from string");
             Log.v(TAG, "Received JSON: " + response);
-            return "False";
+            request_result = null;
         }
     }
 
@@ -201,56 +215,57 @@ public class Update_Server extends Service {
             process_message(message);
         }
     }
+    private class JSONEncoder{
+        String TAG = "JSONEncoder";
+        JSONObject obj;
+
+        public JSONObject create_template(){
+            Log.v(TAG, " Started");
+            try {
+                obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Hash\":\"0000\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.v(TAG," Done");
+            return obj;
+        }
+
+        public void set_values(String key [], String value [],int update_main){
+            switch (update_main){
+                case 0:
+                    try {
+                        for (int i = 0; i < key.length; i++)
+                            obj.getJSONObject("main").put(key[i],value[i]);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 1:
+                    try {
+                        JSONArray items = new JSONArray();
+                        JSONArray a = new JSONArray();
+                        JSONObject tmp = new JSONObject();
+                        a.put(value[0]);
+                        a.put(value[1]);
+                        items.put(a);
+                        items.put(value[2]);
+                        items.put(value[3]);
+                        tmp.put("Item",items);
+                        Log.v(TAG, String.valueOf(a));
+                        Log.v(TAG, String.valueOf(items));
+                        Log.v(TAG, String.valueOf(tmp));
+                        obj.put("Values",tmp);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+        }
+
+        public JSONObject return_json(){
+            return obj;
+        }
+    }
+
 }
 
-class JSONEncoder{
-    String TAG = "JSONEncoder";
-    JSONObject obj;
-
-    public JSONObject create_template(){
-        Log.v(TAG, " Started");
-        try {
-            obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Hash\":\"0000\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.v(TAG," Done");
-        return obj;
-    }
-
-    public void set_values(String key [], String value [],int update_main){
-        switch (update_main){
-            case 0:
-                try {
-                    for (int i = 0; i < key.length; i++)
-                        obj.getJSONObject("main").put(key[i],value[i]);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case 1:
-                try {
-                    JSONArray items = new JSONArray();
-                    JSONArray a = new JSONArray();
-                    JSONObject tmp = new JSONObject();
-                    a.put(value[0]);
-                    a.put(value[1]);
-                    items.put(a);
-                    items.put(value[2]);
-                    items.put(value[3]);
-                    tmp.put("Item",items);
-                    Log.v(TAG, String.valueOf(a));
-                    Log.v(TAG, String.valueOf(items));
-                    Log.v(TAG, String.valueOf(tmp));
-                    obj.put("Values",tmp);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                break;
-        }
-    }
-
-    public JSONObject return_json(){
-        return obj;
-    }
-}
