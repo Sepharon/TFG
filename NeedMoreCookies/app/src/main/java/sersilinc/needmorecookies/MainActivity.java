@@ -70,10 +70,9 @@ public class MainActivity extends AppCompatActivity
     private View separator1;
     private View separator2;
 
-    TextView Data1;
-    TextView Data2;
-    String data1="";
-    String data2="";
+    List<List<String>> private_l;
+    List<List<String>> public_l;
+
     String [] last_list = new String[2];
     // ListView
     private ListView listview;
@@ -182,15 +181,31 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listview.getItemAtPosition(position).toString();
                 if (is_bound) {
-                    Log.v(TAG, selected);
+                    Log.v(TAG, "SELECTED: "+selected);
                     //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
+
                     Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
-                    bundle.putString("code_list", "private_silvia");
-                    bundle.putString("hash_list", "xyz");
+
+                    private_l = usr_inf.getPrivate_lists();
+                    public_l = usr_inf.getPublic_lists();
+                    for (int i= 0; i<private_l.size(); i++){
+                        Log.v(TAG, "LIST: " + private_l.get(i));
+                        if (private_l.get(i).get(0).equals(selected)){
+                            bundle.putString("code_list", private_l.get(i).get(2));
+                        }
+                    }
+
+                    for (int i= 0; i<public_l.size(); i++){
+                        Log.v(TAG, "LIST: " + public_l.get(i));
+                        if (public_l.get(i).get(0).equals(selected)){
+                            bundle.putString("code_list", public_l.get(i).get(2));
+                        }
+                    }
+
                     bundle.putString("GoogleAccount", usr_inf.getEmail());
                     msg.setData(bundle);
                     try {
@@ -361,7 +376,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
             finish();
         } else if (id == R.id.nav_share) {
-            Intent intent = new Intent(MainActivity.this,Items.class);
+            Intent intent = new Intent(MainActivity.this, Items.class);
             // Start next activity
             startActivity(intent);
             finish();
