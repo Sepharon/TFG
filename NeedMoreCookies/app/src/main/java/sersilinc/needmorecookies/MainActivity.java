@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     // Current state of UI true = private ; false = public
     boolean private_or_public = true;
 
+
     //User info
     User_Info usr_inf;
 
@@ -263,7 +264,6 @@ public class MainActivity extends AppCompatActivity
             unbindService(mConnection2);
             is_bound_server = false;
         }
-
         timer.cancel();
     }
 
@@ -362,6 +362,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        getAll_ShoppingLists(usr_inf.getEmail());
         timer.start();
     }
 
@@ -551,20 +552,20 @@ public class MainActivity extends AppCompatActivity
                         shopping_list_public.add(list_name);
                         shopping_list_public.add("0");
                         shopping_list_public.add(code);
-                        if (!usr_inf.getPublic_lists().contains(shopping_list_public)) {
+                        if (!public_list.contains(list_name)) {
                             public_list.add(list_name);
-                            usr_inf.setPublic_lists(shopping_list_public);
                         }
+                        usr_inf.setPublic_lists(shopping_list_public);
                         reload_ui(Boolean.TRUE);
                         break;
                     case 1:
                         shopping_list_private.add(list_name);
                         shopping_list_private.add("1");
                         shopping_list_private.add(code);
-                        if (!usr_inf.getPrivate_lists().contains(shopping_list_private)) {
+                        if (!private_list.contains(list_name)) {
                             private_list.add(list_name);
-                            usr_inf.setPrivate_lists(shopping_list_private);
                         }
+                        usr_inf.setPrivate_lists(shopping_list_private);
                         reload_ui(Boolean.TRUE);
                         break;
                 }
