@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by sergi on 19/02/16.
- */
-
 public class User_Info {
     private final String TAG = "User Info: ";
     // Global variables for class
@@ -27,7 +23,7 @@ public class User_Info {
     private String name;
     private String email;
     // Name of the list
-    //List of list [[NAME,TYPE,HASH],[NAME,TYPE,HASH]..]
+    //List of list [[NAME,TYPE,CODE],[NAME,TYPE,CODE]..]
     List<List<String>> public_lists = new ArrayList<>();
     List<List<String>> private_lists = new ArrayList<>();
     // GoogleAPICLient
@@ -69,9 +65,6 @@ public class User_Info {
     public List<List<String>> getPublic_lists() {
         return public_lists;
     }
-    /*public GoogleApiClient getmAPIClient() {
-        return mAPIClient;
-    }*/
 
     // Set values
     public void setID(int ID) {
@@ -85,21 +78,18 @@ public class User_Info {
     }
 
     public void setPrivate_lists(List<String> private_list) {
-        private_list.add(set_hash(private_list.get(0)));
-        this.public_lists.add(private_list);
+        //private_list.add(set_hash(private_list.get(0)));
+        this.private_lists.add(private_list);
     }
-    // Values from list [Name,Type]
+    // Values from list [Name,Type,Code]
     public void setPublic_lists(List<String> public_list) {
-        public_list.add(set_hash(public_list.get(0)));
+        //public_list.add(set_hash(public_list.get(0)));
         this.public_lists.add(public_list);
 
     }
-    /*public void setmAPIClient(GoogleApiClient mAPIClient) {
-        this.mAPIClient = mAPIClient;
-    }*/
 
 
-
+    /*
     // Create Hash functions
     private String set_hash(String list_na){
         int n;
@@ -141,7 +131,7 @@ public class User_Info {
             } while (two_halfs++ < 1);
         }
         return buf.toString();
-    }
+    }*/
 
     public String toFormat(){
         return "User: " + getName() + " " + getEmail();

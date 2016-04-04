@@ -68,10 +68,8 @@ public class MainActivity extends AppCompatActivity
     private View separator1;
     private View separator2;
 
-    TextView Data1;
-    TextView Data2;
-    String data1="";
-    String data2="";
+    List<List<String>> private_l;
+    List<List<String>> public_l;
 
     // ListView
     private ListView listview;
@@ -180,15 +178,31 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listview.getItemAtPosition(position).toString();
                 if (is_bound) {
-                    Log.v(TAG, selected);
+                    Log.v(TAG, "SELECTED: "+selected);
                     //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
+
                     Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
-                    bundle.putString("code_list", "private_silvia");
-                    bundle.putString("hash_list", "xyz");
+
+                    private_l = usr_inf.getPrivate_lists();
+                    public_l = usr_inf.getPublic_lists();
+                    for (int i= 0; i<private_l.size(); i++){
+                        Log.v(TAG, "LIST: " + private_l.get(i));
+                        if (private_l.get(i).get(0).equals(selected)){
+                            bundle.putString("code_list", private_l.get(i).get(2));
+                        }
+                    }
+
+                    for (int i= 0; i<public_l.size(); i++){
+                        Log.v(TAG, "LIST: " + public_l.get(i));
+                        if (public_l.get(i).get(0).equals(selected)){
+                            bundle.putString("code_list", public_l.get(i).get(2));
+                        }
+                    }
+
                     bundle.putString("GoogleAccount", usr_inf.getEmail());
                     msg.setData(bundle);
                     try {
@@ -285,7 +299,7 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case "all":
                     list = intent.getStringExtra("all");
-                    updateUI(list);
+                    update_Users_data(list);
                     break;
                 case "shared_list":
                     list = intent.getStringExtra("shared_list");
@@ -360,9 +374,6 @@ public class MainActivity extends AppCompatActivity
 
     //Sign Out from Google Account
     public void signOut() {
-        User_Info usr_inf;
-        usr_inf = User_Info.getInstance();
-        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -444,33 +455,47 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void updateUI(String result){
+    public void update_Users_data(String result){
         try {
+            Log.v(TAG, result);
             JSONObject json_obj = new JSONObject(result);
             Log.v(TAG, "length: " + json_obj.length());
             Iterator<String> keys = json_obj.keys();
-            while (keys.hasNext()){
+            while (keys.hasNext()) {
                 //JSONObject list1 = json_obj.getJSONObject(String.valueOf(keys.next()));
                 String list_name = String.valueOf(keys.next());
                 JSONObject list1 = json_obj.getJSONObject(list_name);
-                switch (list1.getInt("TypeList")){
+                String code = list1.getString("Code");
+
+                List<String> shopping_list_private = new ArrayList<>();
+                List<String> shopping_list_public = new ArrayList<>();
+
+                int type = list1.getInt("TypeList");
+                switch (type) {
                     case 0:
                         public_list.add(list_name);
+                        shopping_list_public.add(list_name);
+                        shopping_list_public.add("0");
+                        shopping_list_public.add(code);
+                        //Log.v(TAG, "LISTSS" + shopping_list_public);
+                        usr_inf.setPublic_lists(shopping_list_public);
                         reload_ui(Boolean.TRUE);
                         break;
                     case 1:
                         private_list.add(list_name);
+                        shopping_list_private.add(list_name);
+                        shopping_list_private.add("1");
+                        shopping_list_private.add(code);
+                        usr_inf.setPrivate_lists(shopping_list_private);
                         reload_ui(Boolean.TRUE);
                         break;
                 }
-                //Log.v(TAG, "OBJECT: "+list1+ "LIST: "+list_name+" TYPE: "+list1.getInt("TypeList"));
-                //Log.v(TAG, "keys: "+String.valueOf(keys.next()));
             }
+
         } catch (JSONException e){
             Log.v(TAG, "Error_JSON");
             e.printStackTrace();
         }
-
 
     }
 }

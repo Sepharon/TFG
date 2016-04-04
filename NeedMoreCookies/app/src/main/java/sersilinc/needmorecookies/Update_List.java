@@ -163,7 +163,6 @@ public class Update_List extends Service {
                             json_obj.put("request_code", "True");
                             json_obj.put("all", "False");
                             json_obj.put("list_name", code_name);
-                            json_obj.put("Hash", hash_list);
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "one_list":
@@ -172,7 +171,6 @@ public class Update_List extends Service {
                             json_obj.put("request_code", "False");
                             json_obj.put("all", "False");
                             json_obj.put("Code", code_name);
-                            json_obj.put("Hash", hash_list);
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                     }
