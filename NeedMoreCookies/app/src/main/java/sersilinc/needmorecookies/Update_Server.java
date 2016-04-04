@@ -83,17 +83,6 @@ public class Update_Server extends Service {
         return START_STICKY;
     }
 
-    // Creates the apropiate JSON based if the values need to go in the main or in Values
-    public boolean set_json(String [] key, String[] value,int update_main){
-
-        if (jsonEncoderClass.return_json() == null) return false;
-        if (update_main == 0) {
-            if (key.length != value.length) return false;
-            jsonEncoderClass.set_values(key, value, update_main);
-        }
-        else jsonEncoderClass.set_values(key, value, update_main);
-        return true;
-    }
     // Sets the values for the values array
     public boolean set_values(int objective_code,String list_code,String list_name,String hash,String update,String status){
         if (objective_code > 10) return false;
@@ -104,7 +93,9 @@ public class Update_Server extends Service {
         values[4] = update;
         values[5] = User_Info.getInstance().getEmail();
         values[6] = status;
-        Log.v(TAG,values.toString());
+
+        set_json(keys,values, 0);
+        Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
         return true;
     }
     // Sets values for the item array
@@ -113,6 +104,8 @@ public class Update_Server extends Service {
         items[1] = Product_name;
         items[2] = Price;
         items[3] = Quantity;
+
+        set_json(keys,items,1);
     }
 
     public void send_request (){
@@ -121,6 +114,17 @@ public class Update_Server extends Service {
             Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
         else
             send_post_request(jsonEncoderClass.return_json());
+    }
+    // Creates the apropiate JSON based if the values need to go in the main or in Values
+    private boolean set_json(String [] key, String[] value,int update_main){
+
+        if (jsonEncoderClass.return_json() == null) return false;
+        if (update_main == 0) {
+            if (key.length != value.length) return false;
+            jsonEncoderClass.set_values(key, value, update_main);
+        }
+        else jsonEncoderClass.set_values(key, value, update_main);
+        return true;
     }
 
     private void send_post_request(final JSONObject o){
@@ -233,12 +237,14 @@ public class Update_Server extends Service {
         public void set_values(String key [], String value [],int update_main){
             switch (update_main){
                 case 0:
+                    Log.v(TAG,"Creating main");
                     try {
                         for (int i = 0; i < key.length; i++)
                             obj.getJSONObject("main").put(key[i],value[i]);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                    Log.v(TAG,obj.toString());
                     break;
                 case 1:
                     try {

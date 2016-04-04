@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity
                 android.R.layout.simple_list_item_1,private_list);
         // Create listview
         listview.setAdapter(adapter);
-
+        Log.v(TAG,User_Info.getInstance().getPrivate_lists().toString());
         //Navigation + floating action button
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -273,8 +273,8 @@ public class MainActivity extends AppCompatActivity
                                        IBinder service) {
             Log.v(TAG, "Binding service");
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            //Update_List.LocalBinder binder = (Update_List.LocalBinder) service;
-            //binder.getService();
+            Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
+            server_service = binder.getService();
             //mService = new Messenger(service);
             is_bound_server = true;
         }
@@ -314,16 +314,22 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case "result":
                     if (GoogleAccount.equals(usr_inf.getEmail())) {
+                        Log.v(TAG,"Processing result");
                         String objective = intent.getStringExtra("objective");
                         List<String> list_arrays = new ArrayList<String>();
                         if (objective.equals("new_list")) {
+                            Log.v(TAG,"Adding new list");
                             list_arrays.add(last_list[0]);
                             list_arrays.add(last_list[1]);
                             list_arrays.add(main);
-                            if (last_list[1].equals("0"))
+                            if (last_list[1].equals("0")) {
+                                Log.v(TAG, "Adding to public");
                                 User_Info.getInstance().setPublic_lists(list_arrays);
-                            else if (last_list[1].equals("1"))
+                            }
+                            else if (last_list[1].equals("1")) {
+                                Log.v(TAG, "Adding to private");
                                 User_Info.getInstance().setPrivate_lists(list_arrays);
+                            }
                         } else if (objective.equals("delete_list")) {
                             if (main.equals("True"))
                                 Toast.makeText(MainActivity.this, "Shopping List deleted", Toast.LENGTH_LONG).show();
@@ -415,15 +421,20 @@ public class MainActivity extends AppCompatActivity
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Log.v(TAG,"Result OK");
-                Log.v(TAG,"" + data.getStringExtra("Type"));
+                String list_name = data.getStringExtra("List_Name");
+                String Type = data.getStringExtra("Type");
+                Log.v(TAG, "" + Type);
+                Log.v(TAG,list_name);
                 switch (data.getStringExtra("Type")){
                     case "true":
-                        private_list.add(data.getStringExtra("List_Name"));
+                        private_list.add(list_name);
                         reload_ui(true);
+                        send_request_server(list_name,"1");
                         break;
                     case "false":
-                        public_list.add(data.getStringExtra("List_Name"));
+                        public_list.add(list_name);
                         reload_ui(false);
+                        send_request_server(list_name, "0");
                         break;
                 }
             }
@@ -431,7 +442,8 @@ public class MainActivity extends AppCompatActivity
     }
     private void send_request_server(String list_name,String status){
         server_service.set_values(5, "_", list_name, "gh", "True", status);
-        Log.v(TAG,server_service.get_json_object().toString());
+        server_service.set_items("_", "_", "_", "_");
+        Log.v(TAG, server_service.get_json_object().toString());
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
