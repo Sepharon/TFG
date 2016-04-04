@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -79,12 +80,16 @@ public class User_Info {
 
     public void setPrivate_lists(List<String> private_list) {
         //private_list.add(set_hash(private_list.get(0)));
-        this.private_lists.add(private_list);
+        if (!private_lists.contains(private_list)){
+            this.private_lists.add(private_list);
+        }
     }
     // Values from list [Name,Type,Code]
     public void setPublic_lists(List<String> public_list) {
         //public_list.add(set_hash(public_list.get(0)));
-        this.public_lists.add(public_list);
+        if (!public_lists.contains(public_list)) {
+            this.public_lists.add(public_list);
+        }
 
     }
 
