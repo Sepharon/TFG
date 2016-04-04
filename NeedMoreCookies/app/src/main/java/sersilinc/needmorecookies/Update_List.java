@@ -242,7 +242,6 @@ public class Update_List extends Service {
         t.start();
     }
 
-
     //It handles incoming messages
     class IncomingHandler extends Handler {
         @Override

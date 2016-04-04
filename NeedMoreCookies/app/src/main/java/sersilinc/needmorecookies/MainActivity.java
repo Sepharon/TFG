@@ -1,5 +1,6 @@
 package sersilinc.needmorecookies;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
@@ -25,10 +27,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,12 +46,10 @@ import com.google.android.gms.common.api.Status;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO : CREATE BIND SERVICE IMPLEMENTATION
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     // call functions from service usuing data.function_name()
@@ -70,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     Button public_lists;
     private View separator1;
     private View separator2;
-
+    ProgressBar loading;
     List<List<String>> private_l;
     List<List<String>> public_l;
 
@@ -86,7 +89,6 @@ public class MainActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     // Current state of UI true = private ; false = public
     boolean private_or_public = true;
-
 
     //User info
     User_Info usr_inf;
@@ -118,7 +120,8 @@ public class MainActivity extends AppCompatActivity
         separator1 = findViewById(R.id.separator);
         separator2 = findViewById(R.id.separator2);
         listview = (ListView) findViewById(R.id.list);
-        // Create array with all the pacients
+        loading = (ProgressBar) findViewById(R.id.progressBar);
+      // Create array with all the pacients
         //private_list.add("Test");
         //Log.v(TAG, private_list.size() + "");
 
@@ -154,7 +157,6 @@ public class MainActivity extends AppCompatActivity
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
@@ -264,6 +266,7 @@ public class MainActivity extends AppCompatActivity
             unbindService(mConnection2);
             is_bound_server = false;
         }
+
         timer.cancel();
     }
 
@@ -279,10 +282,16 @@ public class MainActivity extends AppCompatActivity
             //binder.getService();
             mService = new Messenger(service);
             is_bound = true;
-            getAll_ShoppingLists(usr_inf.getEmail());
+            new ProgressTask().execute();
+
+            //loading_gif.setVisibility(View.INVISIBLE);
+            //listview.setVisibility(View.VISIBLE);
+            Log.v(TAG, usr_inf.getPrivate_lists().size() + "");
+            Log.v(TAG, usr_inf.getPublic_lists().size() + "");
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.v(TAG,"Update List disconnected");
             mService = null;
             is_bound = false;
         }
@@ -339,7 +348,7 @@ public class MainActivity extends AppCompatActivity
                     if (GoogleAccount.equals(usr_inf.getEmail())) {
                         Log.v(TAG,"Processing result");
                         String objective = intent.getStringExtra("objective");
-                        List<String> list_arrays = new ArrayList<String>();
+                        List<String> list_arrays = new ArrayList<>();
                         if (objective.equals("new_list")) {
                             Log.v(TAG,"Adding new list");
                             list_arrays.add(last_list[0]);
@@ -368,8 +377,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        getAll_ShoppingLists(usr_inf.getEmail());
         timer.start();
+        new ProgressTask().execute();
     }
 
 
@@ -425,8 +434,7 @@ public class MainActivity extends AppCompatActivity
 
     //Sign Out from Google Account
     public void signOut() {
-        User_Info usr_inf;
-        usr_inf = User_Info.getInstance();
+        User_Info usr_inf = User_Info.getInstance();
         //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
@@ -454,7 +462,7 @@ public class MainActivity extends AppCompatActivity
                     case "true":
                         private_list.add(list_name);
                         reload_ui(true);
-                        send_request_server(list_name,"1");
+                        send_request_server(list_name, "1");
                         break;
                     case "false":
                         public_list.add(list_name);
@@ -473,6 +481,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run() {
                 server_service.send_request();
+                //noinspection StatementWithEmptyBody
                 while (!server_service.return_response_status());
                 String response = server_service.return_result();
                 Intent intent = new Intent();
@@ -541,6 +550,7 @@ public class MainActivity extends AppCompatActivity
 
             // Done sending data
         }
+        else Log.v(TAG,"NOT BOUND");
     }
 
     public void update_Users_data(String result){
@@ -566,6 +576,7 @@ public class MainActivity extends AppCompatActivity
                         shopping_list_public.add(code);
                         if (!public_list.contains(list_name)) {
                             public_list.add(list_name);
+
                         }
                         usr_inf.setPublic_lists(shopping_list_public);
                         reload_ui(Boolean.TRUE);
@@ -591,4 +602,28 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+    class ProgressTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute(){
+            loading.setVisibility(View.VISIBLE);
+            listview.setVisibility(View.INVISIBLE);
+        }
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            getAll_ShoppingLists(usr_inf.getEmail());
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            loading.setVisibility(View.GONE);
+            listview.setVisibility(View.VISIBLE);
+        }
+    }
+
 }

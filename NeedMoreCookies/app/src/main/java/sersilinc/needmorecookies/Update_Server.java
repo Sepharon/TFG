@@ -67,13 +67,11 @@ public class Update_Server extends Service {
 
         Log.v(TAG, " Update Server Created");
         jsonEncoderClass.create_template();
-        // Set values
-        //set_values(3,"private_sergi","Private Sergi","abc","True","0");
-        //set_items("Meat","Beef","6","1");
-        // Create JSON
-        //set_json(keys, values, 0);
-        //set_json(keys, items, 1);
-        //Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
     @Override
