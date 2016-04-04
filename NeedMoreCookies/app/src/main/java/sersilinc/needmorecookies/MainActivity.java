@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -88,6 +89,8 @@ public class MainActivity extends AppCompatActivity
 
     //User info
     User_Info usr_inf;
+
+    CountDownTimer timer;
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
@@ -181,7 +184,7 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listview.getItemAtPosition(position).toString();
                 if (is_bound) {
-                    Log.v(TAG, "SELECTED: "+selected);
+                    Log.v(TAG, "SELECTED: " + selected);
                     //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
@@ -192,16 +195,16 @@ public class MainActivity extends AppCompatActivity
 
                     private_l = usr_inf.getPrivate_lists();
                     public_l = usr_inf.getPublic_lists();
-                    for (int i= 0; i<private_l.size(); i++){
+                    for (int i = 0; i < private_l.size(); i++) {
                         Log.v(TAG, "LIST: " + private_l.get(i));
-                        if (private_l.get(i).get(0).equals(selected)){
+                        if (private_l.get(i).get(0).equals(selected)) {
                             bundle.putString("code_list", private_l.get(i).get(2));
                         }
                     }
 
-                    for (int i= 0; i<public_l.size(); i++){
+                    for (int i = 0; i < public_l.size(); i++) {
                         Log.v(TAG, "LIST: " + public_l.get(i));
-                        if (public_l.get(i).get(0).equals(selected)){
+                        if (public_l.get(i).get(0).equals(selected)) {
                             bundle.putString("code_list", public_l.get(i).get(2));
                         }
                     }
@@ -222,13 +225,31 @@ public class MainActivity extends AppCompatActivity
 
         //Get User info
         usr_inf = User_Info.getInstance();
+
+
+        //Counter to reload the MainActivity every 2 minutes
+        timer = new CountDownTimer(120000, 1000) { //2min
+            public void onTick(long millisUntilFinished) {}
+            public void onFinish() {
+                //Write function to be called
+                Log.v(TAG, "timer");
+                getAll_ShoppingLists(usr_inf.getEmail());
+                start();
+            }
+        }.start();
     }
 
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        timer.start();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        timer.cancel();
+    }
 
     @Override
     protected void onDestroy() {
@@ -242,6 +263,8 @@ public class MainActivity extends AppCompatActivity
             unbindService(mConnection2);
             is_bound_server = false;
         }
+
+        timer.cancel();
     }
 
     // Binding Update List
@@ -339,6 +362,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        timer.start();
     }
 
 
@@ -524,25 +548,30 @@ public class MainActivity extends AppCompatActivity
                 int type = list1.getInt("TypeList");
                 switch (type) {
                     case 0:
-                        public_list.add(list_name);
                         shopping_list_public.add(list_name);
                         shopping_list_public.add("0");
                         shopping_list_public.add(code);
-                        //Log.v(TAG, "LISTSS" + shopping_list_public);
-                        usr_inf.setPublic_lists(shopping_list_public);
+                        if (!usr_inf.getPublic_lists().contains(shopping_list_public)) {
+                            public_list.add(list_name);
+                            usr_inf.setPublic_lists(shopping_list_public);
+                        }
                         reload_ui(Boolean.TRUE);
                         break;
                     case 1:
-                        private_list.add(list_name);
                         shopping_list_private.add(list_name);
                         shopping_list_private.add("1");
                         shopping_list_private.add(code);
-                        usr_inf.setPrivate_lists(shopping_list_private);
+                        if (!usr_inf.getPrivate_lists().contains(shopping_list_private)) {
+                            private_list.add(list_name);
+                            usr_inf.setPrivate_lists(shopping_list_private);
+                        }
                         reload_ui(Boolean.TRUE);
                         break;
                 }
             }
 
+            Log.v(TAG, "PRIVATE LIST: "+ usr_inf.getPrivate_lists());
+            Log.v(TAG, "PUBLIC LIST: "+ usr_inf.getPublic_lists());
         } catch (JSONException e){
             Log.v(TAG, "Error_JSON");
             e.printStackTrace();
