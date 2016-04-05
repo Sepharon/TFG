@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     String list;
     String main;
     MyReceiver receiver;
+    IntentFilter filter;
 
     // UI elements
     Button private_lists;
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //Intent-filter for receiving Broadcast
-        IntentFilter filter = new IntentFilter("broadcast_service");
+        filter = new IntentFilter("broadcast_service");
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
 
@@ -121,9 +122,7 @@ public class MainActivity extends AppCompatActivity
         separator2 = findViewById(R.id.separator2);
         listview = (ListView) findViewById(R.id.list);
         loading = (ProgressBar) findViewById(R.id.progressBar);
-      // Create array with all the pacients
-        //private_list.add("Test");
-        //Log.v(TAG, private_list.size() + "");
+
 
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,private_list);
@@ -267,6 +266,7 @@ public class MainActivity extends AppCompatActivity
             is_bound_server = false;
         }
 
+        unregisterReceiver(receiver);
         timer.cancel();
     }
 
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity
             mService = new Messenger(service);
             is_bound = true;
             new ProgressTask().execute();
+
 
             //loading_gif.setVisibility(View.INVISIBLE);
             //listview.setVisibility(View.VISIBLE);
@@ -378,6 +379,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         timer.start();
+        registerReceiver(receiver, filter);
         new ProgressTask().execute();
     }
 
@@ -434,8 +436,6 @@ public class MainActivity extends AppCompatActivity
 
     //Sign Out from Google Account
     public void signOut() {
-        User_Info usr_inf = User_Info.getInstance();
-        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -604,10 +604,11 @@ public class MainActivity extends AppCompatActivity
     }
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
-        protected void onPreExecute(){
+        protected void onPreExecute() {
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.INVISIBLE);
         }
+
         @Override
         protected Void doInBackground(Void... arg0) {
             getAll_ShoppingLists(usr_inf.getEmail());
@@ -625,5 +626,4 @@ public class MainActivity extends AppCompatActivity
             listview.setVisibility(View.VISIBLE);
         }
     }
-
 }

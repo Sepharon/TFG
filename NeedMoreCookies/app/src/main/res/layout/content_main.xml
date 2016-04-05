@@ -9,14 +9,12 @@
     tools:context="sersilinc.needmorecookies.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
+
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_below="@+id/firstLayout">
 
     </ListView>
 
@@ -81,13 +79,17 @@
             android:visibility="invisible" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" >
-    </ProgressBar>
+
+   <ProgressBar
+       android:id="@+id/progressBar"
+       style="?android:attr/progressBarStyleLarge"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_centerHorizontal="true"
+       android:layout_centerVertical="true" >
+   </ProgressBar>
+
+
 
 </RelativeLayout>
+

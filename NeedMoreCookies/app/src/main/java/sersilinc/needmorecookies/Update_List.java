@@ -74,20 +74,6 @@ public class Update_List extends Service {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-
-
-
-        Log.v(TAG, "Started countdown");
-        /*new CountDownTimer(18000, 1000) {
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                //Write function to be called
-                send_post_request();
-                start();
-            }
-        }.start();*/
     }
 
     @Override
@@ -129,7 +115,7 @@ public class Update_List extends Service {
     }
 
 
-    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String hash_list) {
+    private void send_post_request(final String request, final String GoogleAccount, final String code_name) {
         Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
@@ -256,20 +242,18 @@ public class Update_List extends Service {
                         switch (request) {
                             case "one_list":
                                 String code_list = msg.getData().getString("code_list");
-                                String hash_list = msg.getData().getString("hash_list");
-                                send_post_request(request, GoogleAccount, code_list, hash_list);
+                                send_post_request(request, GoogleAccount, code_list);
                                 break;
                             case "shared_list":
                                 String code_list2 = msg.getData().getString("code_list");
-                                send_post_request(request, GoogleAccount, code_list2, null);
+                                send_post_request(request, GoogleAccount, code_list2);
                                 break;
                             case "code":
                                 String list_name = msg.getData().getString("list_name");
-                                String hash_list3 = msg.getData().getString("hash_list");
-                                send_post_request(request, GoogleAccount, list_name, hash_list3);
+                                send_post_request(request, GoogleAccount, list_name);
                                 break;
                             case "all":
-                                send_post_request(request, GoogleAccount, null, null);
+                                send_post_request(request, GoogleAccount, null);
                                 break;
                         }
                     } catch (NullPointerException e){
