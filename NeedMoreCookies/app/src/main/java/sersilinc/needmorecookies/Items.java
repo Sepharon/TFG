@@ -116,7 +116,7 @@ public class Items extends AppCompatActivity
         listview_items.setAdapter(adapter);
 
         temp=new HashMap<String, String>();
-        temp.put(FIRST_COLUMN,"Product");
+        temp.put(FIRST_COLUMN, "Product");
         temp.put(SECOND_COLUMN, "Quantity");
         temp.put(THIRD_COLUMN, "Price");
         all_items_l.add(temp);
@@ -129,8 +129,7 @@ public class Items extends AppCompatActivity
 
         //Preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        currency = prefs.getString("currency_list", "");
-
+        currency = prefs.getString("currency_list", null);
 
 
         //Navigation + floating action button
@@ -421,11 +420,10 @@ public class Items extends AppCompatActivity
                         while (i<products.length()){
                             JSONArray rec = products.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -441,11 +439,10 @@ public class Items extends AppCompatActivity
                         while (i<products2.length()){
                             JSONArray rec = products2.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -461,11 +458,10 @@ public class Items extends AppCompatActivity
                         while (i<products3.length()){
                             JSONArray rec = products3.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -481,11 +477,10 @@ public class Items extends AppCompatActivity
                         while (i<products4.length()){
                             JSONArray rec = products4.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -501,11 +496,10 @@ public class Items extends AppCompatActivity
                         while (i<products5.length()){
                             JSONArray rec = products5.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -521,11 +515,10 @@ public class Items extends AppCompatActivity
                         while (i<products6.length()){
                             JSONArray rec = products6.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -541,11 +534,10 @@ public class Items extends AppCompatActivity
                         while (i<products7.length()){
                             JSONArray rec = products7.getJSONArray(i);
                             temp=new HashMap<String, String>();
-                            String curr = getCurrency();
                             if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+curr);
+                                temp.put(THIRD_COLUMN, "-"+currency);
                             } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+curr);
+                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
@@ -566,22 +558,4 @@ public class Items extends AppCompatActivity
         }
     }
 
-    String getCurrency(){
-        String result = "";
-        switch(currency) {
-            case "0":
-                result = "€";
-                break;
-            case "1":
-                result = "DKK";
-                break;
-            case "2":
-                result = "£";
-                break;
-            case "3":
-                result = "$";
-                break;
-        }
-        return result;
-    }
 }

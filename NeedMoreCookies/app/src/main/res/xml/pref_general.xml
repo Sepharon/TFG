@@ -30,7 +30,7 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_add_friends_to_messages" />-->
     <ListPreference
-        android:defaultValue="0"
+        android:defaultValue="€"
         android:entries="@array/currency_array"
         android:entryValues="@array/currency_array_values"
         android:key="currency_list"

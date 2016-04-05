@@ -4,6 +4,7 @@ package sersilinc.needmorecookies;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.Ringtone;
@@ -47,7 +48,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
 
-    User_Info userinfo;
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -182,8 +182,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         // Start next activity
         startActivity(intent);
     }
-
-
 
 
     /**
