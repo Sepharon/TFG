@@ -30,7 +30,7 @@
         <item name="android:elevation" tools:targetApi="lollipop">0dp</item>
         <item name="colorPrimary">@color/material_deep_teal_500</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
 </resources>

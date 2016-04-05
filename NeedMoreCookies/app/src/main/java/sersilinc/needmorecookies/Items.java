@@ -63,7 +63,11 @@ public class Items extends AppCompatActivity
 
 
     // ListView
-    private ListView listview_items;
+    //Header
+    ListView listview_header;
+    ArrayList<HashMap<String, String>> l_header = new ArrayList<HashMap<String,String>>();
+    //Content
+    ListView listview_items;
     // Lists
     ArrayList<HashMap<String, String>> all_items_l = new ArrayList<HashMap<String,String>>();
     ArrayList<HashMap<String, String>> meat_items_l = new ArrayList<HashMap<String,String>>();
@@ -75,6 +79,7 @@ public class Items extends AppCompatActivity
 
     // Adapter
     ListViewAdapters adapter;
+    ListViewAdapters adapter_header;
     //ArrayList<HashMap<String, String>> list;
     static final String FIRST_COLUMN="First";
     static final String SECOND_COLUMN="Second";
@@ -111,11 +116,23 @@ public class Items extends AppCompatActivity
 
         listview_items = (ListView) findViewById(R.id.list_item);
 
-        adapter=new ListViewAdapters(this, all_items_l);
+        listview_header = (ListView) findViewById(R.id.list_header);
+
+        temp=new HashMap<String, String>();
+        temp.put(FIRST_COLUMN, "Product");
+        temp.put(SECOND_COLUMN, "Quantity");
+        temp.put(THIRD_COLUMN, "Price");
+        l_header.add(temp);
+
+        adapter_header=new ListViewAdapters(this, l_header, Boolean.FALSE);
+
+        listview_header.setAdapter(adapter_header);
+
+        adapter=new ListViewAdapters(this, all_items_l, Boolean.TRUE);
 
         listview_items.setAdapter(adapter);
 
-        temp=new HashMap<String, String>();
+        /*temp=new HashMap<String, String>();
         temp.put(FIRST_COLUMN, "Product");
         temp.put(SECOND_COLUMN, "Quantity");
         temp.put(THIRD_COLUMN, "Price");
@@ -126,6 +143,7 @@ public class Items extends AppCompatActivity
         dairy_items_l.add(temp);
         others_items_l.add(temp);
         sweet_items_l.add(temp);
+        */
 
         //Preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -281,18 +299,15 @@ public class Items extends AppCompatActivity
             Intent intent = new Intent(Items.this,MapsActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         }
         else if (id == R.id.nav_home) {
             Intent intent = new Intent(Items.this,MainActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(Items.this,SettingsActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         } else if (id == R.id.nav_share) {
             //share();
 
@@ -326,7 +341,7 @@ public class Items extends AppCompatActivity
     private void reload_ui(int type){
         Log.v(TAG, "Updating UI");
         if (type==1){
-            adapter=new ListViewAdapters(this, all_items_l);
+            adapter=new ListViewAdapters(this, all_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,all_items_l);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -337,7 +352,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==2){
-            adapter=new ListViewAdapters(this, meat_items_l);
+            adapter=new ListViewAdapters(this, meat_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,meat_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.VISIBLE);
@@ -348,7 +363,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==3){
-            adapter=new ListViewAdapters(this, vegetables_items_l);
+            adapter=new ListViewAdapters(this, vegetables_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,vegetables_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -359,7 +374,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==4){
-            adapter=new ListViewAdapters(this, cereals_items_l);
+            adapter=new ListViewAdapters(this, cereals_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,cereals_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -370,7 +385,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==5){
-            adapter=new ListViewAdapters(this, dairy_items_l);
+            adapter=new ListViewAdapters(this, dairy_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dairy_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -381,7 +396,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==6){
-            adapter=new ListViewAdapters(this, sweet_items_l);
+            adapter=new ListViewAdapters(this, sweet_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,sweet_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -392,7 +407,7 @@ public class Items extends AppCompatActivity
             separator7.setVisibility(View.INVISIBLE);
         }
         else if (type==7){
-            adapter=new ListViewAdapters(this, others_items_l);
+            adapter=new ListViewAdapters(this, others_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,others_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);

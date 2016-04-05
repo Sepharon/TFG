@@ -130,13 +130,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
-        //setupActionBar();
+        //getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
+        setupActionBar();
         //getActionBar().setDisplayHomeAsUpEnabled(false);
     }
-    /*
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
+    // Set up the {@link android.app.ActionBar}, if the API is available.
 
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -144,7 +142,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
-    }*/
+    }
 
     /**
      * {@inheritDoc}
@@ -175,13 +173,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || ContactPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+    /*
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         Intent intent = new Intent(SettingsActivity.this,MainActivity.class);
         // Start next activity
         startActivity(intent);
-    }
+    }/*
 
 
     /**

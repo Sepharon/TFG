@@ -24,10 +24,12 @@ public class ListViewAdapters extends BaseAdapter{
     TextView txtFirst;
     TextView txtSecond;
     TextView txtThird;
-    public ListViewAdapters(Activity activity,ArrayList<HashMap<String, String>> list){
+    Boolean type;
+    public ListViewAdapters(Activity activity,ArrayList<HashMap<String, String>> list, Boolean type){
         super();
         this.activity=activity;
         this.list=list;
+        this.type=type;
     }
 
     @Override
@@ -60,8 +62,11 @@ public class ListViewAdapters extends BaseAdapter{
 
         if(convertView == null){
 
-            convertView=inflater.inflate(R.layout.row_view, null);
-
+            if (type) {
+                convertView = inflater.inflate(R.layout.row_view, null);
+            } else{
+                convertView = inflater.inflate(R.layout.row_header, null);
+            }
             txtFirst=(TextView) convertView.findViewById(R.id.product);
             txtSecond=(TextView) convertView.findViewById(R.id.quantity);
             txtThird=(TextView) convertView.findViewById(R.id.price);

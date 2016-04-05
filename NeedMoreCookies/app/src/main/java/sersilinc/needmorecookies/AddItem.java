@@ -160,23 +160,19 @@ public class AddItem extends AppCompatActivity
             Intent intent = new Intent(AddItem.this,MapsActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(AddItem.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         }
         else if (id == R.id.nav_home) {
             Intent intent = new Intent(AddItem.this,MainActivity.class);
             // Start next activity
             startActivity(intent);
-            finish();
         } else if (id == R.id.nav_share) {
             Intent intent = new Intent(AddItem.this,Items.class);
             // Start next activity
             startActivity(intent);
-            finish();
             //share();
 
         } else if (id == R.id.nav_logout) {

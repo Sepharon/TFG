@@ -10,10 +10,17 @@
     tools:showIn="@layout/app_bar_items">
 
     <ListView
+        android:id="@+id/list_header"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_below="@+id/firstLayout_items">
+
+    </ListView>
+    <ListView
         android:id="@+id/list_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/firstLayout_items">
+        android:layout_below="@+id/list_header">
 
     </ListView>
 
