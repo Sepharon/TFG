@@ -71,7 +71,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Meat"
+                        android:text="Meat and Fish"
                         android:id="@+id/meat"
                         android:background="@null"
                         android:textColor="#ffffff" />

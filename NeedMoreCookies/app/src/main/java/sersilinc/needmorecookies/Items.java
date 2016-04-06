@@ -65,27 +65,27 @@ public class Items extends AppCompatActivity
     // ListView
     //Header
     ListView listview_header;
-    ArrayList<HashMap<String, String>> l_header = new ArrayList<HashMap<String,String>>();
+    ArrayList<HashMap<String, String>> l_header = new ArrayList<HashMap<String, String>>();
     //Content
     ListView listview_items;
     // Lists
-    ArrayList<HashMap<String, String>> all_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> meat_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> vegetables_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> cereals_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> dairy_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> sweet_items_l = new ArrayList<HashMap<String,String>>();
-    ArrayList<HashMap<String, String>> others_items_l = new ArrayList<HashMap<String,String>>();
+    ArrayList<HashMap<String, String>> all_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> meat_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> vegetables_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> cereals_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> dairy_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> sweet_items_l = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> others_items_l = new ArrayList<HashMap<String, String>>();
 
     // Adapter
     ListViewAdapters adapter;
     ListViewAdapters adapter_header;
     //ArrayList<HashMap<String, String>> list;
-    static final String FIRST_COLUMN="First";
-    static final String SECOND_COLUMN="Second";
-    static final String THIRD_COLUMN="Third";
+    static final String FIRST_COLUMN = "First";
+    static final String SECOND_COLUMN = "Second";
+    static final String THIRD_COLUMN = "Third";
 
-    HashMap<String,String> temp;
+    HashMap<String, String> temp;
 
     //Preferences
     SharedPreferences prefs;
@@ -118,17 +118,17 @@ public class Items extends AppCompatActivity
 
         listview_header = (ListView) findViewById(R.id.list_header);
 
-        temp=new HashMap<String, String>();
+        temp = new HashMap<String, String>();
         temp.put(FIRST_COLUMN, "Product");
         temp.put(SECOND_COLUMN, "Quantity");
         temp.put(THIRD_COLUMN, "Price");
         l_header.add(temp);
 
-        adapter_header=new ListViewAdapters(this, l_header, Boolean.FALSE);
+        adapter_header = new ListViewAdapters(this, l_header, Boolean.FALSE);
 
         listview_header.setAdapter(adapter_header);
 
-        adapter=new ListViewAdapters(this, all_items_l, Boolean.TRUE);
+        adapter = new ListViewAdapters(this, all_items_l, Boolean.TRUE);
 
         listview_items.setAdapter(adapter);
 
@@ -147,7 +147,7 @@ public class Items extends AppCompatActivity
 
         //Preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        currency = prefs.getString("currency_list", null);
+        currency = prefs.getString("currency_list", "");
 
 
         //Navigation + floating action button
@@ -160,9 +160,8 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Items.this, AddItem.class);
-                // Start next activity
-                startActivity(intent);
-                finish();
+                // Start next activit
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -182,7 +181,6 @@ public class Items extends AppCompatActivity
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-
 
 
         all_items.setOnClickListener(new View.OnClickListener() {
@@ -263,10 +261,10 @@ public class Items extends AppCompatActivity
         try {
             String main = extras.get("Main").toString();
             String list = extras.get("List").toString();
-            Log.v(TAG, main+list+"");
+            Log.v(TAG, main + list + "");
 
             update_ShoppingList(list);
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
 
@@ -296,16 +294,15 @@ public class Items extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_locations) {
-            Intent intent = new Intent(Items.this,MapsActivity.class);
+            Intent intent = new Intent(Items.this, MapsActivity.class);
             // Start next activity
             startActivity(intent);
-        }
-        else if (id == R.id.nav_home) {
-            Intent intent = new Intent(Items.this,MainActivity.class);
+        } else if (id == R.id.nav_home) {
+            Intent intent = new Intent(Items.this, MainActivity.class);
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_manage) {
-            Intent intent = new Intent(Items.this,SettingsActivity.class);
+            Intent intent = new Intent(Items.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_share) {
@@ -335,13 +332,10 @@ public class Items extends AppCompatActivity
     }
 
 
-
-
-
-    private void reload_ui(int type){
+    private void reload_ui(int type) {
         Log.v(TAG, "Updating UI");
-        if (type==1){
-            adapter=new ListViewAdapters(this, all_items_l, Boolean.TRUE);
+        if (type == 1) {
+            adapter = new ListViewAdapters(this, all_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,all_items_l);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -350,9 +344,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==2){
-            adapter=new ListViewAdapters(this, meat_items_l, Boolean.TRUE);
+        } else if (type == 2) {
+            adapter = new ListViewAdapters(this, meat_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,meat_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.VISIBLE);
@@ -361,9 +354,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==3){
-            adapter=new ListViewAdapters(this, vegetables_items_l, Boolean.TRUE);
+        } else if (type == 3) {
+            adapter = new ListViewAdapters(this, vegetables_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,vegetables_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -372,9 +364,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==4){
-            adapter=new ListViewAdapters(this, cereals_items_l, Boolean.TRUE);
+        } else if (type == 4) {
+            adapter = new ListViewAdapters(this, cereals_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,cereals_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -383,9 +374,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==5){
-            adapter=new ListViewAdapters(this, dairy_items_l, Boolean.TRUE);
+        } else if (type == 5) {
+            adapter = new ListViewAdapters(this, dairy_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dairy_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -394,9 +384,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.VISIBLE);
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==6){
-            adapter=new ListViewAdapters(this, sweet_items_l, Boolean.TRUE);
+        } else if (type == 6) {
+            adapter = new ListViewAdapters(this, sweet_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,sweet_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -405,9 +394,8 @@ public class Items extends AppCompatActivity
             separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.VISIBLE);
             separator7.setVisibility(View.INVISIBLE);
-        }
-        else if (type==7){
-            adapter=new ListViewAdapters(this, others_items_l, Boolean.TRUE);
+        } else if (type == 7) {
+            adapter = new ListViewAdapters(this, others_items_l, Boolean.TRUE);
             //adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,others_items_l);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
@@ -422,155 +410,171 @@ public class Items extends AppCompatActivity
     }
 
 
-    public void update_ShoppingList(String list){
-        try{
+    public void update_ShoppingList(String list) {
+        try {
             int i = 0;
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
             while (keys.hasNext()) {
                 String type = String.valueOf(keys.next());
-                switch (type){
+                switch (type) {
                     case "Everything":
                         JSONArray products = json_obj.getJSONArray(type);
-                        while (i<products.length()){
+                        while (i < products.length()) {
                             JSONArray rec = products.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
 
                             all_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         break;
                     case "Meat and Fish":
                         JSONArray products2 = json_obj.getJSONArray(type);
-                        while (i<products2.length()){
+                        while (i < products2.length()) {
                             JSONArray rec = products2.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             meat_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                     case "Vegetables":
                         JSONArray products3 = json_obj.getJSONArray(type);
-                        while (i<products3.length()){
+                        while (i < products3.length()) {
                             JSONArray rec = products3.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             vegetables_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                     case "Cereal":
                         JSONArray products4 = json_obj.getJSONArray(type);
-                        while (i<products4.length()){
+                        while (i < products4.length()) {
                             JSONArray rec = products4.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             cereals_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                     case "Dairy":
                         JSONArray products5 = json_obj.getJSONArray(type);
-                        while (i<products5.length()){
+                        while (i < products5.length()) {
                             JSONArray rec = products5.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             dairy_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                     case "Sweet":
                         JSONArray products6 = json_obj.getJSONArray(type);
-                        while (i<products6.length()){
+                        while (i < products6.length()) {
                             JSONArray rec = products6.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             sweet_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                     case "Others":
                         JSONArray products7 = json_obj.getJSONArray(type);
-                        while (i<products7.length()){
+                        while (i < products7.length()) {
                             JSONArray rec = products7.getJSONArray(i);
-                            temp=new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")){
-                                temp.put(THIRD_COLUMN, "-"+currency);
-                            } else{
-                                temp.put(THIRD_COLUMN, rec.getString(2)+currency);
+                            temp = new HashMap<String, String>();
+                            if (rec.getString(2).equals("null")) {
+                                temp.put(THIRD_COLUMN, "-" + currency);
+                            } else {
+                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             others_items_l.add(temp);
-                            i = i+1;
+                            i = i + 1;
                             Log.v(TAG, "" + rec.toString());
                         }
-                        i=0;
+                        i = 0;
                         //Log.v(TAG, "" + products.toString());
                         break;
                 }
             }
 
 
-        } catch (JSONException e){
+        } catch (JSONException e) {
             Log.v(TAG, "Error JSON");
             e.printStackTrace();
         }
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Log.v(TAG, "Result OK");
+                String product = data.getStringExtra("product");
+                String quantity = data.getStringExtra("quantity");
+                String price = data.getStringExtra("price");
+                String type = data.getStringExtra("type");
+                Log.v(TAG, product + quantity + price + type);
+            }
+        }
+    }
 }

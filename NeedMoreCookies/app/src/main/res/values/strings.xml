@@ -93,4 +93,12 @@
     <string name="quantity">Quantity</string>
     <string name="product">Product</string>
     <string name="add_item_textview">Please, write the name of the product,\n the quantity and the price,\n if applicable.</string>
+    <string-array name="type_of_products">
+        <item>Meat and Fish</item>
+        <item>Vegetables</item>
+        <item>Cereal</item>
+        <item>Dairy</item>
+        <item>Sweet</item>
+        <item>Others</item>
+    </string-array>
 </resources>

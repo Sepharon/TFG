@@ -12,8 +12,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -31,6 +34,8 @@ public class AddItem extends AppCompatActivity
     EditText Price;
 
     Button Save;
+
+    Spinner type;
 
     boolean product_added = false;
     boolean quantity_added = false;
@@ -65,14 +70,26 @@ public class AddItem extends AppCompatActivity
         Quantity = (EditText)findViewById(R.id.quantity);
         Price = (EditText)findViewById(R.id.price);
         Save = (Button)findViewById(R.id.save_item);
+        type = (Spinner) findViewById(R.id.type);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.type_of_products, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        type.setAdapter(adapter);
+
+
 
         Save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Send to server?
-                Intent intent = new Intent(AddItem.this, Items.class);
-                // Start next activity
-                startActivity(intent);
+                Intent result_data = new Intent();
+                result_data.putExtra("product", Product.getText().toString());
+                result_data.putExtra("quantity", Quantity.getText().toString());
+                result_data.putExtra("price", Price.getText().toString());
+                result_data.putExtra("type", type.getSelectedItem().toString());
+                setResult(MainActivity.RESULT_OK, result_data);
                 finish();
             }
         });
