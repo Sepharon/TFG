@@ -27,24 +27,26 @@ import com.google.android.gms.common.api.Status;
 public class AddItem extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
 
-    EditText Product;
-    EditText Quantity;
-    EditText Price;
+    //UI elements
+    private EditText Product;
+    private EditText Quantity;
+    private EditText Price;
+    private Button Save;
+    private Spinner type;
 
-    Button Save;
-
-    Spinner type;
-
-    boolean product_added = false;
-    boolean quantity_added = false;
+    //Flags
+    private boolean product_added = false;
+    private boolean quantity_added = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
-        //Navigation
+
+        /**[START Navigation]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_item);
         setSupportActionBar(toolbar);
 
@@ -56,21 +58,26 @@ public class AddItem extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_item);
         navigationView.setNavigationItemSelectedListener(this);
+        /**[END Navigation]**/
 
-
+        /**[START GoogleApiClient]**/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+        /**[END GoogleApiClient]**/
 
-
+        /**[START UI elements]**/
         Product = (EditText)findViewById(R.id.product);
         Quantity = (EditText)findViewById(R.id.quantity);
         Price = (EditText)findViewById(R.id.price);
         Save = (Button)findViewById(R.id.save_item);
         type = (Spinner) findViewById(R.id.type);
+        /**[END UI elements]**/
+
+        /**[START Spinner]**/
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.type_of_products, android.R.layout.simple_spinner_item);
@@ -78,9 +85,10 @@ public class AddItem extends AppCompatActivity
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         type.setAdapter(adapter);
+        /**[END Spinner]**/
 
 
-
+        /**[START onClickListener]**/
         Save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,7 +103,9 @@ public class AddItem extends AppCompatActivity
         });
 
         Save.setEnabled(false);
+        /**[END onClickListener]**/
 
+        /**[START TextChangedListener]**/
         Product.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -146,6 +156,7 @@ public class AddItem extends AppCompatActivity
 
             }
         });
+        /**[END TextChangedListener]**/
 
     }
 
@@ -153,7 +164,6 @@ public class AddItem extends AppCompatActivity
         super.onStart();
         mGoogleApiClient.connect();
     }
-
 
 
     @Override
@@ -167,7 +177,6 @@ public class AddItem extends AppCompatActivity
     }
 
     //Navigation
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -187,9 +196,9 @@ public class AddItem extends AppCompatActivity
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_share) {
-            Intent intent = new Intent(AddItem.this,Items.class);
+            //Intent intent = new Intent(AddItem.this,Items.class);
             // Start next activity
-            startActivity(intent);
+            //startActivity(intent);
             //share();
 
         } else if (id == R.id.nav_logout) {
@@ -203,9 +212,7 @@ public class AddItem extends AppCompatActivity
 
 
     //Sign Out from Google Account
-    public void signOut() {
-        User_Info usr_info = User_Info.getInstance();
-        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {

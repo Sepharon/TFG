@@ -4,33 +4,27 @@ import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+
+// Shows name, email and other info
 
 public class User_Info {
+
+    //Tag for Logs
     private final String TAG = "User Info: ";
+
     // Global variables for class
-    // Random value variable
-    Random ran;
-    // Shows name, email and other info
-    // Identifiers
-    private int ID;
     // Name,email
     private String name;
     private String email;
-    // Name of the list
+
+    //Array that contains the name of the list, type and code
     //List of list [[NAME,TYPE,CODE],[NAME,TYPE,CODE]..]
     List<List<String>> public_lists = new ArrayList<>();
     List<List<String>> private_lists = new ArrayList<>();
-    // GoogleAPICLient
-    //private GoogleApiClient mAPIClient;
 
-    // Instantiate
+    //Instantiate
     private static User_Info user_info = new User_Info();
 
     public static User_Info getInstance(){
@@ -40,20 +34,15 @@ public class User_Info {
     // Dummy class init
     public User_Info(){}
     // Actual class init
-    public User_Info(int ID,String name,String email,GoogleApiClient mAPIClient){
+    public User_Info(String name,String email){
         super();
         // Set variable with values
-        this.ID = ID;
         this.name = name;
         this.email = email;
-        //this.mAPIClient = mAPIClient;
-        Log.v(TAG,"User Info added for " + name);
+        //Log.v(TAG,"User Info added for " + name);
     }
 
     // Get values
-    public int getID(){
-        return ID;
-    }
     public String getName(){
         return name;
     }
@@ -68,9 +57,6 @@ public class User_Info {
     }
 
     // Set values
-    public void setID(int ID) {
-        this.ID = ID;
-    }
     public void setName(String name) {
         this.name = name;
     }
@@ -78,66 +64,21 @@ public class User_Info {
         this.email = email;
     }
 
+    // Values from list [Name,Type,Code]
     public void setPrivate_lists(List<String> private_list) {
-        //private_list.add(set_hash(private_list.get(0)));
         if (!private_lists.contains(private_list)){
             this.private_lists.add(private_list);
         }
     }
     // Values from list [Name,Type,Code]
     public void setPublic_lists(List<String> public_list) {
-        //public_list.add(set_hash(public_list.get(0)));
         if (!public_lists.contains(public_list)) {
             this.public_lists.add(public_list);
         }
 
     }
 
-
-    /*
-    // Create Hash functions
-    private String set_hash(String list_na){
-        int n;
-        String hash = "";
-        StringBuilder stringBuilder = new StringBuilder();
-        ran = new Random();
-        // Random number between 0 and 8
-        n = ran.nextInt(4);
-        for (int i = 0; i < list_na.length(); i++){
-            stringBuilder.append(list_na.charAt(i)<<n);
-        }
-        // Create SHA1 Hash
-        try {
-            hash = SHA1(stringBuilder.toString());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return hash;
-    }
-
-    private static String SHA1(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte [] bytes = text.getBytes("UTF-8");
-        md.update(bytes, 0, bytes.length);
-        byte[] sha1hash = md.digest();
-        return convertToHex(sha1hash);
-    }
-    // Convert to hex
-    private static String convertToHex(byte[] data) {
-        StringBuilder buf = new StringBuilder();
-        for (byte b : data) {
-            int halfbyte = (b >>> 4) & 0x0F;
-            int two_halfs = 0;
-            do {
-                buf.append((0 <= halfbyte) && (halfbyte <= 9) ? (char) ('0' + halfbyte) : (char) ('a' + (halfbyte - 10)));
-                halfbyte = b & 0x0F;
-            } while (two_halfs++ < 1);
-        }
-        return buf.toString();
-    }*/
-
+    //Retrieve the name and the email of the user
     public String toFormat(){
         return "User: " + getName() + " " + getEmail();
     }

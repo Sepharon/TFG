@@ -19,10 +19,12 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 
 /**
- * Created by sergi on 15/02/16.
  * Forked from https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java
- * FINISHED ON 17/02/2016
- */
+ *
+ * This class is responsible for the Login logic of the app. It stores the email and the name of the user.
+ * */
+
+
 
 public class Login extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -32,7 +34,7 @@ public class Login extends AppCompatActivity implements
     private static final int RC_SIGN_IN = 9001;
 
 
-    User_Info usr_inf;
+    private User_Info usr_inf;
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
@@ -47,38 +49,39 @@ public class Login extends AppCompatActivity implements
 
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-        //findViewById(R.id.sign_out_button).setOnClickListener(this);
-        //findViewById(R.id.disconnect_button).setOnClickListener(this);
+
         // Get User Info class
         usr_inf = User_Info.getInstance();
-        // [START configure_signin]
+
+        /**[START configure_signin]**/
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
-        // [END configure_signin]
+        /**[END configure_signin]**/
 
-        // [START build_client]
+        /**[START build_client]**/
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        // [END build_client]
+        /**[END build_client]**/
 
-        // [START customize_button]
+        /**[START customize_button]**/
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_WIDE);
         signInButton.setScopes(gso.getScopeArray());
-        // [END customize_button]
+        /**[END customize_button]**/
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
+        //Check if the user has signed in before
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
             // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
@@ -101,7 +104,7 @@ public class Login extends AppCompatActivity implements
         }
     }
 
-    // [START onActivityResult]
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -112,9 +115,7 @@ public class Login extends AppCompatActivity implements
             handleSignInResult(result);
         }
     }
-    // [END onActivityResult]
 
-    // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
@@ -126,23 +127,18 @@ public class Login extends AppCompatActivity implements
             usr_inf.setName(acct.getDisplayName());
             //usr_inf.setmAPIClient(mGoogleApiClient);
             Log.v(TAG, usr_inf.toFormat());
-            launch_next_activity(acct);
-            // I do not think is necessary to update the UI
-            //updateUI(true);
-            //mStatusTextView.setText("You are now Signed In");
+            launch_next_activity();
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
         }
     }
-    // [END handleSignInResult]
 
-    // [START signIn]
+
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
-    // [END signIn]
 
 
     @Override
@@ -171,11 +167,9 @@ public class Login extends AppCompatActivity implements
     private void updateUI(boolean signedIn) {
         if (signedIn) {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.Status_SignedOut);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
     }
 
@@ -191,10 +185,9 @@ public class Login extends AppCompatActivity implements
         }
     }
 
-    private void launch_next_activity (GoogleSignInAccount account){
+    private void launch_next_activity(){
         // Start new activity
         Intent intent = new Intent(Login.this,MainActivity.class);
-        // Might need to add things in the intent
         Log.v(TAG,"Launching next activity");
         // Start next activity
         startActivity(intent);

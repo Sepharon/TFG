@@ -2,9 +2,7 @@ package sersilinc.needmorecookies;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,31 +21,32 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-/**
- * CHange Public for shared?
- */
 
 public class AddList extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
-    static final int PICK_CONTACT_REQUEST = 1;
-    Button add_friend,save;
-    EditText list_name;
-    CheckBox pub,priv;
+
+    //UI elements
+    private Button add_friend, save;
+    private EditText list_name;
+    private CheckBox pub, priv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_list);
-        //Items on Layout
+
+        /**[START UI elements]**/
         list_name = (EditText) findViewById(R.id.list_name);
         priv = (CheckBox) findViewById(R.id.private_checkBox2);
         pub = (CheckBox) findViewById(R.id.public_checkBox);
         add_friend = (Button) findViewById(R.id.add_friends);
         save = (Button) findViewById(R.id.save);
+        /**[END UI elements]**/
 
-        //Navigation
+        /**[START Navigation]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_list);
         setSupportActionBar(toolbar);
 
@@ -59,24 +58,19 @@ public class AddList extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_list);
         navigationView.setNavigationItemSelectedListener(this);
+        /**[END Navigation]**/
 
 
+        /**[START GoogleApiClient]**/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        // If this is clicked start new activity displaying a listview of all current friends
-        add_friend.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            // TODO : START NEW ACTIVITY
-            Intent in = new Intent(AddList.this,List_Contacts.class);
-            Log.v("Add new list: ","Starting list_contacts");
-            startActivityForResult(in,PICK_CONTACT_REQUEST);
-        }
-    });
+        /**[END GoogleApiClient]**/
+
+        /**[START onCLickListeners]**/
         // If save is clicked save data to server and return it
         save.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -98,7 +92,6 @@ public class AddList extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (pub.isChecked() && priv.isChecked()) priv.toggle();
-                add_friend.setEnabled(true);
             }
         });
 
@@ -106,9 +99,9 @@ public class AddList extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (priv.isChecked() && pub.isChecked()) pub.toggle();
-                add_friend.setEnabled(false);
             }
         });
+        /**[END onClickListeners]**/
     }
 
 
@@ -130,7 +123,6 @@ public class AddList extends AppCompatActivity
     }
 
     //Navigation
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -150,9 +142,9 @@ public class AddList extends AppCompatActivity
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_share) {
-            Intent intent = new Intent(AddList.this,Items.class);
+            //Intent intent = new Intent(AddList.this,Items.class);
             // Start next activity
-            startActivity(intent);
+            //startActivity(intent);
             //share();
 
         } else if (id == R.id.nav_logout) {
@@ -166,10 +158,7 @@ public class AddList extends AppCompatActivity
 
 
     //Sign Out from Google Account
-    public void signOut() {
-        User_Info usr_inf;
-        usr_inf = User_Info.getInstance();
-        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -179,18 +168,5 @@ public class AddList extends AppCompatActivity
                 finish();
             }
         });
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        if (requestCode == PICK_CONTACT_REQUEST) {
-            // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                // The user picked a contact.
-                // The Intent's data Uri identifies which contact was selected.
-
-                // Do something with the contact here (bigger example below)
-            }
-        }
     }
 }

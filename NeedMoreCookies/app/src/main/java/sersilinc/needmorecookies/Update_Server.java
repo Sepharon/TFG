@@ -19,27 +19,35 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class Update_Server extends Service {
 
-    static final String url = "https://www.tfg.centrethailam.com";
+    //URL
+    private static final String url = "https://www.tfg.centrethailam.com";
+
+    //Tag for Logs
     private final String TAG = "Update_Server: ";
 
-    JSONEncoder jsonEncoderClass = new JSONEncoder();
+    //JSONEncoder class instance
+    private JSONEncoder jsonEncoderClass = new JSONEncoder();
 
     private final IBinder mBinder = new LocalBinder();
 
-    IntentFilter filter;
+    //Filter and Receiver
+    private IntentFilter filter;
     private MyReceiver receiver;
 
+    //JSON values
     private final String [] keys = {"Objective","Code","list_name","Hash","Update","GoogleAccount","status"};
     private String [] values = new String[7];
     private String [] items = new String[4];
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
     private String request_result;
 
+    //Flag
     private boolean got_response = false;
 
     public class LocalBinder extends Binder {
@@ -61,11 +69,12 @@ public class Update_Server extends Service {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        //Filter and my receiver
         filter = new IntentFilter("Update_Server_Thread");
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
 
-        Log.v(TAG, " Update Server Created");
+        //Log.v(TAG, " Update Server Created");
         jsonEncoderClass.create_template();
     }
     @Override
@@ -96,6 +105,7 @@ public class Update_Server extends Service {
         Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
         return true;
     }
+
     // Sets values for the item array
     public void set_items(String Type, String Product_name, String Price, String Quantity){
         items[0] = Type;
@@ -113,9 +123,9 @@ public class Update_Server extends Service {
         else
             send_post_request(jsonEncoderClass.return_json());
     }
+
     // Creates the apropiate JSON based if the values need to go in the main or in Values
     private boolean set_json(String [] key, String[] value,int update_main){
-
         if (jsonEncoderClass.return_json() == null) return false;
         if (update_main == 0) {
             if (key.length != value.length) return false;
@@ -126,18 +136,17 @@ public class Update_Server extends Service {
     }
 
     private void send_post_request(final JSONObject o){
-
-        Log.v(TAG, "full url = " + url);
+        //Log.v(TAG, "full url = " + url);
         // Create new thread so not to block URL
-        Log.v(TAG,"Creating thread to send data");
+        //Log.v(TAG,"Creating thread to send data");
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 String response = "";
-                HttpURLConnection connection = null;
+                HttpsURLConnection connection = null;
                 try {
                     URL link_url = new URL(url);
-                    connection = (HttpURLConnection)link_url.openConnection();
+                    connection = (HttpsURLConnection)link_url.openConnection();
                     //Set to POST
                     connection.setDoOutput(true);
                     connection.setRequestMethod("POST");
@@ -180,6 +189,7 @@ public class Update_Server extends Service {
 
     public JSONObject get_json_object() {return jsonEncoderClass.return_json();}
 
+    //Check if network available
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -187,8 +197,8 @@ public class Update_Server extends Service {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    //Process the message received from the server and checks if it is correct
     private void process_message(String response){
-
         try {
             JSONObject rsp = new JSONObject(response);
             String usr_email = rsp.getJSONObject("main").getString("GoogleAccount");
@@ -208,15 +218,19 @@ public class Update_Server extends Service {
         }
     }
 
+    //Receiver
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
-            Log.d(TAG, "Got message: " + message);
+            //Log.d(TAG, "Got message: " + message);
             process_message(message);
         }
     }
+
+
+    //JSONEncoder class
     private class JSONEncoder{
         String TAG = "JSONEncoder";
         JSONObject obj;
@@ -228,21 +242,21 @@ public class Update_Server extends Service {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Log.v(TAG," Done");
+            //Log.v(TAG," Done");
             return obj;
         }
 
         public void set_values(String key [], String value [],int update_main){
             switch (update_main){
                 case 0:
-                    Log.v(TAG,"Creating main");
+                    //Log.v(TAG,"Creating main");
                     try {
                         for (int i = 0; i < key.length; i++)
                             obj.getJSONObject("main").put(key[i],value[i]);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Log.v(TAG,obj.toString());
+                    //Log.v(TAG,obj.toString());
                     break;
                 case 1:
                     try {
@@ -255,9 +269,9 @@ public class Update_Server extends Service {
                         items.put(value[2]);
                         items.put(value[3]);
                         tmp.put("Item",items);
-                        Log.v(TAG, String.valueOf(a));
-                        Log.v(TAG, String.valueOf(items));
-                        Log.v(TAG, String.valueOf(tmp));
+                        //Log.v(TAG, String.valueOf(a));
+                        //Log.v(TAG, String.valueOf(items));
+                        //Log.v(TAG, String.valueOf(tmp));
                         obj.put("Values",tmp);
                     } catch (JSONException e) {
                         e.printStackTrace();

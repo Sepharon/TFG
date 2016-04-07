@@ -1,16 +1,17 @@
 package sersilinc.needmorecookies;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,32 +22,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import android.os.Handler;
 import android.os.Message;
 
+import javax.net.ssl.HttpsURLConnection;
+
 
 public class Update_List extends Service {
 
     //URL
-    static final String url = "https://www.tfg.centrethailam.com";
-    //static final String url = "10.192.129.34";
-
+    private static final String url = "https://www.tfg.centrethailam.com";
 
     //JSON objects and arrays
-    JSONObject mainData = null;
+    private JSONObject mainData = null;
 
 
     //Handle incoming messages
     static final int MSG_GET_DATA = 1;
-    static HttpURLConnection urlConnection;
+    private static HttpsURLConnection urlConnection;
 
-    //TAG for Log
+    //TAG for Logs
     private final String TAG = "Update List Service: ";
-
 
     //Bind service
     private final IBinder mBinder = new LocalBinder();
@@ -57,7 +55,7 @@ public class Update_List extends Service {
         }
     }
 
-    //Incoming handler
+    //Incoming messages handler
     private Messenger msg = new Messenger(new IncomingHandler());
 
 
@@ -70,27 +68,27 @@ public class Update_List extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.v(TAG, "Created");
+        //Log.v(TAG, "Created");
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //return super.onStartCommand(intent, flags, startId);
-        Log.v(TAG,"StartCommand");
+        Log.v(TAG, "StartCommand");
         return START_STICKY;
     }
 
     //It gets the JSON data from the API
-    public void get_data_json(JSONObject json_obj, String request) throws JSONException{
+    private void get_data_json(JSONObject json_obj, String request) throws JSONException{
         JSONObject mainJSON = json_obj.getJSONObject("main");
         Intent broadcast = new Intent();
         broadcast.setAction("broadcast_service");
 
         broadcast.putExtra("Main", mainJSON.toString());
 
+        //Process type of request and broadcast it
         switch (request){
             case "all":
                 JSONObject listsJSON = json_obj.getJSONObject("lists");
@@ -98,28 +96,22 @@ public class Update_List extends Service {
                 break;
             case "one_list":
                 JSONObject listJSON = json_obj.getJSONObject("list");
-                //JSONArray meat = listJSON.getJSONArray("Meat and Fish");
-                //broadcast.putExtra("MeatAndFish", meat.toString());
                 broadcast.putExtra("One_list", listJSON.toString());
                 break;
             case "shared_list":
                 JSONObject shared_list = json_obj.getJSONObject("list");
-                //JSONArray meat = listJSON.getJSONArray("Meat and Fish");
-                //broadcast.putExtra("MeatAndFish", meat.toString());
                 broadcast.putExtra("shared_list", shared_list.toString());
                 break;
         }
         broadcast.putExtra("Request", request);
-        //broadcast.putExtra("GoogleAccount", mainJSON.getString("GoogleAccount"));
         sendBroadcast(broadcast);
     }
 
 
     private void send_post_request(final String request, final String GoogleAccount, final String code_name) {
-        Log.v(TAG, "full url = " + url);
+        //Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
-        Log.v(TAG, "Creating thread to send data");
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -127,6 +119,7 @@ public class Update_List extends Service {
                     String result;
                     JSONObject json_obj = new JSONObject();
 
+                    //Process type of request. Depending on the value, we create a different JSON object.
                     switch (request) {
                         case "all":
                             json_obj.put("Update", "False");
@@ -164,10 +157,10 @@ public class Update_List extends Service {
                     JSONObject mainObj = new JSONObject();
                     mainObj.put("main", json_obj);
 
-                    Log.v(TAG, mainObj.toString());
+                    //Log.v(TAG, mainObj.toString());
 
                     URL link_url = new URL(url);
-                    urlConnection = (HttpURLConnection) link_url.openConnection();
+                    urlConnection = (HttpsURLConnection) link_url.openConnection();
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "application/json");
                     //urlConnection.setRequestProperty("Accept", "application/json");
@@ -228,40 +221,53 @@ public class Update_List extends Service {
         t.start();
     }
 
+    //Check if network available
+    private boolean is_network_available(){
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     //It handles incoming messages
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_GET_DATA:
-                    Log.v("Service:", "Got data");
-                    String request = msg.getData().getString("request");
-                    String GoogleAccount = msg.getData().getString("GoogleAccount");
-                    Log.v("Service:", request);
-                    try {
-                        switch (request) {
-                            case "one_list":
-                                String code_list = msg.getData().getString("code_list");
-                                send_post_request(request, GoogleAccount, code_list);
-                                break;
-                            case "shared_list":
-                                String code_list2 = msg.getData().getString("code_list");
-                                send_post_request(request, GoogleAccount, code_list2);
-                                break;
-                            case "code":
-                                String list_name = msg.getData().getString("list_name");
-                                send_post_request(request, GoogleAccount, list_name);
-                                break;
-                            case "all":
-                                send_post_request(request, GoogleAccount, null);
-                                break;
+            if (!is_network_available()) {
+                Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
+            } else {
+                switch (msg.what) {
+                    case MSG_GET_DATA:
+                        Log.v("Service:", "Got data");
+                        String request = msg.getData().getString("request");
+                        String GoogleAccount = msg.getData().getString("GoogleAccount");
+                        Log.v("Service:", request);
+                        try {
+                            //Process type of request and send POST request
+                            switch (request) {
+                                case "one_list":
+                                    String code_list = msg.getData().getString("code_list");
+                                    send_post_request(request, GoogleAccount, code_list);
+                                    break;
+                                case "shared_list":
+                                    String code_list2 = msg.getData().getString("code_list");
+                                    send_post_request(request, GoogleAccount, code_list2);
+                                    break;
+                                case "code":
+                                    String list_name = msg.getData().getString("list_name");
+                                    send_post_request(request, GoogleAccount, list_name);
+                                    break;
+                                case "all":
+                                    send_post_request(request, GoogleAccount, null);
+                                    break;
+                            }
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
                         }
-                    } catch (NullPointerException e){
-                        e.printStackTrace();
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
             }
         }
     }

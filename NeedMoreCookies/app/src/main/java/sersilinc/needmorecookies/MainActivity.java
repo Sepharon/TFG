@@ -1,6 +1,5 @@
 package sersilinc.needmorecookies;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,18 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.ListPreference;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -27,17 +22,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -55,88 +46,113 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    // call functions from service usuing data.function_name()
+
     // Main tag for Logs
     private final String TAG = "Main Activity: ";
+
     // Service elements
-    Messenger mService = null;
-    boolean is_bound = false;
-    Update_Server server_service;
-    boolean is_bound_server = false;
+    private Messenger mService = null;
+    private boolean is_bound = false;
+    private Update_Server server_service;
+    private boolean is_bound_server = false;
 
     //Receiver
-    String GoogleAccount;
-    String request_type;
-    String list;
-    String main;
-    MyReceiver receiver;
-    IntentFilter filter;
+    private String GoogleAccount;
+    private String request_type;
+    private String list;
+    private String main;
+    private MyReceiver receiver;
+    private IntentFilter filter;
 
     // UI elements
-    Button private_lists;
-    Button public_lists;
+    private Button private_lists;
+    private Button public_lists;
     private View separator1;
     private View separator2;
-    ProgressBar loading;
-    List<List<String>> private_l;
-    List<List<String>> public_l;
+    private ProgressBar loading;
 
-    String [] last_list = new String[2];
+    //Lists
+    private List<List<String>> private_l;
+    private List<List<String>> public_l;
+    private String [] last_list = new String[2];
+
     // ListView
     private ListView listview;
     // Private and public list names
-    List<String> public_list = new ArrayList<>();
-    List<String> private_list = new ArrayList<>();
+    private List<String> public_list = new ArrayList<>();
+    private List<String> private_list = new ArrayList<>();
+
     // Adapter
-    ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> adapter;
+
     //Google API client
     private GoogleApiClient mGoogleApiClient;
-    // Current state of UI true = private ; false = public
-    boolean private_or_public = true;
 
     //User info
-    User_Info usr_inf;
+    private User_Info usr_inf;
 
-    CountDownTimer timer;
+    //Timer
+    private CountDownTimer timer;
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Intent-filter for receiving Broadcast
+        /**[START Intent-filter for receiving Broadcast]**/
         filter = new IntentFilter("broadcast_service");
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
+        /**[END Intent-filter for receiving Broadcast]**/
 
-        //Bind service Update List
+        /**[START Bind service Update List]**/
         Intent intent = new Intent(this, Update_List.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        /**[END Bind service Update List]**/
 
-        //Bind service Update Server
-        //Log.v(TAG, "Starting Update Server");
+        /**[START Bind service Update Server]**/
         Intent in = new Intent(this, Update_Server.class);
         bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
+        /**[END Bind service Update Server]**/
 
 
+        /**[START UI elements]**/
         private_lists = (Button) findViewById(R.id.private_lists);
         public_lists = (Button) findViewById(R.id.public_lists);
         separator1 = findViewById(R.id.separator);
         separator2 = findViewById(R.id.separator2);
         listview = (ListView) findViewById(R.id.list);
         loading = (ProgressBar) findViewById(R.id.progressBar);
+        /**[END UI elements]**/
 
-
+        /**[START List view]**/
+         //Adapter
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,private_list);
-        // Create listview
+        // Create List View
         listview.setAdapter(adapter);
-        Log.v(TAG,User_Info.getInstance().getPrivate_lists().toString());
-        //Navigation + floating action button
+        /**[END List view]**/
+
+        /**[START Navigation]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setElevation(0);
+        try {
+            getSupportActionBar().setElevation(0);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        /**[END Navigation]**/
+
+        /**[START AddList call]**/
+        //Add new list
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,23 +162,20 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 1);
             }
         });
+        /**[END AddList call]**/
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-
+        /**[START GoogleApiClient]**/
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+        /**[END GoogleApiClient]**/
 
+        /**[START OnClickListeners]**/
+        //Change to private or public view
         private_lists.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,31 +197,31 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        //Show the products of the selected shopping list in a new activity
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listview.getItemAtPosition(position).toString();
                 if (is_bound) {
-                    Log.v(TAG, "SELECTED: " + selected);
-                    //if (!is_bound) return;
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
-
                     Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
 
+                    //Get the private and public shopping lists of the user
+                    //and check which one has been selected
                     private_l = usr_inf.getPrivate_lists();
                     public_l = usr_inf.getPublic_lists();
                     for (int i = 0; i < private_l.size(); i++) {
-                        Log.v(TAG, "LIST: " + private_l.get(i));
+                        //Log.v(TAG, "LIST: " + private_l.get(i));
                         if (private_l.get(i).get(0).equals(selected)) {
                             bundle.putString("code_list", private_l.get(i).get(2));
                         }
                     }
 
                     for (int i = 0; i < public_l.size(); i++) {
-                        Log.v(TAG, "LIST: " + public_l.get(i));
+                        //Log.v(TAG, "LIST: " + public_l.get(i));
                         if (public_l.get(i).get(0).equals(selected)) {
                             bundle.putString("code_list", public_l.get(i).get(2));
                         }
@@ -216,39 +229,42 @@ public class MainActivity extends AppCompatActivity
 
                     bundle.putString("GoogleAccount", usr_inf.getEmail());
                     msg.setData(bundle);
+
+                    //Send message
                     try {
                         mService.send(msg);
-                        Log.v(TAG, "Message sent");
+                        //Log.v(TAG, "Message sent");
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-
-                    // Done sending data
                 }
             }
         });
+        /**[END OnClickListeners]**/
 
+        /**[START User_Info]**/
         //Get User info
         usr_inf = User_Info.getInstance();
+        /**[END User_Info]**/
 
 
+        /**[START Counter]**/
         //Counter to reload the MainActivity every 2 minutes
         timer = new CountDownTimer(120000, 1000) { //2min
             public void onTick(long millisUntilFinished) {}
             public void onFinish() {
-                //Write function to be called
-                Log.v(TAG, "timer");
+                //Log.v(TAG, "timer");
                 getAll_ShoppingLists(usr_inf.getEmail());
                 start();
             }
         }.start();
+        /**[END Counter]**/
 
     }
 
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
-        timer.start();
     }
 
     @Override
@@ -260,7 +276,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unbind from the service
+
+        // Unbind from the services
         if (is_bound) {
             unbindService(mConnection);
             is_bound = false;
@@ -270,29 +287,25 @@ public class MainActivity extends AppCompatActivity
             is_bound_server = false;
         }
 
+        //Unregister receiver
         unregisterReceiver(receiver);
         timer.cancel();
     }
 
     // Binding Update List
     private ServiceConnection mConnection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             Log.v(TAG, "Binding service");
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            //Update_List.LocalBinder binder = (Update_List.LocalBinder) service;
-            //binder.getService();
             mService = new Messenger(service);
             is_bound = true;
+
+            //Get the shopping lists and displaying a loading progress circle
             new ProgressTask().execute();
 
-
-            //loading_gif.setVisibility(View.INVISIBLE);
-            //listview.setVisibility(View.VISIBLE);
-            Log.v(TAG, usr_inf.getPrivate_lists().size() + "");
-            Log.v(TAG, usr_inf.getPublic_lists().size() + "");
+            //Log.v(TAG, usr_inf.getPrivate_lists().size() + "");
+            //Log.v(TAG, usr_inf.getPublic_lists().size() + "");
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
@@ -304,7 +317,6 @@ public class MainActivity extends AppCompatActivity
 
     // Binding Update Server
     private ServiceConnection mConnection2 = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
@@ -312,26 +324,25 @@ public class MainActivity extends AppCompatActivity
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
-            //mService = new Messenger(service);
             is_bound_server = true;
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            //mService = null;
             is_bound_server = false;
         }
     };
 
 
 
-    //Receiver from Service
+    //Receiver from Services
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //text.setText("");
             request_type = intent.getStringExtra("Request");
             main = intent.getStringExtra("Main");
             GoogleAccount = intent.getStringExtra("GoogleAccount");
+
+            //Check type of request
             switch(request_type){
                 case "one_list":
                     list = intent.getStringExtra("One_list");
@@ -373,8 +384,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
             }
-            Log.v(TAG, "Main: " + main + "\r\n"+"Shopping_list: "+list);
-            //text.setText("Main: "+main+"\r\n"+"Shopping_list: "+list);
+            //Log.v(TAG, "Main: " + main + "\r\n"+"Shopping_list: "+list);
         }
     }
 
@@ -382,8 +392,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        //Restart timer
         timer.start();
+
+        //Register receiver
         registerReceiver(receiver, filter);
+
+        //Get shopping lists
         new ProgressTask().execute();
     }
 
@@ -399,7 +414,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Navigation
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -413,12 +427,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
-        }
-        else if (id == R.id.nav_home) {
-            Intent intent = new Intent(MainActivity.this,MainActivity.class);
-            // Start next activity
-            startActivity(intent);
         } else if (id == R.id.nav_share) {
+            //TODO: Change share
             Intent intent = new Intent(MainActivity.this, Items.class);
             // Start next activity
             startActivity(intent);
@@ -435,7 +445,7 @@ public class MainActivity extends AppCompatActivity
 
 
     //Sign Out from Google Account
-    public void signOut() {
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -446,19 +456,23 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    //Get result from AddList activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
-        Log.v(TAG, "Received result");
+        //Log.v(TAG, "Received result");
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                Log.v(TAG,"Result OK");
+                //Log.v(TAG,"Result OK");
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
-                Log.v(TAG, "" + Type);
-                Log.v(TAG,list_name);
-                switch (data.getStringExtra("Type")){
+                //Log.v(TAG, "" + Type);
+                //Log.v(TAG,list_name);
+
+                //Check which type of list the user wants to add
+                switch (Type){
                     case "true":
                         private_list.add(list_name);
                         reload_ui(true);
@@ -473,10 +487,12 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    //Send request to Update Server service
     private void send_request_server(String list_name,String status){
         server_service.set_values(5, "_", list_name, "gh", "True", status);
         server_service.set_items("_", "_", "_", "_");
-        Log.v(TAG, server_service.get_json_object().toString());
+        //Log.v(TAG, server_service.get_json_object().toString());
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -503,17 +519,17 @@ public class MainActivity extends AppCompatActivity
         });
         t.start();
     }
+
+    //Change the UI either private or public shopping lists
     private void reload_ui(Boolean type){
-        Log.v(TAG, "Updating UI");
+        //Log.v(TAG, "Updating UI");
         if (type){
             adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,private_list);
-            private_or_public = true;
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
         }
         else {
             adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,public_list);
-            private_or_public = false;
             separator2.setVisibility(View.VISIBLE);
             separator1.setVisibility(View.INVISIBLE);
         }
@@ -522,53 +538,57 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
-    public void changeActivity(String main, String list){
+    //When a shopping lists is pressed, change to Items activity and send the items
+    private void changeActivity(String main, String list){
         Intent intent = new Intent(this, Items.class);
         intent.putExtra("Main", main);
         intent.putExtra("List", list);
         startActivity(intent);
     }
 
-    public void getAll_ShoppingLists(String GoogleAccount){
+    private void getAll_ShoppingLists(String GoogleAccount){
         if (is_bound) {
-            //if (!is_bound) return;
             // Create and send a message to the service, using a supported 'what' value
-            Log.v(TAG, "Getting ready");
+            //Log.v(TAG, "Getting ready");
             Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "all");
             bundle.putString("GoogleAccount", GoogleAccount);
             msg.setData(bundle);
+
+            //Send message
             try {
                 mService.send(msg);
                 Log.v(TAG, "Message sent");
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-
-            // Done sending data
         }
-        else Log.v(TAG,"NOT BOUND");
+        //else Log.v(TAG,"NOT BOUND");
     }
 
-    public void update_Users_data(String result){
+    //Update the UI with all the shopping lists
+    private void update_Users_data(String result){
         try {
-            Log.v(TAG, result);
+            //Log.v(TAG, result);
             JSONObject json_obj = new JSONObject(result);
-            Log.v(TAG, "length: " + json_obj.length());
+            //Log.v(TAG, "length: " + json_obj.length());
             Iterator<String> keys = json_obj.keys();
             while (keys.hasNext()) {
-                //JSONObject list1 = json_obj.getJSONObject(String.valueOf(keys.next()));
+                //Get list name
                 String list_name = String.valueOf(keys.next());
                 JSONObject list1 = json_obj.getJSONObject(list_name);
+
+                //Get the code
                 String code = list1.getString("Code");
 
+                //Variables to store the list name, type and code
                 List<String> shopping_list_private = new ArrayList<>();
                 List<String> shopping_list_public = new ArrayList<>();
 
                 int type = list1.getInt("TypeList");
+                //Check type of shopping list and store them in the User_Info class
+                //The format is the following: [[List_name, Type, Code], [List_name2, Type, Code],...]
                 switch (type) {
                     case 0:
                         shopping_list_public.add(list_name);
@@ -594,19 +614,18 @@ public class MainActivity extends AppCompatActivity
                 }
             }
 
-            Log.v(TAG, "PRIVATE LIST: "+ usr_inf.getPrivate_lists());
-            Log.v(TAG, "PUBLIC LIST: "+ usr_inf.getPublic_lists());
         } catch (JSONException e){
-            Log.v(TAG, "Error_JSON");
             e.printStackTrace();
         }
-
     }
+
+
+    //Create the loading and get all the shopping lists when finished
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             loading.setVisibility(View.VISIBLE);
-            listview.setVisibility(View.INVISIBLE);
+            listview.setVisibility(View.GONE);
         }
 
         @Override

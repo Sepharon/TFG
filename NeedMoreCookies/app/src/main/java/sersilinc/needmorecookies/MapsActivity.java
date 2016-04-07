@@ -11,7 +11,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -32,11 +31,10 @@ public class MapsActivity extends AppCompatActivity
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    //Places
     //TODO: Implement Google API Places to show nearby supermarkets
-    //private static final int PLACE_PICKER_REQUEST = 1;
 
 
+    //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
 
     //Location
@@ -53,7 +51,7 @@ public class MapsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        //[NAVIGATION MENU]
+        /**[START NAVIGATION MENU]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar3);
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout3);
@@ -64,15 +62,15 @@ public class MapsActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view3);
         navigationView.setNavigationItemSelectedListener(this);
-        //[END NAVIGATION MENU]
+        /**[END NAVIGATION MENU]**/
 
-        //[Location]
+        /**[START Location]**/
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        //[END LOCATION]
+        /**[END LOCATION]**/
 
-        //[SIGN OUT]
+        /**[START GoogleApiClient]**/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
 
@@ -80,7 +78,7 @@ public class MapsActivity extends AppCompatActivity
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        //[END SIGN OUT]
+        /**[END SIGN OUT]**/
     }
 
 
@@ -106,7 +104,7 @@ public class MapsActivity extends AppCompatActivity
         super.onResume();
     }
 
-    //[NAVIGATION MENU]
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -123,7 +121,6 @@ public class MapsActivity extends AppCompatActivity
 
 
     //Navigation
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -155,10 +152,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     //Sign Out from Google Account
-    public void signOut() {
-        User_Info usr_inf;
-        usr_inf = User_Info.getInstance();
-        //Log.v("GOAPICLIENT2", "" + usr_inf.getmAPIClient());
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -169,7 +163,6 @@ public class MapsActivity extends AppCompatActivity
             }
         });
     }
-    //[END NAVIGATION MENU]
 
 
     @Override
@@ -185,7 +178,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
-    //[Location]
+    //Location
 
     /**
      * Enables the My Location layer if the fine location permission has been granted.
@@ -244,8 +237,6 @@ public class MapsActivity extends AppCompatActivity
         PermissionUtils.PermissionDeniedDialog
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
     }
-
-    //[END Location]
 
 }
 
