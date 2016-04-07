@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -104,6 +105,9 @@ public class MainActivity extends AppCompatActivity
     //Timer
     private CountDownTimer timer;
 
+    //Selected shopping list
+    private int currentSelection;
+
     @Override
     protected void onCreate(Bundle saveInstanceState){
         super.onCreate(saveInstanceState);
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity
                 android.R.layout.simple_list_item_1,private_list);
         // Create List View
         listview.setAdapter(adapter);
+        registerForContextMenu(listview);
         /**[END List view]**/
 
         /**[START Navigation]**/
@@ -251,6 +256,19 @@ public class MainActivity extends AppCompatActivity
                         e.printStackTrace();
                     }
                 }
+            }
+        });
+
+        //Show option to edit or delete if long press
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.v(TAG, "OnItemLongClickListener");
+                System.out.println("Long click");
+                currentSelection = position;
+                startActionMode(modeCallBack);
+                view.setSelected(true);
+                return true;
             }
         });
         /**[END OnClickListeners]**/
@@ -686,4 +704,44 @@ public class MainActivity extends AppCompatActivity
             });
         }
     }
+
+
+
+    //On long pressed in a shopping list, display options
+    private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.setTitle("Options");
+            mode.getMenuInflater().inflate(R.menu.menu_list, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.delete: {
+                    adapter.remove(adapter.getItem(currentSelection));
+                    mode.finish();
+                    break;
+                }
+                case R.id.edit: {
+                    System.out.println(" edit ");
+                    break;
+                }
+                default:
+                    return false;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+    };
 }
