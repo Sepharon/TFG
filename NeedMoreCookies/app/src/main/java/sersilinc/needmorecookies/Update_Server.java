@@ -41,8 +41,8 @@ public class Update_Server extends Service {
     private MyReceiver receiver;
 
     //JSON values
-    private final String [] keys = {"Objective","Code","list_name","Hash","Update","GoogleAccount","status"};
-    private String [] values = new String[7];
+    private final String [] keys = {"Objective","Code","list_name","Update","GoogleAccount","status"};
+    private String [] values = new String[6];
     private String [] items = new String[4];
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
     private String request_result;
@@ -89,17 +89,15 @@ public class Update_Server extends Service {
         Log.v(TAG, " Update Server started");
         return START_STICKY;
     }
-
     // Sets the values for the values array
-    public boolean set_values(int objective_code,String list_code,String list_name,String hash,String update,String status){
+    public boolean set_values(int objective_code,String list_code,String list_name,String update,String status){
         if (objective_code > 10) return false;
         values[0] = objectives[objective_code];
         values[1] = list_code;
         values[2] = list_name;
-        values[3] = hash;
-        values[4] = update;
-        values[5] = User_Info.getInstance().getEmail();
-        values[6] = status;
+        values[3] = update;
+        values[4] = User_Info.getInstance().getEmail();
+        values[5] = status;
 
         set_json(keys,values, 0);
         Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
@@ -203,18 +201,16 @@ public class Update_Server extends Service {
             JSONObject rsp = new JSONObject(response);
             String usr_email = rsp.getJSONObject("main").getString("GoogleAccount");
             String result = rsp.getJSONObject("Result").getString("result");
-            if (usr_email.equals(User_Info.getInstance().getEmail())) {
-                request_result = result;
-                got_response = true;
-
-            }
-            else request_result = null;
+            if (usr_email.equals(User_Info.getInstance().getEmail())) request_result = result;
+            else request_result = "False";
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.v(TAG, "Unable to create JSON from string");
             Log.v(TAG, "Received JSON: " + response);
-            request_result = null;
+            request_result = "False";
+        } finally {
+            got_response = true;
         }
     }
 
@@ -238,7 +234,7 @@ public class Update_Server extends Service {
         public JSONObject create_template(){
             Log.v(TAG, " Started");
             try {
-                obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Hash\":\"0000\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
+                obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
             } catch (JSONException e) {
                 e.printStackTrace();
             }

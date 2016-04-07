@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private String request_type;
     private String list;
     private String main;
-    private MyReceiver receiver;
+    public MyReceiver receiver;
     private IntentFilter filter;
 
     // UI elements
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
 
     //User info
     private User_Info usr_inf;
-
+    private int list_type = -1;
     //Timer
     private CountDownTimer timer;
 
@@ -216,6 +216,7 @@ public class MainActivity extends AppCompatActivity
                     for (int i = 0; i < private_l.size(); i++) {
                         //Log.v(TAG, "LIST: " + private_l.get(i));
                         if (private_l.get(i).get(0).equals(selected)) {
+                            list_type = 0;
                             bundle.putString("code_list", private_l.get(i).get(2));
                         }
                     }
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity
                     for (int i = 0; i < public_l.size(); i++) {
                         //Log.v(TAG, "LIST: " + public_l.get(i));
                         if (public_l.get(i).get(0).equals(selected)) {
+                            list_type = 1;
                             bundle.putString("code_list", public_l.get(i).get(2));
                         }
                     }
@@ -346,6 +348,7 @@ public class MainActivity extends AppCompatActivity
             switch(request_type){
                 case "one_list":
                     list = intent.getStringExtra("One_list");
+                    Log.v(TAG,list);
                     changeActivity(main, list);
                     break;
                 case "all":
@@ -360,31 +363,19 @@ public class MainActivity extends AppCompatActivity
                     list = "";
                     changeActivity(main, list);
                     break;
-                case "result":
-                    if (GoogleAccount.equals(usr_inf.getEmail())) {
-                        Log.v(TAG,"Processing result");
-                        String objective = intent.getStringExtra("objective");
-                        List<String> list_arrays = new ArrayList<>();
-                        if (objective.equals("new_list")) {
-                            Log.v(TAG,"Adding new list");
-                            list_arrays.add(last_list[0]);
-                            list_arrays.add(last_list[1]);
-                            list_arrays.add(main);
-                            if (last_list[1].equals("0")) {
-                                Log.v(TAG, "Adding to public");
-                                User_Info.getInstance().setPublic_lists(list_arrays);
-                            }
-                            else if (last_list[1].equals("1")) {
-                                Log.v(TAG, "Adding to private");
-                                User_Info.getInstance().setPrivate_lists(list_arrays);
-                            }
-                        } else if (objective.equals("delete_list")) {
-                            if (main.equals("True"))
-                                Toast.makeText(MainActivity.this, "Shopping List deleted", Toast.LENGTH_LONG).show();
-                        }
-                    }
+                case "new_list":
+                    if (main.equals("False"))
+                        Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
+                                .show();
+                    Log.v(TAG, "Added new Shopping List correctly");
+                    break;
+                case "new_item":
+                    if (main.equals("False"))
+                        Toast.makeText(MainActivity.this,R.string.add_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    Log.v(TAG,"Added new item correctly");
+                    break;
             }
-            //Log.v(TAG, "Main: " + main + "\r\n"+"Shopping_list: "+list);
         }
     }
 
@@ -465,12 +456,9 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                //Log.v(TAG,"Result OK");
+
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
-                //Log.v(TAG, "" + Type);
-                //Log.v(TAG,list_name);
-
                 //Check which type of list the user wants to add
                 switch (Type){
                     case "true":
@@ -490,9 +478,8 @@ public class MainActivity extends AppCompatActivity
 
     //Send request to Update Server service
     private void send_request_server(String list_name,String status){
-        server_service.set_values(5, "_", list_name, "gh", "True", status);
+        server_service.set_values(5, "_", list_name, "True", status);
         server_service.set_items("_", "_", "_", "_");
-        //Log.v(TAG, server_service.get_json_object().toString());
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -500,21 +487,12 @@ public class MainActivity extends AppCompatActivity
                 //noinspection StatementWithEmptyBody
                 while (!server_service.return_response_status());
                 String response = server_service.return_result();
+                Log.v("Thread",response);
                 Intent intent = new Intent();
-                try {
-                    JSONObject rsp = new JSONObject(response);
-                    String acc = rsp.getJSONObject("main").getString("GoogleAccount");
-                    String objective = rsp.getJSONObject("main").getString("Objective");
-                    String result = rsp.getJSONObject("Result").getString("result");
-                    intent.setAction("broadcast_service");
-                    intent.putExtra("GoogleAccount",acc);
-                    intent.putExtra("main",result);
-                    intent.putExtra("request_type",objective);
-                    Log.d("Thread ", "Sending response");
-                    sendBroadcast(intent);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                intent.setAction("broadcast_service");
+                intent.putExtra("Main",response);
+                intent.putExtra("Request", "new_list");
+                sendBroadcast(intent);
             }
         });
         t.start();
@@ -540,9 +518,11 @@ public class MainActivity extends AppCompatActivity
 
     //When a shopping lists is pressed, change to Items activity and send the items
     private void changeActivity(String main, String list){
+        Log.v(TAG,main);
         Intent intent = new Intent(this, Items.class);
         intent.putExtra("Main", main);
         intent.putExtra("List", list);
+        intent.putExtra("Type", list_type +"");
         startActivity(intent);
     }
 

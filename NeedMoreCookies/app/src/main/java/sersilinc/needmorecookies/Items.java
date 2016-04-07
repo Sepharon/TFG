@@ -1,8 +1,13 @@
 package sersilinc.needmorecookies;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -27,7 +32,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.Format;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -86,10 +93,19 @@ public class Items extends AppCompatActivity
     //Temporal HashMap to write to the columns
     private HashMap<String, String> temp;
     /**[END ListView]**/
-
+    // RECEIVER
+    private IntentFilter filter;
     //Preferences
     private SharedPreferences prefs;
     private String currency;
+
+    // Service
+    private Update_Server server_service;
+    private boolean is_bound_server = false;
+
+    // Info
+    String main = null,list_type = null;
+    int current_tab = 1;
 
 
     @Override
@@ -119,6 +135,12 @@ public class Items extends AppCompatActivity
 
         listview_header = (ListView) findViewById(R.id.list_header);
         /**[END UI elements]**/
+
+        /**[START Intent-filter for receiving Broadcast]**/
+        filter = new IntentFilter("broadcast_service");
+        MainActivity i = new MainActivity();
+        this.registerReceiver(i.receiver, filter);
+        /**[END Intent-filter for receiving Broadcast]**/
 
         /**[START List View]**/
 
@@ -173,7 +195,10 @@ public class Items extends AppCompatActivity
         });
         /**[END AddItem activity]**/
 
-
+        /**[START Service binding]**/
+        Intent in = new Intent(this, Update_Server.class);
+        bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
+        /**[END Service binding]**/
 
         /**[START GoogleApiClient]**/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -190,6 +215,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator1.getVisibility() != View.VISIBLE) {
+                    current_tab = 1;
                     reload_ui(1);
                 }
             }
@@ -198,6 +224,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator2.getVisibility() != View.VISIBLE) {
+                    current_tab = 2;
                     reload_ui(2);
                 }
             }
@@ -206,6 +233,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator3.getVisibility() != View.VISIBLE) {
+                    current_tab = 3;
                     reload_ui(3);
                 }
             }
@@ -214,6 +242,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator4.getVisibility() != View.VISIBLE) {
+                    current_tab = 4;
                     reload_ui(4);
                 }
             }
@@ -222,6 +251,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator5.getVisibility() != View.VISIBLE) {
+                    current_tab = 5;
                     reload_ui(5);
                 }
             }
@@ -230,6 +260,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator6.getVisibility() != View.VISIBLE) {
+                    current_tab = 6;
                     reload_ui(6);
                 }
             }
@@ -238,6 +269,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (separator7.getVisibility() != View.VISIBLE) {
+                    current_tab = 7;
                     reload_ui(7);
                 }
             }
@@ -248,9 +280,11 @@ public class Items extends AppCompatActivity
         Bundle extras = getIntent().getExtras();
         //Get JSON Strings from the MainActivity
         try {
-            String main = extras.get("Main").toString();
+            main = extras.get("Main").toString();
             String list = extras.get("List").toString();
+            list_type = extras.getString("Type");
             Log.v(TAG, main + list + "");
+            Log.v(TAG,main);
 
             update_ShoppingList(list);
         } catch (NullPointerException e) {
@@ -553,13 +587,90 @@ public class Items extends AppCompatActivity
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
+                // TODO : Diferents if's per cada "status"
+                // New Item
                 Log.v(TAG, "Result OK");
                 String product = data.getStringExtra("product");
                 String quantity = data.getStringExtra("quantity");
                 String price = data.getStringExtra("price");
                 String type = data.getStringExtra("type");
                 Log.v(TAG, product + quantity + price + type);
+                String code = null;
+                try {
+                    JSONObject rsp = new JSONObject(main);
+                    code = rsp.getString("Code");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                send_request_server(list_type,code,type,product,price,quantity);
+                temp = new HashMap<String, String>();
+                if (price.equals("null")) {
+                    temp.put(THIRD_COLUMN, "-" + currency);
+                } else {
+                    temp.put(THIRD_COLUMN, price + currency);
+                }
+                temp.put(FIRST_COLUMN, product);
+                temp.put(SECOND_COLUMN, quantity);
+                all_items_l.add(temp);
+                switch (type){
+                    case "Cereal":
+                        cereals_items_l.add(temp);
+                        break;
+                    case "Dairy":
+                        dairy_items_l.add(temp);
+                        break;
+                    case "Meat and Fish":
+                        meat_items_l.add(temp);
+                        break;
+                    case "Others":
+                        others_items_l.add(temp);
+                        break;
+                    case "Sweet":
+                        sweet_items_l.add(temp);
+                        break;
+                    case "Vegetables":
+                        vegetables_items_l.add(temp);
+                        break;
+                }
+                reload_ui(current_tab);
             }
         }
     }
+
+    //Send request to Update Server service
+    private void send_request_server(String status,String code,String type, String product,String price,String quantity){
+        server_service.set_values(3, code, "_", "True", status);
+        server_service.set_items(type, product , price, quantity);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                server_service.send_request();
+                //noinspection StatementWithEmptyBody
+                while (!server_service.return_response_status());
+                String response = server_service.return_result();
+                Intent intent = new Intent();
+                intent.setAction("broadcast_service");
+                intent.putExtra("Main",response);
+                intent.putExtra("Request", "new_item");
+                sendBroadcast(intent);
+            }
+        });
+        t.start();
+    }
+    // Binding Update Server
+    private ServiceConnection mConnection2 = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Log.v(TAG, "Binding service");
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
+            server_service = binder.getService();
+            is_bound_server = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            is_bound_server = false;
+        }
+    };
 }
