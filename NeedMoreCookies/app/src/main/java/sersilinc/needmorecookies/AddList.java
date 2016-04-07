@@ -11,9 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -29,9 +33,13 @@ public class AddList extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
 
     //UI elements
-    private Button add_friend, save;
+    private Button add_friend;
+    private ImageButton save;
     private EditText list_name;
-    private CheckBox pub, priv;
+    private Switch pub, priv;
+
+    //Others
+    private boolean first_time = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +48,10 @@ public class AddList extends AppCompatActivity
 
         /**[START UI elements]**/
         list_name = (EditText) findViewById(R.id.list_name);
-        priv = (CheckBox) findViewById(R.id.private_checkBox2);
-        pub = (CheckBox) findViewById(R.id.public_checkBox);
+        priv = (Switch) findViewById(R.id.private_switch);
+        pub = (Switch) findViewById(R.id.public_switch);
         add_friend = (Button) findViewById(R.id.add_friends);
-        save = (Button) findViewById(R.id.save);
+        save = (ImageButton) findViewById(R.id.save);
         /**[END UI elements]**/
 
         /**[START Navigation]**/
@@ -76,29 +84,44 @@ public class AddList extends AppCompatActivity
         @Override
         public void onClick(View v) {
             // Save list name, and if its public or private
-            if (pub.isChecked() || priv.isChecked()) {
-                Log.v("AddList: ","Returning data");
-                Intent result_data = new Intent();
-                result_data.putExtra("List_Name", list_name.getText().toString());
-                result_data.putExtra("Type","" + priv.isChecked());
-                setResult(MainActivity.RESULT_OK, result_data);
-                finish();
-            }
-            else Toast.makeText(AddList.this,"You must choose a public or private list", Toast.LENGTH_LONG).show();
+            if (!list_name.getText().toString().equals("")) {
+                if (pub.isChecked() || priv.isChecked()) {
+                    Log.v("AddList: ", "Returning data");
+                    Intent result_data = new Intent();
+                    result_data.putExtra("List_Name", list_name.getText().toString());
+                    result_data.putExtra("Type", "" + priv.isChecked());
+                    setResult(MainActivity.RESULT_OK, result_data);
+                    finish();
+                } else
+                    Toast.makeText(AddList.this, "You must choose a public or private list", Toast.LENGTH_LONG).show();
+            } else
+                Toast.makeText(AddList.this, R.string.no_name_toast, Toast.LENGTH_LONG).show();
         }
         });
 
         pub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!pub.isChecked() && !priv.isChecked()){
+                    first_time = true;
+                    save.setVisibility(View.GONE);
+                }
+                if (pub.isChecked() && first_time) start_animation();
                 if (pub.isChecked() && priv.isChecked()) priv.toggle();
+
             }
         });
 
         priv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!pub.isChecked() && !priv.isChecked()){
+                    first_time = true;
+                    save.setVisibility(View.GONE);
+                }
+                if (priv.isChecked() && first_time) start_animation();
                 if (priv.isChecked() && pub.isChecked()) pub.toggle();
+
             }
         });
         /**[END onClickListeners]**/
@@ -154,6 +177,14 @@ public class AddList extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void start_animation(){
+        first_time = false;
+        Animation fadein = new AlphaAnimation(0,1);
+        fadein.setDuration(1000);
+        save.setVisibility(View.VISIBLE);
+        save.setAnimation(fadein);
     }
 
 

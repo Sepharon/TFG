@@ -11,48 +11,23 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="sersilinc.needmorecookies.AddList"
     tools:showIn="@layout/app_bar_addlist"
-    android:background="#e0e0e0">
+    android:background="#ffffff">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_name"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="53dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
+        android:layout_marginTop="30dp"
         android:background="@null"
         android:textColor="#000000"
         android:hint="@string/hint_list_name"
         android:textSize="20dp"
-        android:inputType="textCapWords|textCapSentences" />
-
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/public_name"
-        android:id="@+id/public_checkBox"
-        android:checked="false"
-        android:textColor="#000000"
-        android:textSize="20dp"
-        android:layout_below="@+id/private_checkBox2"
+        android:inputType="textCapWords|textCapSentences"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="36dp" />
-
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/private_name"
-        android:id="@+id/private_checkBox2"
-        android:textColor="#000000"
-        android:checked="false"
-        android:textSize="20dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -65,25 +40,92 @@
         android:layout_alignParentStart="true"
         android:layout_marginBottom="49dp"/>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:id="@+id/save"
-        android:layout_alignTop="@+id/add_friends"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/chose_public_priv"
         android:id="@+id/textView"
+        android:layout_marginTop="53dp"
+        android:textSize="18dp"
         android:layout_below="@+id/list_name"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="77dp"
-        android:textSize="18dp" />
+        android:layout_alignParentStart="true" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/private_switch"
+        android:layout_marginTop="25dp"
+        android:checked="false"
+        android:layout_below="@+id/textView"
+        android:layout_toLeftOf="@+id/public_switch_text"
+        android:layout_toStartOf="@+id/public_switch_text" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/public_switch"
+        android:layout_marginTop="25dp"
+        android:checked="false"
+        android:layout_below="@+id/private_switch_explanation"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/private_switch"
+        android:id="@+id/private_switch_text"
+        android:layout_alignTop="@+id/private_switch"
+        android:layout_alignLeft="@+id/public_switch_text"
+        android:layout_alignStart="@+id/public_switch_text" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/public_switch"
+        android:id="@+id/public_switch_text"
+        android:layout_alignTop="@+id/public_switch"
+        android:layout_toRightOf="@+id/public_switch"
+        android:layout_toEndOf="@+id/public_switch"
+        android:layout_marginLeft="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/private_text"
+        android:id="@+id/private_switch_explanation"
+        android:layout_below="@+id/private_switch"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/private_switch"
+        android:layout_toEndOf="@+id/private_switch" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/public_text"
+        android:id="@+id/public_switch_explanation"
+        android:layout_below="@+id/public_switch"
+        android:layout_alignLeft="@+id/private_switch_explanation"
+        android:layout_alignStart="@+id/private_switch_explanation"
+        android:layout_marginTop="5dp" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/save"
+        android:src="@drawable/ic_done_black_24dp"
+        android:background="@null"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignTop="@+id/add_friends"
+        android:layout_alignRight="@+id/public_switch_explanation"
+        android:layout_alignEnd="@+id/public_switch_explanation"
+        android:layout_alignBottom="@+id/add_friends"
+        android:layout_toRightOf="@+id/private_switch_text"
+        android:layout_toEndOf="@+id/private_switch_text"
+        android:visibility="gone" />
 
 </RelativeLayout>

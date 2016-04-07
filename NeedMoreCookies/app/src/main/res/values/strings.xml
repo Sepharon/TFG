@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Need More Cookies!</string>
-    <string name="title_activity_main">"MainActivity"</string>
+    <string name="title_activity_main"><b>"Shopping Lists"</b></string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_settings">Settings</string>
     <string name="Request">Request</string>
     <string name="Status_SignedOut">"To start using this app, first you need to Log In to your Google account"</string>
     <string name="Sign_Title">"Welcome to \n Need More Cookies!"</string>
-    <string name="hint_list_name">Write the name of the list here</string>
+
     <string name="public_name">Public</string>
     <string name="private_name">Private</string>
     <string name="chose_public_priv">Choose between a private or public list</string>
@@ -102,7 +102,19 @@
         <item>Others</item>
     </string-array>
 
-    <!--Main Activity Toasts -->
+    <!-- Add List -->
+    <string name="hint_list_name">Name of the shopping list here</string>
+    <string name="private_switch">Private Shopping List</string>
+    <string name="public_switch">Public Shopping List</string>
+    <string name="private_text">A private Shopping List can only be accessed by yourself. Choose this option if you are
+    the only one that need to use this list. You can convert a private Shopping List to public any time</string>
+    <string name="public_text">A public Shopping List can be accessed by users that you choose. Choose this option if you
+    wish to share this Shopping List with more people</string>
+    <string name="no_name_toast">You must write a name for your list</string>
+
+    <!--Main Activity-->
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
     <string name="add_item_error">A problem occurred while adding the Item</string>
+    <string name="update">Updating Shopping Lists</string>
+
 </resources>

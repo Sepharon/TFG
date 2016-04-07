@@ -27,7 +27,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:id="@+id/firstLayout_items">
+        android:id="@+id/firstLayout_items"
+        android:background="#02BBD2">
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:scrollbars="none"
@@ -41,7 +42,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500"
+                    android:background="@null"
                     android:visibility="visible">
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -65,7 +66,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -74,7 +75,9 @@
                         android:text="Meat and Fish"
                         android:id="@+id/meat"
                         android:background="@null"
-                        android:textColor="#ffffff" />
+                        android:textColor="#ffffff"
+                        android:layout_marginRight="5dp"
+                        android:capitalize="words" />
                     <View android:id="@+id/separator2_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
@@ -88,7 +91,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -97,7 +100,8 @@
                         android:text="Vegetables"
                         android:id="@+id/vegetables"
                         android:background="@null"
-                        android:textColor="#ffffff" />
+                        android:textColor="#ffffff"
+                        android:capitalize="words" />
                     <View android:id="@+id/separator3_items"
                         android:background="#ffffff"
                         android:layout_width = "fill_parent"
@@ -111,7 +115,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -133,7 +137,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -155,7 +159,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"
@@ -177,7 +181,7 @@
                     android:layout_weight="1"
                     android:layout_height="45dp"
                     android:orientation="vertical"
-                    android:background="@color/material_deep_teal_500">
+                    android:background="@null">
 
                     <Button
                         style="?android:attr/borderlessButtonStyle"

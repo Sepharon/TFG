@@ -9,15 +9,30 @@
     tools:context="sersilinc.needmorecookies.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/firstLayout">
+        android:elevation="10dp"
+        android:layout_below="@+id/firstLayout"
+        android:visibility="gone">
 
     </ListView>
 
+
+    <TextView
+        android:layout_width="361dp"
+        android:layout_height="515dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Welcome back!"
+        android:id="@+id/welcome_text"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="40dp"
+        android:layout_alignParentTop="true"
+        android:textStyle="bold"
+        android:visibility="visible"
+        android:textAlignment="center" />
 
     <LinearLayout
         android:id="@+id/firstLayout"
@@ -26,11 +41,12 @@
         android:orientation="vertical"
         android:layout_alignRight="@+id/secondView"
         android:layout_alignEnd="@+id/secondView"
-        android:background="@color/material_deep_teal_500"
+        android:background="#02BBD2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_alignBottom="@+id/thirdLayout">
+
         <Button
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
@@ -52,7 +68,8 @@
         android:id="@+id/secondView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="#02BBD2" />
 
     <LinearLayout
         android:id="@+id/thirdLayout"
@@ -60,7 +77,8 @@
         android:layout_height="45dp"
         android:layout_toRightOf="@+id/secondView"
         android:orientation="vertical"
-        android:background="@color/material_deep_teal_500">
+        android:background="#02BBD2"
+        android:visibility="gone">
 
         <Button
             style="?android:attr/borderlessButtonStyle"
@@ -88,7 +106,6 @@
        android:layout_centerHorizontal="true"
        android:layout_centerVertical="true" >
    </ProgressBar>
-
 
 
 </RelativeLayout>

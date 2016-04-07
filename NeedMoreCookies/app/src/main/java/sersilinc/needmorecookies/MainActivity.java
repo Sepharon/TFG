@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
@@ -22,13 +23,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -69,7 +76,10 @@ public class MainActivity extends AppCompatActivity
     private Button public_lists;
     private View separator1;
     private View separator2;
+    private TextView welcome;
     private ProgressBar loading;
+    private View first_layout;
+    private View third_layout;
 
     //Lists
     private List<List<String>> private_l;
@@ -98,7 +108,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle saveInstanceState){
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_main);
-
         /**[START Intent-filter for receiving Broadcast]**/
         filter = new IntentFilter("broadcast_service");
         receiver = new MyReceiver();
@@ -122,7 +131,10 @@ public class MainActivity extends AppCompatActivity
         separator1 = findViewById(R.id.separator);
         separator2 = findViewById(R.id.separator2);
         listview = (ListView) findViewById(R.id.list);
+        welcome = (TextView) findViewById(R.id.welcome_text);
         loading = (ProgressBar) findViewById(R.id.progressBar);
+        first_layout = (View) findViewById(R.id.firstLayout);
+        third_layout = (View) findViewById(R.id.thirdLayout);
         /**[END UI elements]**/
 
         /**[START List view]**/
@@ -136,11 +148,10 @@ public class MainActivity extends AppCompatActivity
         /**[START Navigation]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        try {
-            getSupportActionBar().setElevation(0);
-        } catch (NullPointerException e){
-            e.printStackTrace();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            toolbar.setElevation(25);
         }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -390,7 +401,8 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(receiver, filter);
 
         //Get shopping lists
-        new ProgressTask().execute();
+        //new ProgressTask().execute();
+        getAll_ShoppingLists(usr_inf.getEmail());
     }
 
 
@@ -404,6 +416,28 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_update:
+                getAll_ShoppingLists(usr_inf.getEmail());
+                Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
     //Navigation
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -611,18 +645,45 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... arg0) {
             getAll_ShoppingLists(usr_inf.getEmail());
-            try {
+            /*try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
             loading.setVisibility(View.GONE);
-            listview.setVisibility(View.VISIBLE);
+            final Animation fadein = new AlphaAnimation(0,1);
+            fadein.setDuration(1000);
+            Animation fadeOut = new AlphaAnimation(1, 0);
+            fadeOut.setStartOffset(2000);
+            fadeOut.setDuration(1000);
+            welcome.setText(String.format("\n\nWelcome back\n %s !", usr_inf.getName()));
+            welcome.setVisibility(View.VISIBLE);
+            welcome.setAnimation(fadein);
+            welcome.setAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    welcome.setVisibility(View.GONE);
+                    listview.setVisibility(View.VISIBLE);
+                    listview.setAnimation(fadein);
+                    first_layout.setVisibility(View.VISIBLE);
+                    third_layout.setVisibility(View.VISIBLE);
+                    first_layout.setAnimation(fadein);
+                    third_layout.setAnimation(fadein);
+                }
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });
         }
     }
 }
