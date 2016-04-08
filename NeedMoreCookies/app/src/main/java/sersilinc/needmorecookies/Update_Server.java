@@ -234,7 +234,7 @@ public class Update_Server extends Service {
         public JSONObject create_template(){
             Log.v(TAG, " Started");
             try {
-                obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Update\":\"True\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
+                obj = new JSONObject("{\"main\":{\"status\":\"0\",\"Code\":\"default\",\"list_name\":\"default\",\"Request\":\"Update Server\",\"GoogleAccount\":\"default\", \"Objective\":\"default\"},\"Values\":{}}");
             } catch (JSONException e) {
                 e.printStackTrace();
             }

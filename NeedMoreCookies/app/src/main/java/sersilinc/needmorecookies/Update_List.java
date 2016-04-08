@@ -122,14 +122,14 @@ public class Update_List extends Service {
                     //Process type of request. Depending on the value, we create a different JSON object.
                     switch (request) {
                         case "all":
-                            json_obj.put("Update", "False");
+                            json_obj.put("Request", "Update Android");
                             json_obj.put("shared_list", "False");
                             json_obj.put("request_code", "False");
                             json_obj.put("all", "True");
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "shared_list":
-                            json_obj.put("Update", "False");
+                            json_obj.put("Request", "Update Android");
                             json_obj.put("shared_list", "True");
                             json_obj.put("request_code", "False");
                             json_obj.put("all", "False");
@@ -137,7 +137,7 @@ public class Update_List extends Service {
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "code":
-                            json_obj.put("Update", "False");
+                            json_obj.put("Request", "Update Android");
                             json_obj.put("shared_list", "True");
                             json_obj.put("request_code", "True");
                             json_obj.put("all", "False");
@@ -145,7 +145,7 @@ public class Update_List extends Service {
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "one_list":
-                            json_obj.put("Update", "False");
+                            json_obj.put("Request", "Update Android");
                             json_obj.put("shared_list", "False");
                             json_obj.put("request_code", "False");
                             json_obj.put("all", "False");

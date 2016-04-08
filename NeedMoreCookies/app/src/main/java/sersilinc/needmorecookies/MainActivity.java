@@ -711,7 +711,7 @@ public class MainActivity extends AppCompatActivity
     private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.setTitle("Options");
+            //mode.setTitle("Options");
             mode.getMenuInflater().inflate(R.menu.menu_list, menu);
             return true;
         }
@@ -732,6 +732,10 @@ public class MainActivity extends AppCompatActivity
                 }
                 case R.id.edit: {
                     System.out.println(" edit ");
+                    break;
+                }
+                case R.id.share:{
+                    System.out.println(" share ");
                     break;
                 }
                 default:

@@ -165,7 +165,7 @@ public class Items extends AppCompatActivity
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Get currency User's preference
-        currency = prefs.getString("currency_list", "");
+        currency = prefs.getString("currency_list", "€");
         /**[END Preferences]**/
 
         /**[START Navigation]**/
