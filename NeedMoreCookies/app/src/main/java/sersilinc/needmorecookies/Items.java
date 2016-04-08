@@ -592,7 +592,8 @@ public class Items extends AppCompatActivity
                 Log.v(TAG, "Result OK");
                 String product = data.getStringExtra("product");
                 String quantity = data.getStringExtra("quantity");
-                String price = data.getStringExtra("price");
+                String price  = data.getStringExtra("price");
+                if (price.equals("")) price = " ";
                 String type = data.getStringExtra("type");
                 Log.v(TAG, product + quantity + price + type);
                 String code = null;

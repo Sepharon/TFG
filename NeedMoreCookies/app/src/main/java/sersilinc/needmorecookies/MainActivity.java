@@ -396,13 +396,15 @@ public class MainActivity extends AppCompatActivity
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
                                 .show();
-                    Log.v(TAG, "Added new Shopping List correctly");
+                    else
+                        Log.v(TAG, "Added new Shopping List correctly");
                     break;
                 case "new_item":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this,R.string.add_item_error,Toast.LENGTH_SHORT)
                                 .show();
-                    Log.v(TAG,"Added new item correctly");
+                    else
+                        Log.v(TAG,"Added new item correctly");
                     break;
             }
         }
@@ -663,11 +665,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... arg0) {
             getAll_ShoppingLists(usr_inf.getEmail());
-            /*try {
+            try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }*/
+            }
             return null;
         }
 

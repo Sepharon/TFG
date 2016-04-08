@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -93,6 +94,7 @@ public class AddItem extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent result_data = new Intent();
+                Log.v("additem",Price.getText().toString());
                 result_data.putExtra("product", Product.getText().toString());
                 result_data.putExtra("quantity", Quantity.getText().toString());
                 result_data.putExtra("price", Price.getText().toString());
