@@ -116,5 +116,7 @@
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
     <string name="add_item_error">A problem occurred while adding the Item</string>
     <string name="update">Updating Shopping Lists</string>
+    <string name="title_activity_friend">FriendActivity</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

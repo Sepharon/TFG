@@ -1,8 +1,10 @@
 package sersilinc.needmorecookies;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -22,6 +24,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -34,6 +37,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -51,6 +55,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -263,7 +269,7 @@ public class MainActivity extends AppCompatActivity
         listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v(TAG, "OnItemLongClickListener");
+                //Log.v(TAG, "OnItemLongClickListener");
                 System.out.println("Long click");
                 currentSelection = position;
                 startActionMode(modeCallBack);
@@ -405,6 +411,15 @@ public class MainActivity extends AppCompatActivity
                                 .show();
                     else
                         Log.v(TAG,"Added new item correctly");
+                    break;
+                case "share":
+                    String result = intent.getStringExtra("result");
+                    if (result.equals("Error")){
+                        Toast.makeText(MainActivity.this, "The email you have entered does not belong to a current user", Toast.LENGTH_SHORT).show();
+                    } else{
+                        Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
+                    }
+                    //Log.v(TAG, "RECEIVED: "+list);
                     break;
             }
         }
@@ -604,6 +619,8 @@ public class MainActivity extends AppCompatActivity
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
+            public_list.clear();
+            private_list.clear();
             //Log.v(TAG, result);
             JSONObject json_obj = new JSONObject(result);
             //Log.v(TAG, "length: " + json_obj.length());
@@ -728,16 +745,20 @@ public class MainActivity extends AppCompatActivity
             int id = item.getItemId();
             switch (id) {
                 case R.id.delete: {
+                    delete_shoppingList();
                     adapter.remove(adapter.getItem(currentSelection));
                     mode.finish();
                     break;
                 }
                 case R.id.edit: {
+                    edit_shoppingList();
                     System.out.println(" edit ");
                     break;
                 }
                 case R.id.share:{
-                    System.out.println(" share ");
+                    share_shoppingList();
+                    mode.finish();
+                    //System.out.println(" share ");
                     break;
                 }
                 default:
@@ -750,4 +771,98 @@ public class MainActivity extends AppCompatActivity
         public void onDestroyActionMode(ActionMode mode) {
         }
     };
+
+
+    private void share_shoppingList(){
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Share shopping list");
+        alert.setMessage("Write an email:");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Boolean valid = validateEmail(input.getText().toString());
+                if (!valid) {
+                    Context context = getApplicationContext();
+                    CharSequence error = "Please enter a valid e-mail";
+                    int duration = Toast.LENGTH_LONG;
+                    Toast toast = Toast.makeText(context, error, duration);
+                    toast.show();
+                    share_shoppingList();
+                } else {
+                    if (is_bound) {
+                        // Create and send a message to the service, using a supported 'what' value
+                        Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+                        Bundle bundle = new Bundle();
+                        private_l = usr_inf.getPrivate_lists();
+                        public_l = usr_inf.getPublic_lists();
+                        for (int i = 0; i < private_l.size(); i++) {
+                            //Log.v(TAG, "LIST: " + private_l.get(i));
+                            if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                                list_type = 0;
+                                bundle.putString("code_list", private_l.get(i).get(2));
+                            }
+                        }
+                        for (int i = 0; i < public_l.size(); i++) {
+                            //Log.v(TAG, "LIST: " + public_l.get(i));
+                            if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                                list_type = 1;
+                                bundle.putString("code_list", public_l.get(i).get(2));
+                            }
+                        }
+                        bundle.putString("request", "share");
+                        bundle.putString("GoogleAccount", usr_inf.getEmail());
+                        bundle.putString("Friend", input.getText().toString());
+
+                        msg.setData(bundle);
+
+                        //Send message
+                        try {
+                            mService.send(msg);
+                            Log.v(TAG, "Message sent");
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+
+    }
+
+    private boolean validateEmail(String email) {
+
+        Pattern pattern;
+        Matcher matcher;
+        String EMAIL_PATTERN = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+        pattern = Pattern.compile(EMAIL_PATTERN);
+        matcher = pattern.matcher(email);
+        return matcher.matches();
+
+    }
+
+
+    private void delete_shoppingList(){
+
+        //TODO: delete shopping list
+
+    }
+
+    private void edit_shoppingList(){
+
+        //TODO: edit shopping list
+
+    }
 }

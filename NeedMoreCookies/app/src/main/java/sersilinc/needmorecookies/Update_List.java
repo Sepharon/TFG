@@ -102,13 +102,17 @@ public class Update_List extends Service {
                 JSONObject shared_list = json_obj.getJSONObject("list");
                 broadcast.putExtra("shared_list", shared_list.toString());
                 break;
+            case "share":
+                String result = mainJSON.getString("Result");
+                broadcast.putExtra("result", result);
+                break;
         }
         broadcast.putExtra("Request", request);
         sendBroadcast(broadcast);
     }
 
 
-    private void send_post_request(final String request, final String GoogleAccount, final String code_name) {
+    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String Friend) {
         //Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
@@ -151,6 +155,12 @@ public class Update_List extends Service {
                             json_obj.put("all", "False");
                             json_obj.put("Code", code_name);
                             json_obj.put("GoogleAccount", GoogleAccount);
+                            break;
+                        case "share":
+                            json_obj.put("Request", "Share List");
+                            json_obj.put("Code", code_name);
+                            json_obj.put("GoogleAccount", GoogleAccount);
+                            json_obj.put("Friend", Friend);
                             break;
                     }
 
@@ -247,18 +257,23 @@ public class Update_List extends Service {
                             switch (request) {
                                 case "one_list":
                                     String code_list = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list);
+                                    send_post_request(request, GoogleAccount, code_list, "");
                                     break;
                                 case "shared_list":
                                     String code_list2 = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list2);
+                                    send_post_request(request, GoogleAccount, code_list2, "");
                                     break;
                                 case "code":
                                     String list_name = msg.getData().getString("list_name");
-                                    send_post_request(request, GoogleAccount, list_name);
+                                    send_post_request(request, GoogleAccount, list_name, "");
                                     break;
                                 case "all":
-                                    send_post_request(request, GoogleAccount, null);
+                                    send_post_request(request, GoogleAccount, null, "");
+                                    break;
+                                case "share":
+                                    String code_list3 = msg.getData().getString("code_list");
+                                    String friend = msg.getData().getString("Friend");
+                                    send_post_request(request, GoogleAccount, code_list3, friend);
                                     break;
                             }
                         } catch (NullPointerException e) {
