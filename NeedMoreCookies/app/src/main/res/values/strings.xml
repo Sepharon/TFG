@@ -115,8 +115,10 @@
     <!--Main Activity-->
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
     <string name="add_item_error">A problem occurred while adding the Item</string>
+    <string name="delete_list_error">A problem occurred while deleting the Shopping List</string>
     <string name="update">Updating Shopping Lists</string>
     <string name="title_activity_friend">FriendActivity</string>
     <string name="action_settings">Settings</string>
+    <string name="save_button">Save button</string>
 
 </resources>

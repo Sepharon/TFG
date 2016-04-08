@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this,R.string.add_item_error,Toast.LENGTH_SHORT)
                                 .show();
                     else
-                        Log.v(TAG,"Added new item correctly");
+                        Log.v(TAG, "Added new product correctly");
                     break;
                 case "share":
                     String result = intent.getStringExtra("result");
@@ -418,9 +418,19 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "The email you have entered does not belong to a current user", Toast.LENGTH_SHORT).show();
                     } else{
                         Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
+                        getAll_ShoppingLists(usr_inf.getEmail());
                     }
                     //Log.v(TAG, "RECEIVED: "+list);
                     break;
+                case "delete_list":
+                    if (main.equals("False"))
+                        Toast.makeText(MainActivity.this,R.string.delete_list_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else {
+                        Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
+                        getAll_ShoppingLists(usr_inf.getEmail());
+                    }
+
             }
         }
     }
@@ -746,7 +756,7 @@ public class MainActivity extends AppCompatActivity
             switch (id) {
                 case R.id.delete: {
                     delete_shoppingList();
-                    adapter.remove(adapter.getItem(currentSelection));
+                    //adapter.remove(adapter.getItem(currentSelection));
                     mode.finish();
                     break;
                 }
@@ -855,12 +865,69 @@ public class MainActivity extends AppCompatActivity
 
 
     private void delete_shoppingList(){
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        //TODO: delete shopping list
+        alert.setTitle("Delete the shopping list?");
+        alert.setMessage("Do you really want to delete the shopping list?");
+
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String code_list="";
+                String status="";
+                private_l = usr_inf.getPrivate_lists();
+                public_l = usr_inf.getPublic_lists();
+                for (int i = 0; i < private_l.size(); i++) {
+                    //Log.v(TAG, "LIST: " + private_l.get(i));
+                    if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                        code_list = private_l.get(i).get(2);
+                        status = private_l.get(i).get(1);
+                    }
+                }
+                for (int i = 0; i < public_l.size(); i++) {
+                    //Log.v(TAG, "LIST: " + public_l.get(i));
+                    if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                        code_list = public_l.get(i).get(2);
+                        status = public_l.get(i).get(1);
+                    }
+                }
+
+
+                server_service.set_values(6, code_list, adapter.getItem(currentSelection), "True", status);
+                server_service.set_items("_", "_", "_", "_");
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        server_service.send_request();
+                        //noinspection StatementWithEmptyBody
+                        while (!server_service.return_response_status()) ;
+                        String response = server_service.return_result();
+                        Log.v("Thread", response);
+                        Intent intent = new Intent();
+                        intent.setAction("broadcast_service");
+                        intent.putExtra("Main", response);
+                        intent.putExtra("Request", "delete_list");
+                        sendBroadcast(intent);
+                    }
+                });
+                t.start();
+
+                //getAll_ShoppingLists(usr_inf.getEmail());
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+
 
     }
 
     private void edit_shoppingList(){
+        getAll_ShoppingLists(usr_inf.getEmail());
 
         //TODO: edit shopping list
 

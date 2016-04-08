@@ -13,10 +13,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.google.android.gms.auth.api.Auth;
@@ -35,7 +38,7 @@ public class AddItem extends AppCompatActivity
     private EditText Product;
     private EditText Quantity;
     private EditText Price;
-    private Button Save;
+    private ImageButton Save;
     private Spinner type;
 
     //Flags
@@ -74,7 +77,7 @@ public class AddItem extends AppCompatActivity
         Product = (EditText)findViewById(R.id.product);
         Quantity = (EditText)findViewById(R.id.quantity);
         Price = (EditText)findViewById(R.id.price);
-        Save = (Button)findViewById(R.id.save_item);
+        Save = (ImageButton)findViewById(R.id.save_item);
         type = (Spinner) findViewById(R.id.type);
         /**[END UI elements]**/
 
@@ -118,12 +121,13 @@ public class AddItem extends AppCompatActivity
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (Product.getText().toString().equals("")) {
                     product_added=false;
+                    Save.setVisibility(View.GONE);
                     Save.setEnabled(false);
                 } else {
                     product_added=true;
                 }
                 if (product_added && quantity_added){
-                    Save.setEnabled(true);
+                    start_animation();
                 }
             }
 
@@ -143,13 +147,14 @@ public class AddItem extends AppCompatActivity
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (Quantity.getText().toString().equals("")){
                     quantity_added=false;
+                    Save.setVisibility(View.GONE);
                     Save.setEnabled(false);
                 } else {
                     quantity_added = true;
                 }
 
                 if (product_added && quantity_added){
-                    Save.setEnabled(true);
+                    start_animation();
                 }
             }
 
@@ -224,6 +229,14 @@ public class AddItem extends AppCompatActivity
                 finish();
             }
         });
+    }
+
+    private void start_animation(){
+        Animation fadein = new AlphaAnimation(0,1);
+        fadein.setDuration(1000);
+        Save.setEnabled(true);
+        Save.setVisibility(View.VISIBLE);
+        Save.setAnimation(fadein);
     }
 
 }

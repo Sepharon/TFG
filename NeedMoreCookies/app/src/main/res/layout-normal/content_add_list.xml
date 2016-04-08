@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,12 +12,16 @@
     tools:context="sersilinc.needmorecookies.AddList"
     tools:showIn="@layout/app_bar_addlist"
     android:background="#ffffff">
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_name"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:background="@null"
         android:textColor="#000000"
         android:hint="@string/hint_list_name"
@@ -29,7 +33,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <Button
+    <!--<Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Friends"
@@ -38,14 +42,14 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="49dp"/>
+        android:layout_marginBottom="49dp"/>-->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/chose_public_priv"
         android:id="@+id/textView"
-        android:layout_marginTop="53dp"
+        android:layout_marginTop="20dp"
         android:textSize="18dp"
         android:layout_below="@+id/list_name"
         android:layout_alignParentLeft="true"
@@ -112,20 +116,17 @@
         android:layout_alignStart="@+id/private_switch_explanation"
         android:layout_marginTop="5dp" />
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/save"
-        android:src="@drawable/ic_done_black_24dp"
-        android:background="@null"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:layout_alignTop="@+id/add_friends"
-        android:layout_alignRight="@+id/public_switch_explanation"
-        android:layout_alignEnd="@+id/public_switch_explanation"
-        android:layout_alignBottom="@+id/add_friends"
-        android:layout_toRightOf="@+id/private_switch_text"
-        android:layout_toEndOf="@+id/private_switch_text"
-        android:visibility="gone" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/save"
+            android:layout_below="@+id/public_switch_explanation"
+            android:layout_marginTop="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:background="@null"
+            android:src="@drawable/ic_done_black_24dp"
+            android:visibility="gone"/>
 
 </RelativeLayout>
+</ScrollView>

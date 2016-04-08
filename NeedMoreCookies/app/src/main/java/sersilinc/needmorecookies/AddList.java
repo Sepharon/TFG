@@ -50,7 +50,7 @@ public class AddList extends AppCompatActivity
         list_name = (EditText) findViewById(R.id.list_name);
         priv = (Switch) findViewById(R.id.private_switch);
         pub = (Switch) findViewById(R.id.public_switch);
-        add_friend = (Button) findViewById(R.id.add_friends);
+        //add_friend = (Button) findViewById(R.id.add_friends);
         save = (ImageButton) findViewById(R.id.save);
         /**[END UI elements]**/
 
