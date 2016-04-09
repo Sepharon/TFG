@@ -80,7 +80,11 @@
         <activity
             android:name=".Items"
             android:label="@string/title_activity_items"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="broadcast_service" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".About"
             android:label="@string/title_activity_about"

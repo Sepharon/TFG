@@ -81,7 +81,7 @@ public class Update_List extends Service {
     }
 
     //It gets the JSON data from the API
-    private void get_data_json(JSONObject json_obj, String request) throws JSONException{
+    private void get_data_json(JSONObject json_obj, String request, String source) throws JSONException{
         JSONObject mainJSON = json_obj.getJSONObject("main");
         Intent broadcast = new Intent();
         broadcast.setAction("broadcast_service");
@@ -96,6 +96,15 @@ public class Update_List extends Service {
                 break;
             case "one_list":
                 JSONObject listJSON = json_obj.getJSONObject("list");
+                switch(source){
+                    case "Items":
+                        broadcast.putExtra("Update_Products", "True");
+                        break;
+                    case "MainActivity":
+                        broadcast.putExtra("Update_Products", "False");
+                        break;
+                }
+
                 broadcast.putExtra("One_list", listJSON.toString());
                 break;
             case "shared_list":
@@ -112,7 +121,7 @@ public class Update_List extends Service {
     }
 
 
-    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String Friend) {
+    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String Friend, final String source) {
         //Log.v(TAG, "full url = " + url);
 
         // Create new thread so not to block URL
@@ -205,7 +214,7 @@ public class Update_List extends Service {
 
                     try {
                         mainData = new JSONObject(result);
-                        get_data_json(mainData, request);
+                        get_data_json(mainData, request, source);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -256,24 +265,25 @@ public class Update_List extends Service {
                             //Process type of request and send POST request
                             switch (request) {
                                 case "one_list":
+                                    String source = msg.getData().getString("Activity");
                                     String code_list = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list, "");
+                                    send_post_request(request, GoogleAccount, code_list, "", source);
                                     break;
                                 case "shared_list":
                                     String code_list2 = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list2, "");
+                                    send_post_request(request, GoogleAccount, code_list2, "", null);
                                     break;
                                 case "code":
                                     String list_name = msg.getData().getString("list_name");
-                                    send_post_request(request, GoogleAccount, list_name, "");
+                                    send_post_request(request, GoogleAccount, list_name, "", null);
                                     break;
                                 case "all":
-                                    send_post_request(request, GoogleAccount, null, "");
+                                    send_post_request(request, GoogleAccount, null, "", null);
                                     break;
                                 case "share":
                                     String code_list3 = msg.getData().getString("code_list");
                                     String friend = msg.getData().getString("Friend");
-                                    send_post_request(request, GoogleAccount, code_list3, friend);
+                                    send_post_request(request, GoogleAccount, code_list3, friend, null);
                                     break;
                             }
                         } catch (NullPointerException e) {

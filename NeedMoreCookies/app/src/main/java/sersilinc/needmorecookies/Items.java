@@ -1,13 +1,19 @@
 package sersilinc.needmorecookies;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -17,10 +23,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -37,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 
 public class Items extends AppCompatActivity
@@ -66,7 +78,9 @@ public class Items extends AppCompatActivity
     private View separator7;
 
 
-    /**[START ListView]**/
+    /**
+     * [START ListView]
+     **/
     //Header
     private ListView listview_header;
     private ArrayList<HashMap<String, String>> l_header = new ArrayList<HashMap<String, String>>();
@@ -92,9 +106,9 @@ public class Items extends AppCompatActivity
 
     //Temporal HashMap to write to the columns
     private HashMap<String, String> temp;
-    /**[END ListView]**/
-    // RECEIVER
-    private IntentFilter filter;
+    /**
+     * [END ListView]
+     **/
     //Preferences
     private SharedPreferences prefs;
     private String currency;
@@ -102,10 +116,25 @@ public class Items extends AppCompatActivity
     // Service
     private Update_Server server_service;
     private boolean is_bound_server = false;
+    private boolean is_bound = false;
+    private Messenger mService = null;
+
+    //Receiver
+    private String GoogleAccount;
+    private String request_type;
+    private String list_items;
+    private String main_receiver;
+    private String update_product;
+    public MyReceiver receiver;
+    private IntentFilter filter;
 
     // Info
-    String main = null,list_type = null;
+    String main = null, list_type = null;
     int current_tab = 1;
+    private final String[] objectives = {"new_name", "new_price", "new_quantity", "new_item", "delete_item", "new_list", "delete_list", "set_public", "add_usr_to_list", "add_user"};
+
+    //Selected Item
+    private int currentSelection;
 
 
     @Override
@@ -136,10 +165,15 @@ public class Items extends AppCompatActivity
         listview_header = (ListView) findViewById(R.id.list_header);
         /**[END UI elements]**/
 
-        /**[START Intent-filter for receiving Broadcast]**/
+        /*/**[START Intent-filter for receiving Broadcast]
         filter = new IntentFilter("broadcast_service");
         MainActivity i = new MainActivity();
-        this.registerReceiver(i.receiver, filter);
+        this.registerReceiver(i.receiver, filter);/*
+
+        /**[START Intent-filter for receiving Broadcast]**/
+        filter = new IntentFilter("broadcast_service");
+        receiver = new MyReceiver();
+        this.registerReceiver(receiver, filter);
         /**[END Intent-filter for receiving Broadcast]**/
 
         /**[START List View]**/
@@ -198,6 +232,8 @@ public class Items extends AppCompatActivity
         /**[START Service binding]**/
         Intent in = new Intent(this, Update_Server.class);
         bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this, Update_List.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         /**[END Service binding]**/
 
         /**[START GoogleApiClient]**/
@@ -274,6 +310,19 @@ public class Items extends AppCompatActivity
                 }
             }
         });
+
+        //Show option to edit or delete if long press
+        listview_items.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //Log.v(TAG, "OnItemLongClickListener");
+                //System.out.println("Long click");
+                currentSelection = position;
+                startActionMode(modeCallBack);
+                view.setSelected(true);
+                return true;
+            }
+        });
         /**[END onClickListeners]**/
 
         /**[START Get intent extras]**/
@@ -282,9 +331,9 @@ public class Items extends AppCompatActivity
         try {
             main = extras.get("Main").toString();
             String list = extras.get("List").toString();
-            list_type = extras.getString("Type");
+            list_type = extras.getString("Type").toString();
             Log.v(TAG, main + list + "");
-            Log.v(TAG,main);
+            Log.v(TAG, main);
 
             update_ShoppingList(list);
         } catch (NullPointerException e) {
@@ -295,6 +344,74 @@ public class Items extends AppCompatActivity
         //Reload UI
         reload_ui(1);
     }
+
+
+    // Binding Update List
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Log.v(TAG, "Binding service");
+            mService = new Messenger(service);
+            is_bound = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.v(TAG,"Update List disconnected");
+            mService = null;
+            is_bound = false;
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Unbind from the services
+        if (is_bound) {
+            unbindService(mConnection);
+            is_bound = false;
+        }
+        if (is_bound_server) {
+            unbindService(mConnection2);
+            is_bound_server = false;
+        }
+
+        //Unregister receiver
+        unregisterReceiver(receiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Register receiver
+        registerReceiver(receiver, filter);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_item_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_update_items:
+                getAll_products();
+                Toast.makeText(Items.this, R.string.update_products, Toast.LENGTH_SHORT).show();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
 
     protected void onStart() {
         super.onStart();
@@ -431,6 +548,13 @@ public class Items extends AppCompatActivity
     private void update_ShoppingList(String list) {
         try {
             int i = 0;
+            all_items_l.clear();
+            meat_items_l.clear();
+            vegetables_items_l.clear();
+            cereals_items_l.clear();
+            dairy_items_l.clear();
+            sweet_items_l.clear();
+            others_items_l.clear();
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
             while (keys.hasNext()) {
@@ -570,6 +694,7 @@ public class Items extends AppCompatActivity
                         //Log.v(TAG, "" + products.toString());
                         break;
                 }
+                adapter.notifyDataSetChanged();
             }
 
 
@@ -592,7 +717,7 @@ public class Items extends AppCompatActivity
                 Log.v(TAG, "Result OK");
                 String product = data.getStringExtra("product");
                 String quantity = data.getStringExtra("quantity");
-                String price  = data.getStringExtra("price");
+                String price = data.getStringExtra("price");
                 if (price.equals("")) price = " ";
                 String type = data.getStringExtra("type");
                 Log.v(TAG, product + quantity + price + type);
@@ -603,7 +728,7 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server(list_type,code,type,product,price,quantity);
+                send_request_server("new_item", list_type, code, type, product, price, quantity);
                 temp = new HashMap<String, String>();
                 if (price.equals("null")) {
                     temp.put(THIRD_COLUMN, "-" + currency);
@@ -613,7 +738,7 @@ public class Items extends AppCompatActivity
                 temp.put(FIRST_COLUMN, product);
                 temp.put(SECOND_COLUMN, quantity);
                 all_items_l.add(temp);
-                switch (type){
+                switch (type) {
                     case "Cereal":
                         cereals_items_l.add(temp);
                         break;
@@ -639,25 +764,33 @@ public class Items extends AppCompatActivity
     }
 
     //Send request to Update Server service
-    private void send_request_server(String status,String code,String type, String product,String price,String quantity){
-        server_service.set_values(3, code, "_", "True", status);
-        server_service.set_items(type, product , price, quantity);
+    private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity) {
+        int objective = 0;
+        for (int i = 0; i < objectives.length; i++) {
+            if (objectives[i].equals(Objective)) {
+                objective = i;
+            }
+        }
+        //Log.v(TAG, "Objective: " + Objective + " objective_code: " + objective + " Status: " + status + " Type: " + type + " product: " + product + " price: " + price + " quantity: " + quantity + " Code list: " + code);
+        server_service.set_values(objective, code, "_", "True", status);
+        server_service.set_items(type, product, price, quantity);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 server_service.send_request();
                 //noinspection StatementWithEmptyBody
-                while (!server_service.return_response_status());
+                while (!server_service.return_response_status()) ;
                 String response = server_service.return_result();
                 Intent intent = new Intent();
                 intent.setAction("broadcast_service");
-                intent.putExtra("Main",response);
-                intent.putExtra("Request", "new_item");
+                intent.putExtra("Main", response);
+                intent.putExtra("Request", Objective);
                 sendBroadcast(intent);
             }
         });
         t.start();
     }
+
     // Binding Update Server
     private ServiceConnection mConnection2 = new ServiceConnection() {
         @Override
@@ -669,9 +802,200 @@ public class Items extends AppCompatActivity
             server_service = binder.getService();
             is_bound_server = true;
         }
+
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             is_bound_server = false;
         }
     };
+
+
+    //On long pressed in a shopping list, display options
+    private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            //mode.setTitle("Options");
+            mode.getMenuInflater().inflate(R.menu.menu_item, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.delete_item: {
+                    delete_item();
+                    mode.finish();
+                    break;
+                }
+                case R.id.edit_item: {
+                    //edit_shoppingList();
+                    System.out.println(" edit ");
+                    break;
+                }
+                default:
+                    return false;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+    };
+
+    //Delete selected item
+    private void delete_item() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Delete the product from the shopping list?");
+        alert.setMessage("Do you really want to delete the product?");
+
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Object item = adapter.getItem(currentSelection);
+                String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
+                String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
+                String Price_currency = ((HashMap) item).get(THIRD_COLUMN).toString();
+                String Price = Price_currency.split(currency)[0];
+                if (Price.equals("-")) {
+                    Price = null;
+                }
+                String type = get_Product_Type(adapter.getItem(currentSelection).toString());
+
+                //Get list code
+                String code = null;
+                try {
+                    JSONObject rsp = new JSONObject(main);
+                    code = rsp.getString("Code");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity);
+            }
+        });
+
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+
+    }
+
+    private String get_Product_Type(String selection) {
+        String type = "";
+        for (int i = 0; i < meat_items_l.size(); i++) {
+            if (meat_items_l.get(i).toString().equals(selection)) {
+                type = "Meat and Fish";
+            }
+        }
+        for (int i = 0; i < vegetables_items_l.size(); i++) {
+            if (vegetables_items_l.get(i).toString().equals(selection)) {
+                type = "Vegetables";
+            }
+        }
+        for (int i = 0; i < cereals_items_l.size(); i++) {
+            if (cereals_items_l.get(i).toString().equals(selection)) {
+                type = "Cereal";
+            }
+        }
+        for (int i = 0; i < dairy_items_l.size(); i++) {
+            if (dairy_items_l.get(i).toString().equals(selection)) {
+                type = "Dairy";
+            }
+        }
+        for (int i = 0; i < sweet_items_l.size(); i++) {
+            if (sweet_items_l.get(i).toString().equals(selection)) {
+                type = "Sweet";
+            }
+        }
+        for (int i = 0; i < others_items_l.size(); i++) {
+            if (others_items_l.get(i).toString().equals(selection)) {
+                type = "Others";
+            }
+        }
+        return type;
+    }
+
+
+    private void getAll_products() {
+        if (is_bound) {
+            String code="";
+            String user="";
+            // Create and send a message to the service, using a supported 'what' value
+            //Log.v(TAG, "Getting ready");
+            try {
+                Log.v(TAG, "MAAAIN"+main);
+                JSONObject rsp = new JSONObject(main);
+                code = rsp.getString("Code");
+                user = rsp.getString("GoogleAccount");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+            Bundle bundle = new Bundle();
+            bundle.putString("request", "one_list");
+            bundle.putString("GoogleAccount", user);
+            bundle.putString("code_list", code);
+            bundle.putString("Activity", "Items");
+            msg.setData(bundle);
+
+            //Send message
+            try {
+                mService.send(msg);
+                //Log.v(TAG, "Message sent");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+    //Receiver from Services
+    public class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            request_type = intent.getStringExtra("Request");
+            main_receiver = intent.getStringExtra("Main");
+            GoogleAccount = intent.getStringExtra("GoogleAccount");
+
+            //Check type of request
+            switch(request_type){
+                case "one_list":
+                    update_product = intent.getStringExtra("Update_Products");
+                    if (update_product.equals("True")) {
+                        list_items = intent.getStringExtra("One_list");
+                        update_ShoppingList(list_items);
+                    }
+                    break;
+                case "new_item":
+                    if (main_receiver.equals("False"))
+                        Toast.makeText(Items.this,R.string.add_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else
+                        Log.v(TAG, "Added new product correctly");
+                    break;
+                case "delete_item":
+                    if (main_receiver.equals("False"))
+                        Toast.makeText(Items.this,R.string.delete_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else{
+                        getAll_products();
+                        Log.v(TAG, "Deleted product correctly");
+                    }
+
+                    break;
+            }
+        }
+    }
 }

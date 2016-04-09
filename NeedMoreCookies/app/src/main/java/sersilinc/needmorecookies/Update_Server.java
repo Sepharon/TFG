@@ -92,6 +92,7 @@ public class Update_Server extends Service {
     // Sets the values for the values array
     public boolean set_values(int objective_code,String list_code,String list_name,String update,String status){
         if (objective_code > 10) return false;
+        Log.v(TAG, "Setting values: "+objective_code+list_code+list_name+update+status+objectives[objective_code]);
         values[0] = objectives[objective_code];
         values[1] = list_code;
         values[2] = list_name;

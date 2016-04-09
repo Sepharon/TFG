@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private String request_type;
     private String list;
     private String main;
+    private String update_product;
     public MyReceiver receiver;
     private IntentFilter filter;
 
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity
                     Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
+                    bundle.putString("Activity", "MainActivity");
 
                     //Get the private and public shopping lists of the user
                     //and check which one has been selected
@@ -382,9 +384,12 @@ public class MainActivity extends AppCompatActivity
             //Check type of request
             switch(request_type){
                 case "one_list":
-                    list = intent.getStringExtra("One_list");
-                    Log.v(TAG,list);
-                    changeActivity(main, list);
+                    update_product = intent.getStringExtra("Update_Products");
+                    if (!update_product.equals("True")) {
+                        list = intent.getStringExtra("One_list");
+                        Log.v(TAG, list);
+                        changeActivity(main, list);
+                    }
                     break;
                 case "all":
                     list = intent.getStringExtra("all");
@@ -405,13 +410,6 @@ public class MainActivity extends AppCompatActivity
                     else
                         Log.v(TAG, "Added new Shopping List correctly");
                     break;
-                case "new_item":
-                    if (main.equals("False"))
-                        Toast.makeText(MainActivity.this,R.string.add_item_error,Toast.LENGTH_SHORT)
-                                .show();
-                    else
-                        Log.v(TAG, "Added new product correctly");
-                    break;
                 case "share":
                     String result = intent.getStringExtra("result");
                     if (result.equals("Error")){
@@ -430,7 +428,7 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
                         getAll_ShoppingLists(usr_inf.getEmail());
                     }
-
+                    break;
             }
         }
     }
@@ -814,14 +812,14 @@ public class MainActivity extends AppCompatActivity
                         for (int i = 0; i < private_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + private_l.get(i));
                             if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
-                                list_type = 0;
+                                list_type = 1;
                                 bundle.putString("code_list", private_l.get(i).get(2));
                             }
                         }
                         for (int i = 0; i < public_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + public_l.get(i));
                             if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
-                                list_type = 1;
+                                list_type = 0;
                                 bundle.putString("code_list", public_l.get(i).get(2));
                             }
                         }
