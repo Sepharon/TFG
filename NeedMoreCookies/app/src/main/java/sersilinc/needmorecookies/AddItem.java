@@ -44,6 +44,16 @@ public class AddItem extends AppCompatActivity
     //Flags
     private boolean product_added = false;
     private boolean quantity_added = false;
+    private boolean product_changed = false;
+    private boolean quantity_changed = false;
+    private boolean price_changed = false;
+
+    //Strings
+    private String edit;
+    private String Product_name;
+    private String Quantity_prod;
+    private String Price_prod;
+    private String type_prod;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +91,27 @@ public class AddItem extends AppCompatActivity
         type = (Spinner) findViewById(R.id.type);
         /**[END UI elements]**/
 
+
+        /**[START Get intent extras]**/
+        Bundle extras = getIntent().getExtras();
+        //Get JSON Strings from the MainActivity
+        try {
+            edit = extras.getString("Edit");
+            if (edit.equals("True")) {
+                Product_name = extras.getString("Product");
+                Quantity_prod = extras.getString("Quantity");
+                Price_prod = extras.getString("Price");
+                type_prod = extras.getString("Type");
+                Product.setText(Product_name);
+                Quantity.setText(Quantity_prod);
+                Price.setText(Price_prod);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        /**[END Get intent extras]**/
+
+
         /**[START Spinner]**/
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -89,6 +120,12 @@ public class AddItem extends AppCompatActivity
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         type.setAdapter(adapter);
+
+        if (edit.equals("True")) {
+            int pos = adapter.getPosition(type_prod);
+            type.setSelection(pos);
+            type.setEnabled(Boolean.FALSE);
+        }
         /**[END Spinner]**/
 
 
@@ -97,73 +134,112 @@ public class AddItem extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent result_data = new Intent();
-                Log.v("additem",Price.getText().toString());
-                result_data.putExtra("product", Product.getText().toString());
-                result_data.putExtra("quantity", Quantity.getText().toString());
-                result_data.putExtra("price", Price.getText().toString());
-                result_data.putExtra("type", type.getSelectedItem().toString());
-                setResult(MainActivity.RESULT_OK, result_data);
+                //Log.v("additem",Price.getText().toString());
+                if (edit.equals("True")) {
+                    result_data.putExtra("product", Product.getText().toString());
+                    result_data.putExtra("quantity", Quantity.getText().toString());
+                    result_data.putExtra("price", Price.getText().toString());
+                    result_data.putExtra("type", type.getSelectedItem().toString());
+
+                    result_data.putExtra("product_changed", product_changed);
+                    result_data.putExtra("quantity_changed", quantity_changed);
+                    result_data.putExtra("price_changed", price_changed);
+                } else {
+                    result_data.putExtra("product", Product.getText().toString());
+                    result_data.putExtra("quantity", Quantity.getText().toString());
+                    result_data.putExtra("price", Price.getText().toString());
+                    result_data.putExtra("type", type.getSelectedItem().toString());
+                }
+                setResult(Items.RESULT_OK, result_data);
                 finish();
             }
         });
 
-        Save.setEnabled(false);
+        if (edit.equals("True")) {
+            Save.setEnabled(true);
+            Save.setVisibility(View.VISIBLE);
+        } else {
+            Save.setEnabled(false);
+            Save.setVisibility(View.GONE);
+        }
         /**[END onClickListener]**/
 
         /**[START TextChangedListener]**/
         Product.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                product_changed = false;
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (Product.getText().toString().equals("")) {
-                    product_added=false;
-                    Save.setVisibility(View.GONE);
-                    Save.setEnabled(false);
-                } else {
-                    product_added=true;
-                }
-                if (product_added && quantity_added){
-                    start_animation();
+                if (!edit.equals("True")) {
+                    if (Product.getText().toString().equals("")) {
+                        product_added = false;
+                        Save.setVisibility(View.GONE);
+                        Save.setEnabled(false);
+                    } else {
+                        product_added = true;
+                    }
+                    if (product_added && quantity_added) {
+                        start_animation();
+                    }
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                product_changed = true;
             }
         });
 
         Quantity.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                quantity_changed = false;
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (Quantity.getText().toString().equals("")){
-                    quantity_added=false;
-                    Save.setVisibility(View.GONE);
-                    Save.setEnabled(false);
-                } else {
-                    quantity_added = true;
-                }
+                if (!edit.equals("True")) {
+                    if (Quantity.getText().toString().equals("")) {
+                        quantity_added = false;
+                        Save.setVisibility(View.GONE);
+                        Save.setEnabled(false);
+                    } else {
+                        quantity_added = true;
+                    }
 
-                if (product_added && quantity_added){
-                    start_animation();
+                    if (product_added && quantity_added) {
+                        start_animation();
+                    }
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
+                quantity_changed = true;
+            }
+        });
 
+        Price.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                price_changed = false;
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                price_changed = true;
             }
         });
         /**[END TextChangedListener]**/
+
 
     }
 

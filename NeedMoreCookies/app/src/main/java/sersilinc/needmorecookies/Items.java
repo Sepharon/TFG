@@ -223,6 +223,7 @@ public class Items extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Items.this, AddItem.class);
+                intent.putExtra("Edit", "False");
                 // Start next activity
                 startActivityForResult(intent, 1);
             }
@@ -329,11 +330,11 @@ public class Items extends AppCompatActivity
         Bundle extras = getIntent().getExtras();
         //Get JSON Strings from the MainActivity
         try {
-            main = extras.get("Main").toString();
-            String list = extras.get("List").toString();
-            list_type = extras.getString("Type").toString();
-            Log.v(TAG, main + list + "");
-            Log.v(TAG, main);
+            main = extras.getString("Main");
+            String list = extras.getString("List");
+            list_type = extras.getString("Type");
+            //Log.v(TAG, main + list + "");
+            //Log.v(TAG, main);
 
             update_ShoppingList(list);
         } catch (NullPointerException e) {
@@ -761,6 +762,39 @@ public class Items extends AppCompatActivity
                 reload_ui(current_tab);
             }
         }
+        else if (requestCode==2) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Log.v(TAG, "Result OK");
+                String product = data.getStringExtra("product");
+                String quantity = data.getStringExtra("quantity");
+                String price = data.getStringExtra("price");
+                if (price.equals("")) price = " ";
+
+                Boolean product_changed = data.getBooleanExtra("product_changed", false);
+                Boolean quantity_changed = data.getBooleanExtra("quantity_changed", false);
+                Boolean price_changed = data.getBooleanExtra("price_changed", false);
+
+                String type = data.getStringExtra("type");
+                Log.v(TAG, product + quantity + price + type);
+                String code = null;
+                try {
+                    JSONObject rsp = new JSONObject(main);
+                    code = rsp.getString("Code");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                Log.v(TAG, "FLAGS: "+product_changed+quantity_changed+price_changed);
+
+                if (product_changed)
+                    send_request_server("new_name", list_type, code, type, product, price, quantity);
+                if (quantity_changed)
+                    send_request_server("new_quantity", list_type, code, type, product, price, quantity);
+                if (price_changed)
+                    send_request_server("new_price", list_type, code, type, product, price, quantity);
+            }
+        }
     }
 
     //Send request to Update Server service
@@ -834,8 +868,9 @@ public class Items extends AppCompatActivity
                     break;
                 }
                 case R.id.edit_item: {
-                    //edit_shoppingList();
-                    System.out.println(" edit ");
+                    edit_shoppingList();
+                    mode.finish();
+                    //System.out.println(" edit ");
                     break;
                 }
                 default:
@@ -934,7 +969,7 @@ public class Items extends AppCompatActivity
             // Create and send a message to the service, using a supported 'what' value
             //Log.v(TAG, "Getting ready");
             try {
-                Log.v(TAG, "MAAAIN"+main);
+                //Log.v(TAG, "MAAAIN"+main);
                 JSONObject rsp = new JSONObject(main);
                 code = rsp.getString("Code");
                 user = rsp.getString("GoogleAccount");
@@ -995,7 +1030,59 @@ public class Items extends AppCompatActivity
                     }
 
                     break;
+                case "new_name":
+                    if (main_receiver.equals("False"))
+                        Toast.makeText(Items.this,R.string.new_name_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else{
+                        getAll_products();
+                        Log.v(TAG, "Name of the product changed correctly");
+                    }
+
+                    break;
+                case "new_quantity":
+                    if (main_receiver.equals("False"))
+                        Toast.makeText(Items.this,R.string.new_quantity_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else{
+                        getAll_products();
+                        Log.v(TAG, "Quantity of the product changed correctly");
+                    }
+
+                    break;
+                case "new_price":
+                    if (main_receiver.equals("False"))
+                        Toast.makeText(Items.this,R.string.new_price_item_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else{
+                        getAll_products();
+                        Log.v(TAG, "Price of the product changed correctly");
+                    }
+
+                    break;
             }
         }
+    }
+
+
+    private void edit_shoppingList(){
+        Object item = adapter.getItem(currentSelection);
+        String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
+        String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
+        String Price_currency = ((HashMap) item).get(THIRD_COLUMN).toString();
+        String Price = Price_currency.split(currency)[0];
+        if (Price.equals("-")) {
+            Price = null;
+        }
+        String type = get_Product_Type(adapter.getItem(currentSelection).toString());
+        Intent intent = new Intent(Items.this, AddItem.class);
+        intent.putExtra("Edit", "True");
+        intent.putExtra("Product", Product);
+        intent.putExtra("Price", Price);
+        intent.putExtra("Quantity", Quantity);
+        intent.putExtra("Type", type);
+
+        // Start next activity
+        startActivityForResult(intent, 2);
     }
 }

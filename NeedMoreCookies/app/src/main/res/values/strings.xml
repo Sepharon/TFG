@@ -114,8 +114,11 @@
 
     <!--Main Activity-->
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
-    <string name="add_item_error">A problem occurred while adding the Item</string>
+    <string name="new_name_item_error">A problem occurred while changing the name of the Item</string>
+    <string name="new_price_item_error">A problem occurred while changing the price of the Item</string>
+    <string name="new_quantity_item_error">A problem occurred while changing the quantity of the Item</string>
     <string name="delete_item_error">A problem occurred while deleting the Item</string>
+    <string name="add_item_error">A problem occurred while adding the Item</string>
     <string name="delete_list_error">A problem occurred while deleting the Shopping List</string>
     <string name="update">Updating Shopping Lists</string>
     <string name="update_products">Updating products</string>
