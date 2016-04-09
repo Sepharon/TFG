@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,6 +95,7 @@ public class Items extends AppCompatActivity
     private ArrayList<HashMap<String, String>> dairy_items_l = new ArrayList<HashMap<String, String>>();
     private ArrayList<HashMap<String, String>> sweet_items_l = new ArrayList<HashMap<String, String>>();
     private ArrayList<HashMap<String, String>> others_items_l = new ArrayList<HashMap<String, String>>();
+    private List<List<String>> items_l;
 
     // Adapter
     private ListViewAdapters adapter;
@@ -129,12 +131,16 @@ public class Items extends AppCompatActivity
     private IntentFilter filter;
 
     // Info
-    String main = null, list_type = null;
+    String main = null;
+    String list_type;
     int current_tab = 1;
     private final String[] objectives = {"new_name", "new_price", "new_quantity", "new_item", "delete_item", "new_list", "delete_list", "set_public", "add_usr_to_list", "add_user"};
 
     //Selected Item
     private int currentSelection;
+
+    //User info instance
+    private User_Info usr_inf;
 
 
     @Override
@@ -326,6 +332,11 @@ public class Items extends AppCompatActivity
         });
         /**[END onClickListeners]**/
 
+        /**[START User_Info]**/
+        //Get User info
+        usr_inf = User_Info.getInstance();
+        /**[END User_Info]**/
+
         /**[START Get intent extras]**/
         Bundle extras = getIntent().getExtras();
         //Get JSON Strings from the MainActivity
@@ -333,14 +344,15 @@ public class Items extends AppCompatActivity
             main = extras.getString("Main");
             String list = extras.getString("List");
             list_type = extras.getString("Type");
-            //Log.v(TAG, main + list + "");
-            //Log.v(TAG, main);
+            Log.v(TAG, main + list + "Type: "+list_type);
+            Log.v(TAG, main);
 
             update_ShoppingList(list);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
         /**[END Get intent extras]**/
+
 
         //Reload UI
         reload_ui(1);
@@ -556,6 +568,7 @@ public class Items extends AppCompatActivity
             dairy_items_l.clear();
             sweet_items_l.clear();
             others_items_l.clear();
+
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
             while (keys.hasNext()) {
@@ -575,6 +588,7 @@ public class Items extends AppCompatActivity
                             temp.put(SECOND_COLUMN, rec.getString(1));
 
                             all_items_l.add(temp);
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -593,6 +607,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             meat_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -612,6 +638,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             vegetables_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -631,6 +669,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             cereals_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -650,6 +700,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             dairy_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -669,6 +731,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             sweet_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -688,6 +762,18 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
                             others_items_l.add(temp);
+
+                            //Variables to store the product name, quantity, price, type and code
+                            List<String> item_list_temp = new ArrayList<>();
+                            item_list_temp.add(rec.getString(0));
+                            item_list_temp.add(rec.getString(1));
+                            item_list_temp.add(rec.getString(2));
+                            item_list_temp.add(type);
+                            item_list_temp.add(rec.getString(3));
+
+                            usr_inf.setItems_lists(item_list_temp);
+
+
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
                         }
@@ -696,6 +782,7 @@ public class Items extends AppCompatActivity
                         break;
                 }
                 adapter.notifyDataSetChanged();
+                //Log.v(TAG, usr_inf.getItems_lists().toString());
             }
 
 
@@ -729,7 +816,7 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server("new_item", list_type, code, type, product, price, quantity);
+                send_request_server("new_item", list_type, code, type, product, price, quantity, "");
                 temp = new HashMap<String, String>();
                 if (price.equals("null")) {
                     temp.put(THIRD_COLUMN, "-" + currency);
@@ -785,20 +872,37 @@ public class Items extends AppCompatActivity
                     e.printStackTrace();
                 }
 
-                Log.v(TAG, "FLAGS: "+product_changed+quantity_changed+price_changed);
+                //Get unique Code
+                String code_item="";
+                Object item = adapter.getItem(currentSelection);
+                String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
+                String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
+                String Price_currency = ((HashMap) item).get(THIRD_COLUMN).toString();
+                String Price = Price_currency.split(currency)[0];
+                if (Price.equals("-") | Price.equals("")) {
+                    Price = "null";
+                }
+                String type_prod = get_Product_Type(adapter.getItem(currentSelection).toString());
+
+                items_l = usr_inf.getItems_lists();
+                for (int i = 0; i < items_l.size(); i++) {
+                    if (items_l.get(i).get(0).equals(Product) & items_l.get(i).get(1).equals(Quantity) & items_l.get(i).get(2).equals(Price) & items_l.get(i).get(3).equals(type_prod)) {
+                        code_item = items_l.get(i).get(4);
+                    }
+                }
 
                 if (product_changed)
-                    send_request_server("new_name", list_type, code, type, product, price, quantity);
+                    send_request_server("new_name", list_type, code, type, product, price, quantity, code_item);
                 if (quantity_changed)
-                    send_request_server("new_quantity", list_type, code, type, product, price, quantity);
+                    send_request_server("new_quantity", list_type, code, type, product, price, quantity, code_item);
                 if (price_changed)
-                    send_request_server("new_price", list_type, code, type, product, price, quantity);
+                    send_request_server("new_price", list_type, code, type, product, price, quantity, code_item);
             }
         }
     }
 
     //Send request to Update Server service
-    private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity) {
+    private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity, String code_item) {
         int objective = 0;
         for (int i = 0; i < objectives.length; i++) {
             if (objectives[i].equals(Objective)) {
@@ -807,7 +911,7 @@ public class Items extends AppCompatActivity
         }
         //Log.v(TAG, "Objective: " + Objective + " objective_code: " + objective + " Status: " + status + " Type: " + type + " product: " + product + " price: " + price + " quantity: " + quantity + " Code list: " + code);
         server_service.set_values(objective, code, "_", "True", status);
-        server_service.set_items(type, product, price, quantity);
+        server_service.set_items(type, product, price, quantity, code_item);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -912,7 +1016,7 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity);
+                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, "");
             }
         });
 

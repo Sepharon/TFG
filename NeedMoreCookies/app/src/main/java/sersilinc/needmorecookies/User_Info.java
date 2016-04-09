@@ -24,6 +24,10 @@ public class User_Info {
     List<List<String>> public_lists = new ArrayList<>();
     List<List<String>> private_lists = new ArrayList<>();
 
+    //Array that contains the name of the product, quantity, price and code
+    //List of list [[NAME,QUANTITY,PRICE,TYPE,CODE],[NAME,QUANTITY,PRICE,TYPE,CODE]..]
+    List<List<String>> item_lists = new ArrayList<>();
+
     //Instantiate
     private static User_Info user_info = new User_Info();
 
@@ -55,6 +59,10 @@ public class User_Info {
     public List<List<String>> getPublic_lists() {
         return public_lists;
     }
+    public List<List<String>> getItems_lists() {
+        return item_lists;
+    }
+
 
     // Set values
     public void setName(String name) {
@@ -74,6 +82,14 @@ public class User_Info {
     public void setPublic_lists(List<String> public_list) {
         if (!public_lists.contains(public_list)) {
             this.public_lists.add(public_list);
+        }
+
+    }
+
+    // Values from list [Name,Quantity,Price,Type,Code]
+    public void setItems_lists(List<String> item_list) {
+        if (!item_lists.contains(item_list)) {
+            this.item_lists.add(item_list);
         }
 
     }

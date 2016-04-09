@@ -43,7 +43,7 @@ public class Update_Server extends Service {
     //JSON values
     private final String [] keys = {"Objective","Code","list_name","Update","GoogleAccount","status"};
     private String [] values = new String[6];
-    private String [] items = new String[4];
+    private String [] items = new String[5];
     private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","set_public","add_usr_to_list","add_user"};
     private String request_result;
 
@@ -106,11 +106,12 @@ public class Update_Server extends Service {
     }
 
     // Sets values for the item array
-    public void set_items(String Type, String Product_name, String Price, String Quantity){
+    public void set_items(String Type, String Product_name, String Price, String Quantity, String Code){
         items[0] = Type;
         items[1] = Product_name;
         items[2] = Price;
         items[3] = Quantity;
+        items[4] = Code;
 
         set_json(keys,items,1);
     }
@@ -265,6 +266,7 @@ public class Update_Server extends Service {
                         items.put(a);
                         items.put(value[2]);
                         items.put(value[3]);
+                        items.put(value[4]);
                         tmp.put("Item",items);
                         //Log.v(TAG, String.valueOf(a));
                         //Log.v(TAG, String.valueOf(items));

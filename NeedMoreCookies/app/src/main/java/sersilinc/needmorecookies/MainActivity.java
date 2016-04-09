@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity
 
     //User info
     private User_Info usr_inf;
-    private int list_type = -1;
+    private String list_type = "";
     //Timer
     private CountDownTimer timer;
 
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity
                     for (int i = 0; i < private_l.size(); i++) {
                         //Log.v(TAG, "LIST: " + private_l.get(i));
                         if (private_l.get(i).get(0).equals(selected)) {
-                            list_type = 0;
+                            list_type = "1";
                             bundle.putString("code_list", private_l.get(i).get(2));
                         }
                     }
@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity
                     for (int i = 0; i < public_l.size(); i++) {
                         //Log.v(TAG, "LIST: " + public_l.get(i));
                         if (public_l.get(i).get(0).equals(selected)) {
-                            list_type = 1;
+                            list_type = "0";
                             bundle.putString("code_list", public_l.get(i).get(2));
                         }
                     }
@@ -556,7 +556,7 @@ public class MainActivity extends AppCompatActivity
     //Send request to Update Server service
     private void send_request_server(String list_name,String status){
         server_service.set_values(5, "_", list_name, "True", status);
-        server_service.set_items("_", "_", "_", "_");
+        server_service.set_items("_", "_", "_", "_", "_");
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -599,7 +599,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, Items.class);
         intent.putExtra("Main", main);
         intent.putExtra("List", list);
-        intent.putExtra("Type", list_type +"");
+        intent.putExtra("Type", list_type);
         startActivity(intent);
     }
 
@@ -812,14 +812,14 @@ public class MainActivity extends AppCompatActivity
                         for (int i = 0; i < private_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + private_l.get(i));
                             if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
-                                list_type = 1;
+                                list_type = "1";
                                 bundle.putString("code_list", private_l.get(i).get(2));
                             }
                         }
                         for (int i = 0; i < public_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + public_l.get(i));
                             if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
-                                list_type = 0;
+                                list_type = "0";
                                 bundle.putString("code_list", public_l.get(i).get(2));
                             }
                         }
@@ -892,7 +892,7 @@ public class MainActivity extends AppCompatActivity
 
 
                 server_service.set_values(6, code_list, adapter.getItem(currentSelection), "True", status);
-                server_service.set_items("_", "_", "_", "_");
+                server_service.set_items("_", "_", "_", "_", "_");
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
