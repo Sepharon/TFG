@@ -134,7 +134,7 @@ public class Items extends AppCompatActivity
     String main = null;
     String list_type;
     int current_tab = 1;
-    private final String[] objectives = {"new_name", "new_price", "new_quantity", "new_item", "delete_item", "new_list", "delete_list", "set_public", "add_usr_to_list", "add_user"};
+    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
 
     //Selected Item
     private int currentSelection;
@@ -568,6 +568,7 @@ public class Items extends AppCompatActivity
             dairy_items_l.clear();
             sweet_items_l.clear();
             others_items_l.clear();
+            adapter.notifyDataSetChanged();
 
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
@@ -781,7 +782,6 @@ public class Items extends AppCompatActivity
                         //Log.v(TAG, "" + products.toString());
                         break;
                 }
-                adapter.notifyDataSetChanged();
                 //Log.v(TAG, usr_inf.getItems_lists().toString());
             }
 
@@ -817,36 +817,6 @@ public class Items extends AppCompatActivity
                     e.printStackTrace();
                 }
                 send_request_server("new_item", list_type, code, type, product, price, quantity, "");
-                temp = new HashMap<String, String>();
-                if (price.equals("null")) {
-                    temp.put(THIRD_COLUMN, "-" + currency);
-                } else {
-                    temp.put(THIRD_COLUMN, price + currency);
-                }
-                temp.put(FIRST_COLUMN, product);
-                temp.put(SECOND_COLUMN, quantity);
-                all_items_l.add(temp);
-                switch (type) {
-                    case "Cereal":
-                        cereals_items_l.add(temp);
-                        break;
-                    case "Dairy":
-                        dairy_items_l.add(temp);
-                        break;
-                    case "Meat and Fish":
-                        meat_items_l.add(temp);
-                        break;
-                    case "Others":
-                        others_items_l.add(temp);
-                        break;
-                    case "Sweet":
-                        sweet_items_l.add(temp);
-                        break;
-                    case "Vegetables":
-                        vegetables_items_l.add(temp);
-                        break;
-                }
-                reload_ui(current_tab);
             }
         }
         else if (requestCode==2) {
@@ -1004,10 +974,11 @@ public class Items extends AppCompatActivity
                 String Price_currency = ((HashMap) item).get(THIRD_COLUMN).toString();
                 String Price = Price_currency.split(currency)[0];
                 if (Price.equals("-")) {
-                    Price = null;
+                    Price = "null";
                 }
                 String type = get_Product_Type(adapter.getItem(currentSelection).toString());
 
+                //Log.v(TAG, "DELETE: "+Product+Quantity+Price+type);
                 //Get list code
                 String code = null;
                 try {
@@ -1016,7 +987,15 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, "");
+                String code_item="";
+                items_l = usr_inf.getItems_lists();
+                //Log.v(TAG, "LIST: "+items_l);
+                for (int i = 0; i < items_l.size(); i++) {
+                    if (items_l.get(i).get(0).equals(Product) & items_l.get(i).get(1).equals(Quantity) & items_l.get(i).get(2).equals(Price) & items_l.get(i).get(3).equals(type)) {
+                        code_item = items_l.get(i).get(4);
+                    }
+                }
+                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
             }
         });
 
@@ -1121,14 +1100,25 @@ public class Items extends AppCompatActivity
                     if (main_receiver.equals("False"))
                         Toast.makeText(Items.this,R.string.add_item_error,Toast.LENGTH_SHORT)
                                 .show();
-                    else
+                    else{
+                        getAll_products();
                         Log.v(TAG, "Added new product correctly");
+                    }
+
                     break;
                 case "delete_item":
                     if (main_receiver.equals("False"))
                         Toast.makeText(Items.this,R.string.delete_item_error,Toast.LENGTH_SHORT)
                                 .show();
                     else{
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_products();
                         Log.v(TAG, "Deleted product correctly");
                     }

@@ -89,7 +89,7 @@
     <string name="title_activity_add_item"><b>"Add Product"</b></string>
 
     <!--Add item-->
-    <string name="price">Price</string>
+    <string name="price">Price (optional)</string>
     <string name="quantity">Quantity</string>
     <string name="product">Product</string>
     <string name="add_item_textview">Please, write the name of the product, the quantity and the price if applicable.</string>
@@ -114,6 +114,7 @@
 
     <!--Main Activity-->
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
+    <string name="change_list_name_error">An error occurred while changing the name of the Shopping List</string>
     <string name="new_name_item_error">A problem occurred while changing the name of the Item</string>
     <string name="new_price_item_error">A problem occurred while changing the price of the Item</string>
     <string name="new_quantity_item_error">A problem occurred while changing the quantity of the Item</string>

@@ -115,6 +115,8 @@ public class MainActivity extends AppCompatActivity
     //Selected shopping list
     private int currentSelection;
 
+    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
+
     @Override
     protected void onCreate(Bundle saveInstanceState){
         super.onCreate(saveInstanceState);
@@ -407,8 +409,20 @@ public class MainActivity extends AppCompatActivity
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
                                 .show();
-                    else
+                    else {
+                        getAll_ShoppingLists(usr_inf.getEmail());
                         Log.v(TAG, "Added new Shopping List correctly");
+                    }
+                    break;
+                case "change_list_name":
+                    if (main.equals("False"))
+                        Toast.makeText(MainActivity.this, R.string.change_list_name_error,Toast.LENGTH_SHORT)
+                                .show();
+                    else {
+                        Toast.makeText(MainActivity.this, "Shopping List name changed", Toast.LENGTH_SHORT).show();
+                        getAll_ShoppingLists(usr_inf.getEmail());
+                        Log.v(TAG, "Name changed correctly");
+                    }
                     break;
                 case "share":
                     String result = intent.getStringExtra("result");
@@ -425,6 +439,9 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this,R.string.delete_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
+                        public_list.clear();
+                        private_list.clear();
+                        adapter.notifyDataSetChanged();
                         Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
                         getAll_ShoppingLists(usr_inf.getEmail());
                     }
@@ -541,12 +558,12 @@ public class MainActivity extends AppCompatActivity
                     case "true":
                         private_list.add(list_name);
                         reload_ui(true);
-                        send_request_server(list_name, "1");
+                        send_request_server(list_name, "1", "new_list", "", "");
                         break;
                     case "false":
                         public_list.add(list_name);
                         reload_ui(false);
-                        send_request_server(list_name, "0");
+                        send_request_server(list_name, "0", "new_list","", "");
                         break;
                 }
             }
@@ -554,9 +571,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Send request to Update Server service
-    private void send_request_server(String list_name,String status){
-        server_service.set_values(5, "_", list_name, "True", status);
-        server_service.set_items("_", "_", "_", "_", "_");
+    private void send_request_server(String list_name,String status, final String Objective, String code, String new_name){
+        int objective = 0;
+        for (int i = 0; i < objectives.length; i++) {
+            if (objectives[i].equals(Objective)) {
+                objective = i;
+            }
+        }
+        server_service.set_values(objective, code, list_name, "True", status);
+        server_service.set_items("_", "_", new_name, "_", "_");
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -564,11 +587,11 @@ public class MainActivity extends AppCompatActivity
                 //noinspection StatementWithEmptyBody
                 while (!server_service.return_response_status());
                 String response = server_service.return_result();
-                Log.v("Thread",response);
+                Log.v("Thread", response);
                 Intent intent = new Intent();
                 intent.setAction("broadcast_service");
-                intent.putExtra("Main",response);
-                intent.putExtra("Request", "new_list");
+                intent.putExtra("Main", response);
+                intent.putExtra("Request", Objective);
                 sendBroadcast(intent);
             }
         });
@@ -629,6 +652,7 @@ public class MainActivity extends AppCompatActivity
         try {
             public_list.clear();
             private_list.clear();
+            adapter.notifyDataSetChanged();
             //Log.v(TAG, result);
             JSONObject json_obj = new JSONObject(result);
             //Log.v(TAG, "length: " + json_obj.length());
@@ -760,7 +784,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 case R.id.edit: {
                     edit_shoppingList();
-                    System.out.println(" edit ");
+                    mode.finish();
+                    //System.out.println(" edit ");
                     break;
                 }
                 case R.id.share:{
@@ -925,9 +950,44 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void edit_shoppingList(){
-        getAll_ShoppingLists(usr_inf.getEmail());
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        //TODO: edit shopping list
+        alert.setTitle("Change name of the Shopping List");
+        alert.setMessage("Enter a new name:");
 
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if (is_bound) {
+                    String code="";
+                    private_l = usr_inf.getPrivate_lists();
+                    public_l = usr_inf.getPublic_lists();
+                    Log.v(TAG, "PRIVATELIST: "+private_l);
+                    for (int i = 0; i < private_l.size(); i++) {
+                        if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                            list_type="1";
+                            code=private_l.get(i).get(2);
+                        }
+                    }
+                    for (int i = 0; i < public_l.size(); i++) {
+                        if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                            list_type="0";
+                            code=public_l.get(i).get(2);
+                        }
+                    }
+                    send_request_server(adapter.getItem(currentSelection), list_type, "change_list_name", code, input.getText().toString());
+                }
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
     }
 }
