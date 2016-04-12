@@ -124,6 +124,14 @@ public class Update_Server extends Service {
             send_post_request(jsonEncoderClass.return_json());
     }
 
+    public int get_objective(String objec){
+        for (int i = 0; i < objectives.length; i++) {
+            if (objectives[i].equals(objec)) {
+                return i;
+            }
+        }return -1;
+    }
+
     // Creates the apropiate JSON based if the values need to go in the main or in Values
     private boolean set_json(String [] key, String[] value,int update_main){
         if (jsonEncoderClass.return_json() == null) return false;

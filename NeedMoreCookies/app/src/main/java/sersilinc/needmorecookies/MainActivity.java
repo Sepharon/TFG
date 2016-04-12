@@ -572,13 +572,8 @@ public class MainActivity extends AppCompatActivity
 
     //Send request to Update Server service
     private void send_request_server(String list_name,String status, final String Objective, String code, String new_name){
-        int objective = 0;
-        for (int i = 0; i < objectives.length; i++) {
-            if (objectives[i].equals(Objective)) {
-                objective = i;
-            }
-        }
-        server_service.set_values(objective, code, list_name, "True", status);
+
+        server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", status);
         server_service.set_items("_", "_", new_name, "_", "_");
         Thread t = new Thread(new Runnable() {
             @Override
@@ -809,8 +804,8 @@ public class MainActivity extends AppCompatActivity
     private void share_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Share shopping list");
-        alert.setMessage("Write an email:");
+        alert.setTitle(R.string.share_list_msg);
+        alert.setMessage(R.string.write_email_msg);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
@@ -822,7 +817,7 @@ public class MainActivity extends AppCompatActivity
                 Boolean valid = validateEmail(input.getText().toString());
                 if (!valid) {
                     Context context = getApplicationContext();
-                    CharSequence error = "Please enter a valid e-mail";
+                    CharSequence error = String.valueOf(R.string.email_not_valid_msg);
                     int duration = Toast.LENGTH_LONG;
                     Toast toast = Toast.makeText(context, error, duration);
                     toast.show();
@@ -890,8 +885,8 @@ public class MainActivity extends AppCompatActivity
     private void delete_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Delete the shopping list?");
-        alert.setMessage("Do you really want to delete the shopping list?");
+        alert.setTitle(R.string.delete_list_alert);
+        alert.setMessage(R.string.delete_list_msg);
 
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -915,27 +910,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
 
-
-                server_service.set_values(6, code_list, adapter.getItem(currentSelection), "True", status);
-                server_service.set_items("_", "_", "_", "_", "_");
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        server_service.send_request();
-                        //noinspection StatementWithEmptyBody
-                        while (!server_service.return_response_status()) ;
-                        String response = server_service.return_result();
-                        Log.v("Thread", response);
-                        Intent intent = new Intent();
-                        intent.setAction("broadcast_service");
-                        intent.putExtra("Main", response);
-                        intent.putExtra("Request", "delete_list");
-                        sendBroadcast(intent);
-                    }
-                });
-                t.start();
-
-                //getAll_ShoppingLists(usr_inf.getEmail());
+                send_request_server(adapter.getItem(currentSelection),status,"delete_list",code_list,"_");
             }
         });
 
@@ -952,11 +927,12 @@ public class MainActivity extends AppCompatActivity
     private void edit_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Change name of the Shopping List");
-        alert.setMessage("Enter a new name:");
+        alert.setTitle(R.string.change_name_list);
+        alert.setMessage(R.string.set_new_name_msg);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         alert.setView(input);
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
