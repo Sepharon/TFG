@@ -136,6 +136,11 @@ public class Items extends AppCompatActivity
     int current_tab = 1;
     private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
 
+    // Update items flags
+    private boolean product_to_update = false;
+    private boolean quantity_to_update = false;
+    private boolean price_to_update = false;
+
     //Selected Item
     private int currentSelection;
 
@@ -861,17 +866,45 @@ public class Items extends AppCompatActivity
                         code_item = items_l.get(i).get(4);
                     }
                 }
+                final String finalCode = code;
+                final String finalPrice = price;
+                final String finalCode_item = code_item;
+                final String finalType = type;
+                final String finalProduct = product;
+                final String finalQuantity = quantity;
 
                 if (product_changed){
-                    Log.v(TAG,"new quantity");
-                    send_request_server("new_name", list_type, code, type, product, price, quantity, code_item);
+                    product_to_update = true;
+                    Log.v(TAG,"new name");
+                    Log.v("Thread2","product changing");
+                    send_request_server("new_name", list_type,finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
                 }
                 if (quantity_changed) {
+                    quantity_to_update = true;
                     Log.v(TAG,"new quantity");
-                    send_request_server("new_quantity", list_type, code, type, product, price, quantity, code_item);
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (product_to_update);
+                            Log.v("Thread2","quantity changing");
+                            send_request_server("new_quantity", list_type, finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
+                        }
+                    });
+                    t.start();
                 }
-                if (price_changed)
-                    send_request_server("new_price", list_type, code, type, product, price, quantity, code_item);
+                if (price_changed) {
+                    price_to_update = true;
+                    Log.v(TAG,"new price");
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (quantity_to_update);
+                            Log.v("Thread2","price changing");
+                            send_request_server("new_price", list_type, finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
+                        }
+                    });
+                    t.start();
+                }
             }
         }
     }
@@ -879,6 +912,7 @@ public class Items extends AppCompatActivity
     //Send request to Update Server service
     private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity, String code_item) {
         int objective = 0;
+        Log.v(TAG,"Objective: " + Objective);
         for (int i = 0; i < objectives.length; i++) {
             if (objectives[i].equals(Objective)) {
                 objective = i;
@@ -1131,20 +1165,22 @@ public class Items extends AppCompatActivity
                     break;
                 case "new_name":
                     if (main_receiver.equals("False"))
-                        Toast.makeText(Items.this,R.string.new_name_item_error,Toast.LENGTH_SHORT)
+                        Toast.makeText(Items.this, R.string.new_name_item_error, Toast.LENGTH_SHORT)
                                 .show();
                     else{
                         getAll_products();
+                        product_to_update = false;
                         Log.v(TAG, "Name of the product changed correctly");
                     }
 
                     break;
                 case "new_quantity":
                     if (main_receiver.equals("False"))
-                        Toast.makeText(Items.this,R.string.new_quantity_item_error,Toast.LENGTH_SHORT)
+                        Toast.makeText(Items.this, R.string.new_quantity_item_error, Toast.LENGTH_SHORT)
                                 .show();
                     else{
                         getAll_products();
+                        quantity_to_update = false;
                         Log.v(TAG, "Quantity of the product changed correctly");
                     }
 
@@ -1155,6 +1191,7 @@ public class Items extends AppCompatActivity
                                 .show();
                     else{
                         getAll_products();
+                        price_to_update = false;
                         Log.v(TAG, "Price of the product changed correctly");
                     }
 
