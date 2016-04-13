@@ -104,10 +104,6 @@
             android:name=".List_Contacts"
             android:label="@string/title_activity_list__contacts" />
 
-        <service
-            android:name=".ShareShoppingList"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>

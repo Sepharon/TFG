@@ -288,7 +288,6 @@ public class MainActivity extends AppCompatActivity
         //Get User info
         usr_inf = User_Info.getInstance();
         /**[END User_Info]**/
-        //send_request_server("Public List","0","add_usr_to_list","public_list","jaime.escuer93@gmail.com");
 
         /**[START Counter]**/
         //Counter to reload the MainActivity every 2 minutes
@@ -400,7 +399,7 @@ public class MainActivity extends AppCompatActivity
             request_type = intent.getStringExtra("Request");
             main = intent.getStringExtra("Main");
             GoogleAccount = intent.getStringExtra("GoogleAccount");
-
+            Log.v(TAG,"Request: "+ request_type);
             //Check type of request
             switch(request_type){
                 case "one_list":
@@ -442,11 +441,11 @@ public class MainActivity extends AppCompatActivity
                         Log.v(TAG, "Name changed correctly");
                     }
                     break;
-                case "share":
-                    String result = intent.getStringExtra("result");
-                    if (result.equals("Error")){
-                        Toast.makeText(MainActivity.this, "The email you have entered does not belong to a current user", Toast.LENGTH_SHORT).show();
+                case "add_usr_to_list":
+                    if (main.equals("False")){
+                        Toast.makeText(MainActivity.this, "The email you have entered does not belong to an existing user", Toast.LENGTH_SHORT).show();
                     } else{
+                        Log.v(TAG,"Shared list");
                         Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
                         getAll_ShoppingLists(usr_inf.getEmail());
                     }
@@ -828,39 +827,26 @@ public class MainActivity extends AppCompatActivity
                     toast.show();
                     share_shoppingList();
                 } else {
-                    if (is_bound) {
-                        // Create and send a message to the service, using a supported 'what' value
-                        Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
-                        Bundle bundle = new Bundle();
+                    if (is_bound_server) {
+
+                        String tmp_code = "";
                         private_l = usr_inf.getPrivate_lists();
                         public_l = usr_inf.getPublic_lists();
                         for (int i = 0; i < private_l.size(); i++) {
-                            //Log.v(TAG, "LIST: " + private_l.get(i));
                             if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
                                 list_type = "1";
-                                bundle.putString("code_list", private_l.get(i).get(2));
+                                tmp_code = private_l.get(i).get(2);
                             }
                         }
                         for (int i = 0; i < public_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + public_l.get(i));
                             if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
                                 list_type = "0";
-                                bundle.putString("code_list", public_l.get(i).get(2));
+                                tmp_code = public_l.get(i).get(2);
                             }
                         }
-                        bundle.putString("request", "share");
-                        bundle.putString("GoogleAccount", usr_inf.getEmail());
-                        bundle.putString("Friend", input.getText().toString());
-
-                        msg.setData(bundle);
-
-                        //Send message
-                        try {
-                            mService.send(msg);
-                            Log.v(TAG, "Message sent");
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
+                        send_request_server(adapter.getItem(currentSelection), list_type,
+                                "add_usr_to_list", tmp_code, input.getText().toString());
                     }
                 }
             }
