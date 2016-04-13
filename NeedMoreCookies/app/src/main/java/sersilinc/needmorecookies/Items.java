@@ -898,7 +898,7 @@ public class Items extends AppCompatActivity
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (quantity_to_update);
+                            while (quantity_to_update || product_to_update);
                             Log.v("Thread2","price changing");
                             send_request_server("new_price", list_type, finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
                         }
