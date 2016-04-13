@@ -1,8 +1,12 @@
 package sersilinc.needmorecookies;
 
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +37,8 @@ public class Login extends AppCompatActivity implements
     private static final String TAG = "LogInActivity";
     private static final int RC_SIGN_IN = 9001;
 
+    private Update_Server server_service;
+    private boolean is_bound_server = false;
 
     private User_Info usr_inf;
     private GoogleApiClient mGoogleApiClient;
@@ -50,6 +56,8 @@ public class Login extends AppCompatActivity implements
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
+        Intent intent = new Intent(this, Update_Server.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         // Get User Info class
         usr_inf = User_Info.getInstance();
 
@@ -127,6 +135,7 @@ public class Login extends AppCompatActivity implements
             usr_inf.setName(acct.getDisplayName());
             //usr_inf.setmAPIClient(mGoogleApiClient);
             Log.v(TAG, usr_inf.toFormat());
+            add_user_to_server(usr_inf.getEmail());
             launch_next_activity();
         } else {
             // Signed out, show unauthenticated UI.
@@ -172,6 +181,42 @@ public class Login extends AppCompatActivity implements
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
         }
     }
+
+    // Binding Update Server
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Log.v(TAG, "Binding service");
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
+            server_service = binder.getService();
+            is_bound_server = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            is_bound_server = false;
+        }
+    };
+
+    private void add_user_to_server(String account){
+        server_service.set_values(server_service.get_objective("add_user"), "_", "_", "True", "_");
+        server_service.set_items("_", "_", "_", "_", "_");
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                server_service.send_request();
+                //noinspection StatementWithEmptyBody
+                while (!server_service.return_response_status());
+                String response = server_service.return_result();
+                Log.v("Thread", response);
+            }
+        });
+        t.start();
+    }
+
+
 
     @Override
     public void onClick(View v) {

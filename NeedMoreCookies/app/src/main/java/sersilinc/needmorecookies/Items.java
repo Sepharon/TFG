@@ -911,15 +911,8 @@ public class Items extends AppCompatActivity
 
     //Send request to Update Server service
     private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity, String code_item) {
-        int objective = 0;
-        Log.v(TAG,"Objective: " + Objective);
-        for (int i = 0; i < objectives.length; i++) {
-            if (objectives[i].equals(Objective)) {
-                objective = i;
-            }
-        }
-        //Log.v(TAG, "Objective: " + Objective + " objective_code: " + objective + " Status: " + status + " Type: " + type + " product: " + product + " price: " + price + " quantity: " + quantity + " Code list: " + code);
-        server_service.set_values(objective, code, "_", "True", status);
+
+        server_service.set_values(server_service.get_objective(Objective), code, "_", "True", status);
         server_service.set_items(type, product, price, quantity, code_item);
         Thread t = new Thread(new Runnable() {
             @Override
