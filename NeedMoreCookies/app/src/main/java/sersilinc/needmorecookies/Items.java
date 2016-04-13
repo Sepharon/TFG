@@ -797,10 +797,10 @@ public class Items extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Add product
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                // TODO : Diferents if's per cada "status"
                 // New Item
                 Log.v(TAG, "Result OK");
                 String product = data.getStringExtra("product");
@@ -819,6 +819,7 @@ public class Items extends AppCompatActivity
                 send_request_server("new_item", list_type, code, type, product, price, quantity, "");
             }
         }
+        // Edit products
         else if (requestCode==2) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -843,7 +844,7 @@ public class Items extends AppCompatActivity
                 }
 
                 //Get unique Code
-                String code_item="";
+                String code_item = "";
                 Object item = adapter.getItem(currentSelection);
                 String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
                 String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
@@ -861,10 +862,14 @@ public class Items extends AppCompatActivity
                     }
                 }
 
-                if (product_changed)
+                if (product_changed){
+                    Log.v(TAG,"new quantity");
                     send_request_server("new_name", list_type, code, type, product, price, quantity, code_item);
-                if (quantity_changed)
+                }
+                if (quantity_changed) {
+                    Log.v(TAG,"new quantity");
                     send_request_server("new_quantity", list_type, code, type, product, price, quantity, code_item);
+                }
                 if (price_changed)
                     send_request_server("new_price", list_type, code, type, product, price, quantity, code_item);
             }

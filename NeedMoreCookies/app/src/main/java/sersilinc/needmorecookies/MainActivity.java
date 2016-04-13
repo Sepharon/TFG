@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     // Main tag for Logs
-    private final String TAG = "Main Activity: ";
+    private final String TAG = "Shopping_Lists: ";
 
     // Service elements
     private Messenger mService = null;
@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity
     private String list_type = "";
     //Timer
     private CountDownTimer timer;
-
+    // Selected private or public tab
+    private boolean is_private_serlected = true;
     //Selected shopping list
     private int currentSelection;
 
@@ -300,7 +301,8 @@ public class MainActivity extends AppCompatActivity
             }
         }.start();
         /**[END Counter]**/
-
+        Log.v(TAG,"Boolean create: " + is_private_serlected);
+        reload_ui(is_private_serlected);
     }
 
     protected void onStart() {
@@ -312,6 +314,22 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         timer.cancel();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Restart timer
+        timer.start();
+        //Register receiver
+        registerReceiver(receiver, filter);
+
+        //Get shopping lists
+        //new ProgressTask().execute();
+        getAll_ShoppingLists(usr_inf.getEmail());
+        Log.v(TAG,"Boolean: " + is_private_serlected);
+        reload_ui(is_private_serlected);
     }
 
     @Override
@@ -450,22 +468,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //Restart timer
-        timer.start();
-
-        //Register receiver
-        registerReceiver(receiver, filter);
-
-        //Get shopping lists
-        //new ProgressTask().execute();
-        getAll_ShoppingLists(usr_inf.getEmail());
-    }
-
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -595,13 +597,14 @@ public class MainActivity extends AppCompatActivity
 
     //Change the UI either private or public shopping lists
     private void reload_ui(Boolean type){
-        //Log.v(TAG, "Updating UI");
         if (type){
+            is_private_serlected = true;
             adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,private_list);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
         }
         else {
+            is_private_serlected = false;
             adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,public_list);
             separator2.setVisibility(View.VISIBLE);
             separator1.setVisibility(View.INVISIBLE);
@@ -677,7 +680,7 @@ public class MainActivity extends AppCompatActivity
 
                         }
                         usr_inf.setPublic_lists(shopping_list_public);
-                        reload_ui(Boolean.TRUE);
+                        //reload_ui(Boolean.TRUE);
                         break;
                     case 1:
                         shopping_list_private.add(list_name);
@@ -687,7 +690,7 @@ public class MainActivity extends AppCompatActivity
                             private_list.add(list_name);
                         }
                         usr_inf.setPrivate_lists(shopping_list_private);
-                        reload_ui(Boolean.TRUE);
+                        //reload_ui(Boolean.TRUE);
                         break;
                 }
             }
