@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity
         //Get User info
         usr_inf = User_Info.getInstance();
         /**[END User_Info]**/
-
+        //send_request_server("Public List","0","add_usr_to_list","public_list","jaime.escuer93@gmail.com");
 
         /**[START Counter]**/
         //Counter to reload the MainActivity every 2 minutes
@@ -573,10 +573,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Send request to Update Server service
-    private void send_request_server(String list_name,String status, final String Objective, String code, String new_name){
+    private void send_request_server(String list_name,String status, final String Objective, String code, String set_value){
 
         server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", status);
-        server_service.set_items("_", "_", new_name, "_", "_");
+        server_service.set_items("_", "_", set_value, "_", "_");
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -746,6 +746,8 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setVisibility(View.VISIBLE);
                     first_layout.setAnimation(fadein);
                     third_layout.setAnimation(fadein);
+                    send_request_server("_","_","add_user","_","_");
+
                 }
                 @Override
                 public void onAnimationRepeat(Animation animation) {

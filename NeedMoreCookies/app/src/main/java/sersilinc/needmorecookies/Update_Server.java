@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -276,9 +277,6 @@ public class Update_Server extends Service {
                         items.put(value[3]);
                         items.put(value[4]);
                         tmp.put("Item",items);
-                        //Log.v(TAG, String.valueOf(a));
-                        //Log.v(TAG, String.valueOf(items));
-                        //Log.v(TAG, String.valueOf(tmp));
                         obj.put("Values",tmp);
                     } catch (JSONException e) {
                         e.printStackTrace();
