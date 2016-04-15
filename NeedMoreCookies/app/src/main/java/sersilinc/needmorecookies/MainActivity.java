@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object shop_list = adapter.getItem(currentSelection);
+                Object shop_list = adapter.getItem(position);
                 String selected = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
                 if (is_bound) {
                     // Create and send a message to the service, using a supported 'what' value
@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity
                     private_l = usr_inf.getPrivate_lists();
                     public_l = usr_inf.getPublic_lists();
                     for (int i = 0; i < private_l.size(); i++) {
-                        //Log.v(TAG, "LIST: " + private_l.get(i));
+                        Log.v(TAG, "LIST: " + private_l.get(i));
                         if (private_l.get(i).get(0).equals(selected)) {
                             list_type = "1";
                             bundle.putString("code_list", private_l.get(i).get(2));
