@@ -45,7 +45,7 @@ public class Update_Server extends Service {
     private final String [] keys = {"Objective","Code","list_name","Update","GoogleAccount","status"};
     private String [] values = new String[6];
     private String [] items = new String[5];
-    private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
+    private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user", "add_token"};
     private String request_result;
 
     //Flag
@@ -92,8 +92,7 @@ public class Update_Server extends Service {
     }
     // Sets the values for the values array
     public boolean set_values(int objective_code,String list_code,String list_name,String update,String status){
-        if (objective_code > 10) return false;
-        //Log.v(TAG, "Setting values: "+objective_code+list_code+list_name+update+status+objectives[objective_code]);
+        if (objective_code > 11) return false;
         values[0] = objectives[objective_code];
         values[1] = list_code;
         values[2] = list_name;

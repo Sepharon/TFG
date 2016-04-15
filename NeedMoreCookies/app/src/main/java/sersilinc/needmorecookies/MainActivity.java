@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -16,8 +17,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -45,6 +48,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -121,7 +126,15 @@ public class MainActivity extends AppCompatActivity
     //Selected shopping list
     private int currentSelection;
 
-    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
+
+    //GCM
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private boolean isReceiverRegistered;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+
+
+    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
@@ -305,8 +318,33 @@ public class MainActivity extends AppCompatActivity
             }
         }.start();
         /**[END Counter]**/
+
+
+        //GCM
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+            }
+        };
+
+        // Registering BroadcastReceiver
+        registerReceiver();
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent2 = new Intent(this, RegistrationIntentService.class);
+            startService(intent2);
+        }
+
+
         Log.v(TAG,"Boolean create: " + is_private_serlected);
         reload_ui(is_private_serlected);
+
+
     }
 
     protected void onStart() {
@@ -328,12 +366,28 @@ public class MainActivity extends AppCompatActivity
         timer.start();
         //Register receiver
         registerReceiver(receiver, filter);
+        registerReceiver();
 
         //Get shopping lists
         //new ProgressTask().execute();
         getAll_ShoppingLists(usr_inf.getEmail());
         Log.v(TAG,"Boolean: " + is_private_serlected);
         reload_ui(is_private_serlected);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        isReceiverRegistered = false;
+    }
+    private void registerReceiver(){
+        if(!isReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+            isReceiverRegistered = true;
+        }
     }
 
     @Override
@@ -417,6 +471,9 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case "all":
                     list = intent.getStringExtra("all");
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
                     update_Users_data(list);
                     break;
                 case "shared_list":
@@ -432,6 +489,9 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
+                        public_list.clear();
+                        private_list.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_ShoppingLists(usr_inf.getEmail());
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
@@ -442,6 +502,9 @@ public class MainActivity extends AppCompatActivity
                                 .show();
                     else {
                         Toast.makeText(MainActivity.this, "Shopping List name changed", Toast.LENGTH_SHORT).show();
+                        public_list.clear();
+                        private_list.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_ShoppingLists(usr_inf.getEmail());
                         Log.v(TAG, "Name changed correctly");
                     }
@@ -452,6 +515,9 @@ public class MainActivity extends AppCompatActivity
                     } else{
                         Log.v(TAG,"Shared list");
                         Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
+                        public_list.clear();
+                        private_list.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_ShoppingLists(usr_inf.getEmail());
                     }
                     //Log.v(TAG, "RECEIVED: "+list);
@@ -467,6 +533,11 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
                         getAll_ShoppingLists(usr_inf.getEmail());
                     }
+                    break;
+                case "Token":
+                    String token = intent.getStringExtra("Token");
+                    send_request_server("_", "_", "add_token", "_", token);
+                    Log.v(TAG, "TOKEN: "+token);
                     break;
             }
         }
@@ -493,6 +564,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_update:
+                public_list.clear();
+                private_list.clear();
+                adapter.notifyDataSetChanged();
                 getAll_ShoppingLists(usr_inf.getEmail());
                 Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
                 return true;
@@ -562,18 +636,16 @@ public class MainActivity extends AppCompatActivity
                 //Check which type of list the user wants to add
                 switch (Type){
                     case "true":
-                        temp = new HashMap<String, String>();
-                        temp.put(FIRST_COLUMN, list_name);
-                        temp.put(SECOND_COLUMN, "prova");
+                        //temp = new HashMap<String, String>();
+                        //temp.put(FIRST_COLUMN, list_name);
 
-                        private_list.add(temp);
+                        //private_list.add(temp);
                         reload_ui(true);
                         send_request_server(list_name, "1", "new_list", "", "");
                         break;
                     case "false":
-                        temp = new HashMap<String, String>();
-                        temp.put(FIRST_COLUMN, list_name);
-                        temp.put(SECOND_COLUMN, "prova");
+                        //temp = new HashMap<String, String>();
+                        //temp.put(FIRST_COLUMN, list_name);
                         reload_ui(false);
                         send_request_server(list_name, "0", "new_list","", "");
                         break;
@@ -585,6 +657,7 @@ public class MainActivity extends AppCompatActivity
     //Send request to Update Server service
     private void send_request_server(String list_name,String status, final String Objective, String code, String set_value){
 
+        //Log.v("NOENTIENDO: ", "FUNC: "+server_service.get_objective(Objective)+" Objective: "+Objective+" VALUES:"+set_value);
         server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", status);
         server_service.set_items("_", "_", set_value, "_", "_");
         Thread t = new Thread(new Runnable() {
@@ -767,7 +840,8 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setVisibility(View.VISIBLE);
                     first_layout.setAnimation(fadein);
                     third_layout.setAnimation(fadein);
-                    send_request_server("_","_","add_user","_","_");
+                    send_request_server("_", "_", "add_user", "_", "_");
+
 
                 }
                 @Override
@@ -860,6 +934,7 @@ public class MainActivity extends AppCompatActivity
                             if (private_l.get(i).get(0).equals(list_name)) {
                                 list_type = "1";
                                 tmp_code = private_l.get(i).get(2);
+                                Log.v("CODELIST: ", ""+tmp_code);
                             }
                         }
                         for (int i = 0; i < public_l.size(); i++) {
@@ -867,6 +942,7 @@ public class MainActivity extends AppCompatActivity
                             if (public_l.get(i).get(0).equals(list_name)) {
                                 list_type = "0";
                                 tmp_code = public_l.get(i).get(2);
+                                Log.v("CODELIST: ", ""+tmp_code);
                             }
                         }
                         send_request_server(list_name, list_type,
@@ -914,7 +990,7 @@ public class MainActivity extends AppCompatActivity
                 private_l = usr_inf.getPrivate_lists();
                 public_l = usr_inf.getPublic_lists();
                 for (int i = 0; i < private_l.size(); i++) {
-                    //Log.v(TAG, "LIST: " + private_l.get(i));
+                    Log.v(TAG, "LIST: " + private_l.get(i));
                     if (private_l.get(i).get(0).equals(list_name)) {
                         code_list = private_l.get(i).get(2);
                         status = private_l.get(i).get(1);
@@ -986,5 +1062,27 @@ public class MainActivity extends AppCompatActivity
         });
 
         alert.show();
+    }
+
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }

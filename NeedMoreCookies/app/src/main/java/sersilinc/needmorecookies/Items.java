@@ -135,7 +135,7 @@ public class Items extends AppCompatActivity
     String main = null;
     String list_type;
     int current_tab = 1;
-    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user"};
+    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
 
     // Update items flags
     private boolean product_to_update = false;
@@ -1173,6 +1173,14 @@ public class Items extends AppCompatActivity
                         Toast.makeText(Items.this,R.string.add_item_error,Toast.LENGTH_SHORT)
                                 .show();
                     else{
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_products();
                         Log.v(TAG, "Added new product correctly");
                     }
@@ -1201,6 +1209,14 @@ public class Items extends AppCompatActivity
                         Toast.makeText(Items.this, R.string.new_name_item_error, Toast.LENGTH_SHORT)
                                 .show();
                     else{
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_products();
                         product_to_update = false;
                         Log.v(TAG, "Name of the product changed correctly");
@@ -1212,6 +1228,14 @@ public class Items extends AppCompatActivity
                         Toast.makeText(Items.this, R.string.new_quantity_item_error, Toast.LENGTH_SHORT)
                                 .show();
                     else{
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_products();
                         quantity_to_update = false;
                         Log.v(TAG, "Quantity of the product changed correctly");
@@ -1223,6 +1247,14 @@ public class Items extends AppCompatActivity
                         Toast.makeText(Items.this,R.string.new_price_item_error,Toast.LENGTH_SHORT)
                                 .show();
                     else{
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         getAll_products();
                         price_to_update = false;
                         Log.v(TAG, "Price of the product changed correctly");
