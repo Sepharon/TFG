@@ -105,6 +105,7 @@ public class Items extends AppCompatActivity
     private static final String FIRST_COLUMN = "First";
     private static final String SECOND_COLUMN = "Second";
     private static final String THIRD_COLUMN = "Third";
+    private static final String FOURTH_COLUMN="Fourth";
 
     //Temporal HashMap to write to the columns
     private HashMap<String, String> temp;
@@ -197,11 +198,11 @@ public class Items extends AppCompatActivity
         l_header.add(temp);
 
         //Custom adapter
-        adapter_header = new ListViewAdapters(this, l_header, Boolean.FALSE);
+        adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
 
         listview_header.setAdapter(adapter_header);
 
-        adapter = new ListViewAdapters(this, all_items_l, Boolean.TRUE);
+        adapter = new ListViewAdapters(this, all_items_l, "Content", list_type);
 
         listview_items.setAdapter(adapter);
         /**[END List View]**/
@@ -358,7 +359,6 @@ public class Items extends AppCompatActivity
         }
         /**[END Get intent extras]**/
 
-
         //Reload UI
         reload_ui(1);
     }
@@ -494,7 +494,7 @@ public class Items extends AppCompatActivity
     private void reload_ui(int type) {
         //Log.v(TAG, "Updating UI");
         if (type == 1) {
-            adapter = new ListViewAdapters(this, all_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, all_items_l, "Content", list_type);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -503,7 +503,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 2) {
-            adapter = new ListViewAdapters(this, meat_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, meat_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.VISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -512,7 +512,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 3) {
-            adapter = new ListViewAdapters(this, vegetables_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, vegetables_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.VISIBLE);
@@ -521,7 +521,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 4) {
-            adapter = new ListViewAdapters(this, cereals_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, cereals_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -530,7 +530,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 5) {
-            adapter = new ListViewAdapters(this, dairy_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, dairy_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -539,7 +539,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 6) {
-            adapter = new ListViewAdapters(this, sweet_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, sweet_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -548,7 +548,7 @@ public class Items extends AppCompatActivity
             separator6.setVisibility(View.VISIBLE);
             separator7.setVisibility(View.INVISIBLE);
         } else if (type == 7) {
-            adapter = new ListViewAdapters(this, others_items_l, Boolean.TRUE);
+            adapter = new ListViewAdapters(this, others_items_l, "Content", list_type);
             separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.INVISIBLE);
@@ -593,6 +593,10 @@ public class Items extends AppCompatActivity
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
 
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             all_items_l.add(temp);
 
                             i = i + 1;
@@ -612,15 +616,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             meat_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 
@@ -643,15 +653,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             vegetables_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 
@@ -674,15 +690,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             cereals_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 
@@ -705,15 +727,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             dairy_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 
@@ -736,15 +764,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             sweet_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 
@@ -767,15 +801,21 @@ public class Items extends AppCompatActivity
                             }
                             temp.put(FIRST_COLUMN, rec.getString(0));
                             temp.put(SECOND_COLUMN, rec.getString(1));
+
+                            if (list_type.equals("0")){
+                                temp.put(FOURTH_COLUMN, rec.getString(4));
+                            }
+
                             others_items_l.add(temp);
 
-                            //Variables to store the product name, quantity, price, type and code
+                            //Variables to store the product name, quantity, price, type, code and last_user
                             List<String> item_list_temp = new ArrayList<>();
                             item_list_temp.add(rec.getString(0));
                             item_list_temp.add(rec.getString(1));
                             item_list_temp.add(rec.getString(2));
                             item_list_temp.add(type);
                             item_list_temp.add(rec.getString(3));
+                            item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
 

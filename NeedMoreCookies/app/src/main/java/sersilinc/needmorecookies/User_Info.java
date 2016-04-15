@@ -20,12 +20,12 @@ public class User_Info {
     private String email;
 
     //Array that contains the name of the list, type and code
-    //List of list [[NAME,TYPE,CODE],[NAME,TYPE,CODE]..]
+    //List of list [[NAME,TYPE,CODE,Timestamp],[NAME,TYPE,CODE,Timestamp]..]
     List<List<String>> public_lists = new ArrayList<>();
     List<List<String>> private_lists = new ArrayList<>();
 
     //Array that contains the name of the product, quantity, price and code
-    //List of list [[NAME,QUANTITY,PRICE,TYPE,CODE],[NAME,QUANTITY,PRICE,TYPE,CODE]..]
+    //List of list [[NAME,QUANTITY,PRICE,TYPE,CODE,USER],[NAME,QUANTITY,PRICE,TYPE,CODE,USER]..]
     List<List<String>> item_lists = new ArrayList<>();
 
     //Instantiate
@@ -72,13 +72,13 @@ public class User_Info {
         this.email = email;
     }
 
-    // Values from list [Name,Type,Code]
+    // Values from list [Name,Type,Code,Timestamp]
     public void setPrivate_lists(List<String> private_list) {
         if (!private_lists.contains(private_list)){
             this.private_lists.add(private_list);
         }
     }
-    // Values from list [Name,Type,Code]
+    // Values from list [Name,Type,Code,Timestamp]
     public void setPublic_lists(List<String> public_list) {
         if (!public_lists.contains(public_list)) {
             this.public_lists.add(public_list);
@@ -86,7 +86,7 @@ public class User_Info {
 
     }
 
-    // Values from list [Name,Quantity,Price,Type,Code]
+    // Values from list [Name,Quantity,Price,Type,Code,User]
     public void setItems_lists(List<String> item_list) {
         if (!item_lists.contains(item_list)) {
             this.item_lists.add(item_list);

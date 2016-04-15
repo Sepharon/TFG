@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -97,11 +98,15 @@ public class MainActivity extends AppCompatActivity
     // ListView
     private ListView listview;
     // Private and public list names
-    private List<String> public_list = new ArrayList<>();
-    private List<String> private_list = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> private_list = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> public_list = new ArrayList<HashMap<String, String>>();
+    HashMap<String, String> temp;
+    //Columns
+    private static final String FIRST_COLUMN = "First";
+    private static final String SECOND_COLUMN = "Second";
 
     // Adapter
-    private ArrayAdapter<String> adapter;
+    private ListViewAdapters adapter;
 
     //Google API client
     private GoogleApiClient mGoogleApiClient;
@@ -152,12 +157,11 @@ public class MainActivity extends AppCompatActivity
         /**[END UI elements]**/
 
         /**[START List view]**/
-         //Adapter
-        adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1,private_list);
-        // Create List View
+        adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
+
         listview.setAdapter(adapter);
-        registerForContextMenu(listview);
+        listview.setAdapter(adapter);
+        //registerForContextMenu(listview);
         /**[END List view]**/
 
         /**[START Navigation]**/
@@ -227,7 +231,8 @@ public class MainActivity extends AppCompatActivity
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selected = listview.getItemAtPosition(position).toString();
+                Object shop_list = adapter.getItem(currentSelection);
+                String selected = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
                 if (is_bound) {
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
@@ -557,12 +562,18 @@ public class MainActivity extends AppCompatActivity
                 //Check which type of list the user wants to add
                 switch (Type){
                     case "true":
-                        private_list.add(list_name);
+                        temp = new HashMap<String, String>();
+                        temp.put(FIRST_COLUMN, list_name);
+                        temp.put(SECOND_COLUMN, "prova");
+
+                        private_list.add(temp);
                         reload_ui(true);
                         send_request_server(list_name, "1", "new_list", "", "");
                         break;
                     case "false":
-                        public_list.add(list_name);
+                        temp = new HashMap<String, String>();
+                        temp.put(FIRST_COLUMN, list_name);
+                        temp.put(SECOND_COLUMN, "prova");
                         reload_ui(false);
                         send_request_server(list_name, "0", "new_list","", "");
                         break;
@@ -598,13 +609,13 @@ public class MainActivity extends AppCompatActivity
     private void reload_ui(Boolean type){
         if (type){
             is_private_serlected = true;
-            adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,private_list);
+            adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
         }
         else {
             is_private_serlected = false;
-            adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,public_list);
+            adapter = new ListViewAdapters(this, public_list, "MainActivity", list_type);
             separator2.setVisibility(View.VISIBLE);
             separator1.setVisibility(View.INVISIBLE);
         }
@@ -662,20 +673,27 @@ public class MainActivity extends AppCompatActivity
                 //Get the code
                 String code = list1.getString("Code");
 
+                //Get timestamp
+                String timestamp = list1.getString("Timestamp");
+
                 //Variables to store the list name, type and code
                 List<String> shopping_list_private = new ArrayList<>();
                 List<String> shopping_list_public = new ArrayList<>();
 
                 int type = list1.getInt("TypeList");
                 //Check type of shopping list and store them in the User_Info class
-                //The format is the following: [[List_name, Type, Code], [List_name2, Type, Code],...]
+                //The format is the following: [[List_name, Type, Code, Timestamp], [List_name2, Type, Code, Timestamp],...]
                 switch (type) {
                     case 0:
                         shopping_list_public.add(list_name);
                         shopping_list_public.add("0");
                         shopping_list_public.add(code);
+                        shopping_list_public.add(timestamp);
                         if (!public_list.contains(list_name)) {
-                            public_list.add(list_name);
+                            temp = new HashMap<String, String>();
+                            temp.put(FIRST_COLUMN, list_name);
+                            temp.put(SECOND_COLUMN, timestamp);
+                            public_list.add(temp);
 
                         }
                         usr_inf.setPublic_lists(shopping_list_public);
@@ -685,8 +703,12 @@ public class MainActivity extends AppCompatActivity
                         shopping_list_private.add(list_name);
                         shopping_list_private.add("1");
                         shopping_list_private.add(code);
+                        shopping_list_private.add(timestamp);
                         if (!private_list.contains(list_name)) {
-                            private_list.add(list_name);
+                            temp = new HashMap<String, String>();
+                            temp.put(FIRST_COLUMN, list_name);
+                            temp.put(SECOND_COLUMN, timestamp);
+                            private_list.add(temp);
                         }
                         usr_inf.setPrivate_lists(shopping_list_private);
                         //reload_ui(Boolean.TRUE);
@@ -828,24 +850,26 @@ public class MainActivity extends AppCompatActivity
                     share_shoppingList();
                 } else {
                     if (is_bound_server) {
+                        Object shop_list = adapter.getItem(currentSelection);
+                        String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
 
                         String tmp_code = "";
                         private_l = usr_inf.getPrivate_lists();
                         public_l = usr_inf.getPublic_lists();
                         for (int i = 0; i < private_l.size(); i++) {
-                            if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                            if (private_l.get(i).get(0).equals(list_name)) {
                                 list_type = "1";
                                 tmp_code = private_l.get(i).get(2);
                             }
                         }
                         for (int i = 0; i < public_l.size(); i++) {
                             //Log.v(TAG, "LIST: " + public_l.get(i));
-                            if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                            if (public_l.get(i).get(0).equals(list_name)) {
                                 list_type = "0";
                                 tmp_code = public_l.get(i).get(2);
                             }
                         }
-                        send_request_server(adapter.getItem(currentSelection), list_type,
+                        send_request_server(list_name, list_type,
                                 "add_usr_to_list", tmp_code, input.getText().toString());
                     }
                 }
@@ -884,24 +908,27 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int whichButton) {
                 String code_list="";
                 String status="";
+                Object shop_list = adapter.getItem(currentSelection);
+                String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
+
                 private_l = usr_inf.getPrivate_lists();
                 public_l = usr_inf.getPublic_lists();
                 for (int i = 0; i < private_l.size(); i++) {
                     //Log.v(TAG, "LIST: " + private_l.get(i));
-                    if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                    if (private_l.get(i).get(0).equals(list_name)) {
                         code_list = private_l.get(i).get(2);
                         status = private_l.get(i).get(1);
                     }
                 }
                 for (int i = 0; i < public_l.size(); i++) {
                     //Log.v(TAG, "LIST: " + public_l.get(i));
-                    if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                    if (public_l.get(i).get(0).equals(list_name)) {
                         code_list = public_l.get(i).get(2);
                         status = public_l.get(i).get(1);
                     }
                 }
 
-                send_request_server(adapter.getItem(currentSelection),status,"delete_list",code_list,"_");
+                send_request_server(list_name,status,"delete_list",code_list,"_");
             }
         });
 
@@ -930,22 +957,25 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int whichButton) {
                 if (is_bound) {
                     String code="";
+                    Object shop_list = adapter.getItem(currentSelection);
+                    String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
+
                     private_l = usr_inf.getPrivate_lists();
                     public_l = usr_inf.getPublic_lists();
                     Log.v(TAG, "PRIVATELIST: "+private_l);
                     for (int i = 0; i < private_l.size(); i++) {
-                        if (private_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                        if (private_l.get(i).get(0).equals(list_name)) {
                             list_type="1";
                             code=private_l.get(i).get(2);
                         }
                     }
                     for (int i = 0; i < public_l.size(); i++) {
-                        if (public_l.get(i).get(0).equals(adapter.getItem(currentSelection))) {
+                        if (public_l.get(i).get(0).equals(list_name)) {
                             list_type="0";
                             code=public_l.get(i).get(2);
                         }
                     }
-                    send_request_server(adapter.getItem(currentSelection), list_type, "change_list_name", code, input.getText().toString());
+                    send_request_server(list_name, list_type, "change_list_name", code, input.getText().toString());
                 }
             }
         });
