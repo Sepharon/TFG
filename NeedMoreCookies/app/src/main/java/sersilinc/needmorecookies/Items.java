@@ -861,7 +861,7 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server("new_item", list_type, code, type, product, price, quantity, "");
+                send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
             }
         }
         // Edit products
