@@ -38,13 +38,13 @@
         android:positiveButtonText="@null"
         android:title="@string/currency" />
 
-    <ListPreference
+    <!--<ListPreference
         android:defaultValue="1"
         android:entries="@array/size_text_array"
         android:entryValues="@array/size_text_array_values"
         android:key="size_text"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
-        android:title="@string/size_text" />
+        android:title="@string/size_text" />-->
 
 </PreferenceScreen>

@@ -44,7 +44,7 @@ public class Update_Android extends Service {
     private static HttpsURLConnection urlConnection;
 
     //TAG for Logs
-    private final String TAG = "Update List Service: ";
+    private final String TAG = "Update_Android ";
 
     //Bind service
     private final IBinder mBinder = new LocalBinder();
@@ -128,15 +128,11 @@ public class Update_Android extends Service {
                     switch (request) {
                         case "all":
                             json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "False");
-                            json_obj.put("request_code", "False");
                             json_obj.put("all", "True");
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "one_list":
                             json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "False");
-                            json_obj.put("request_code", "False");
                             json_obj.put("all", "False");
                             json_obj.put("Code", code_name);
                             json_obj.put("GoogleAccount", GoogleAccount);

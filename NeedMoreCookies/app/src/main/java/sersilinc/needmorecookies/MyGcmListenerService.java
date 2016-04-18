@@ -20,9 +20,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -31,6 +33,14 @@ import com.google.android.gms.gcm.GcmListenerService;
 public class MyGcmListenerService extends GcmListenerService {
 
     private static final String TAG = "MyGcmListenerService";
+
+    //Preferences
+    private SharedPreferences prefs;
+    private Boolean notifications;
+    private String silent;
+    private Boolean vibrate;
+
+    NotificationCompat.Builder notificationBuilder;
 
     /**
      * Called when message is received.
@@ -52,6 +62,15 @@ public class MyGcmListenerService extends GcmListenerService {
         } else {
             // normal downstream message.
         }
+
+        /**[START Preferences]**/
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //Get currency User's preference
+        notifications = prefs.getBoolean("notifications_new_message", true);
+        silent = prefs.getString("notifications_new_message_ringtone", "content://settings/system/notification_sound");
+        vibrate = prefs.getBoolean("notifications_new_message_vibrate", true);
+        /**[END Preferences]**/
 
         // [START_EXCLUDE]
         /**
@@ -81,18 +100,27 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        if (notifications) {
+            notificationBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent);
+            if (!silent.equals("")) {
+                Uri defaultSoundUri = Uri.parse(silent);
+                notificationBuilder.setSound(defaultSoundUri);
+            }
+            if (vibrate) {
+                notificationBuilder.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+            }
+
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        }
     }
 }
