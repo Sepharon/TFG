@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity
     private User_Info usr_inf;
     private String list_type = "";
     //Timer
-    private CountDownTimer timer;
+    private CountDownTimer timer,timer2;
     // Selected private or public tab
     private boolean is_private_serlected = true;
     //Selected shopping list
@@ -241,6 +243,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Show the products of the selected shopping list in a new activity
+        // TODO : SWITCH THIS TO INTERNAL DB
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -313,10 +316,25 @@ public class MainActivity extends AppCompatActivity
             public void onTick(long millisUntilFinished) {}
             public void onFinish() {
                 //Log.v(TAG, "timer");
-                getAll_ShoppingLists(usr_inf.getEmail());
+                if (!usr_inf.getOffline_mode())
+                    getAll_ShoppingLists(usr_inf.getEmail());
                 start();
             }
         }.start();
+        if (usr_inf.getOffline_mode()){
+            timer2 = new CountDownTimer(60000,1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {}
+                @Override
+                public void onFinish() {
+                    if (is_network_available()) {
+                        usr_inf.setOffline_mode(false);
+                        timer2.cancel();
+                    }
+                    start();
+                }
+            }.start();
+        }
         /**[END Counter]**/
 
 
@@ -339,12 +357,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent2 = new Intent(this, RegistrationIntentService.class);
             startService(intent2);
         }
-
-
-        Log.v(TAG,"Boolean create: " + is_private_serlected);
         reload_ui(is_private_serlected);
-
-
     }
 
     protected void onStart() {
@@ -356,6 +369,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         timer.cancel();
+        if (timer2 != null) timer2.cancel();
     }
 
 
@@ -364,14 +378,17 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         //Restart timer
         timer.start();
+        if (timer2 != null) timer2.start();
         //Register receiver
         registerReceiver(receiver, filter);
         registerReceiver();
 
         //Get shopping lists
         //new ProgressTask().execute();
-        getAll_ShoppingLists(usr_inf.getEmail());
-        Log.v(TAG,"Boolean: " + is_private_serlected);
+        if (!usr_inf.getOffline_mode())
+            getAll_ShoppingLists(usr_inf.getEmail());
+        // TODO : READ FROM INTERNAL DB
+        // else {
         reload_ui(is_private_serlected);
     }
 
@@ -420,9 +437,6 @@ public class MainActivity extends AppCompatActivity
 
             //Get the shopping lists and displaying a loading progress circle
             new ProgressTask().execute();
-
-            //Log.v(TAG, usr_inf.getPrivate_lists().size() + "");
-            //Log.v(TAG, usr_inf.getPublic_lists().size() + "");
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
@@ -564,11 +578,15 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_update:
-                public_list.clear();
-                private_list.clear();
-                adapter.notifyDataSetChanged();
-                getAll_ShoppingLists(usr_inf.getEmail());
-                Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
+                if (!usr_inf.getOffline_mode()) {
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
+                    usr_inf.setOffline_mode(false);
+                    getAll_ShoppingLists(usr_inf.getEmail());
+                    Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(getBaseContext(),R.string.offline_update,Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
@@ -634,6 +652,7 @@ public class MainActivity extends AppCompatActivity
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
                 //Check which type of list the user wants to add
+                // TODO : ADD LISTS TO INTERNAL DB
                 switch (Type){
                     case "true":
                         //temp = new HashMap<String, String>();
@@ -641,13 +660,15 @@ public class MainActivity extends AppCompatActivity
 
                         //private_list.add(temp);
                         reload_ui(true);
-                        send_request_server(list_name, "1", "new_list", "", "");
+                        if (!usr_inf.getOffline_mode())
+                            send_request_server(list_name, "1", "new_list", "", "");
                         break;
                     case "false":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
                         reload_ui(false);
-                        send_request_server(list_name, "0", "new_list","", "");
+                        if (!usr_inf.getOffline_mode())
+                            send_request_server(list_name, "0", "new_list","", "");
                         break;
                 }
             }
@@ -802,14 +823,16 @@ public class MainActivity extends AppCompatActivity
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
         }
-
+        // TODO : IF OFFLINE READ FROM INTERNAL DB
         @Override
         protected Void doInBackground(Void... arg0) {
-            getAll_ShoppingLists(usr_inf.getEmail());
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!usr_inf.getOffline_mode()) {
+                getAll_ShoppingLists(usr_inf.getEmail());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             return null;
         }
@@ -822,7 +845,8 @@ public class MainActivity extends AppCompatActivity
             Animation fadeOut = new AlphaAnimation(1, 0);
             fadeOut.setStartOffset(2000);
             fadeOut.setDuration(1000);
-            welcome.setText(String.format("\n\nWelcome back\n %s !", usr_inf.getName()));
+            if (usr_inf.getOffline_mode()) welcome.setText(R.string.offline_explanation);
+            else welcome.setText(String.format("\n\nWelcome back\n %s !", usr_inf.getName()));
             welcome.setVisibility(View.VISIBLE);
             welcome.setAnimation(fadein);
             welcome.setAnimation(fadeOut);
@@ -840,10 +864,9 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setVisibility(View.VISIBLE);
                     first_layout.setAnimation(fadein);
                     third_layout.setAnimation(fadein);
-                    send_request_server("_", "_", "add_user", "_", "_");
-
-
+                    if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", "_");
                 }
+
                 @Override
                 public void onAnimationRepeat(Animation animation) {
                 }
@@ -1064,7 +1087,12 @@ public class MainActivity extends AppCompatActivity
         alert.show();
     }
 
-
+    private boolean is_network_available(){
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from

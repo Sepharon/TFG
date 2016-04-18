@@ -112,6 +112,11 @@
     wish to share this Shopping List with more people</string>
     <string name="no_name_toast">You must write a name for your list</string>
 
+    <!-- Login -->
+    <string name="offline_alert">Can not connect to the server</string>
+    <string name="offline_question">Do you want to enter offline mode?</string>
+    <string name="offline_explanation">In offline mode you will not receive updates, nor update, public lists </string>
+
     <!--Main Activity-->
     <string name="add_list_error">An error occurred while adding the Shopping List</string>
     <string name="change_list_name_error">An error occurred while changing the name of the Shopping List</string>
@@ -133,5 +138,6 @@
     <string name="write_email_msg">Write an email:</string>
     <string name="delete_list_alert">Delete the shopping list?</string>
     <string name="delete_list_msg">Do you really want to delete the shopping list</string>
+    <string name="offline_update">Can not connect to the server</string>
 
 </resources>

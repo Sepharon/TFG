@@ -418,8 +418,11 @@ public class Items extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_update_items:
-                getAll_products();
-                Toast.makeText(Items.this, R.string.update_products, Toast.LENGTH_SHORT).show();
+                if (!usr_inf.getOffline_mode()) {
+                    getAll_products();
+                    Toast.makeText(Items.this, R.string.update_products, Toast.LENGTH_SHORT).show();
+                }
+                else  Toast.makeText(getBaseContext(),R.string.offline_update,Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
@@ -493,69 +496,41 @@ public class Items extends AppCompatActivity
 
     private void reload_ui(int type) {
         //Log.v(TAG, "Updating UI");
+        separator1.setVisibility(View.INVISIBLE);
+        separator2.setVisibility(View.INVISIBLE);
+        separator3.setVisibility(View.INVISIBLE);
+        separator4.setVisibility(View.INVISIBLE);
+        separator5.setVisibility(View.INVISIBLE);
+        separator6.setVisibility(View.INVISIBLE);
+        separator7.setVisibility(View.INVISIBLE);
         if (type == 1) {
             adapter = new ListViewAdapters(this, all_items_l, "Content", list_type);
             separator1.setVisibility(View.VISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 2) {
             adapter = new ListViewAdapters(this, meat_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
             separator2.setVisibility(View.VISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 3) {
             adapter = new ListViewAdapters(this, vegetables_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
             separator3.setVisibility(View.VISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 4) {
             adapter = new ListViewAdapters(this, cereals_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
             separator4.setVisibility(View.VISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 5) {
             adapter = new ListViewAdapters(this, dairy_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
             separator5.setVisibility(View.VISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 6) {
             adapter = new ListViewAdapters(this, sweet_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
             separator6.setVisibility(View.VISIBLE);
-            separator7.setVisibility(View.INVISIBLE);
+
         } else if (type == 7) {
             adapter = new ListViewAdapters(this, others_items_l, "Content", list_type);
-            separator1.setVisibility(View.INVISIBLE);
-            separator2.setVisibility(View.INVISIBLE);
-            separator3.setVisibility(View.INVISIBLE);
-            separator4.setVisibility(View.INVISIBLE);
-            separator5.setVisibility(View.INVISIBLE);
-            separator6.setVisibility(View.INVISIBLE);
             separator7.setVisibility(View.VISIBLE);
+
         }
         //Set adapter
         listview_items.setAdapter(adapter);
@@ -861,7 +836,9 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
+                // TODO : ADD ITEM TO INTERNAL DB
+                if (!usr_inf.getOffline_mode())
+                    send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
             }
         }
         // Edit products
@@ -913,13 +890,14 @@ public class Items extends AppCompatActivity
                 final String finalProduct = product;
                 final String finalQuantity = quantity;
 
-                if (product_changed){
+                // TODO : EDIT ITEMS IN INTERNAL DB
+                if (product_changed && !usr_inf.getOffline_mode()){
                     product_to_update = true;
                     Log.v(TAG,"new name");
                     Log.v("Thread2","product changing");
                     send_request_server("new_name", list_type,finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
                 }
-                if (quantity_changed) {
+                if (quantity_changed && !usr_inf.getOffline_mode()) {
                     quantity_to_update = true;
                     Log.v(TAG,"new quantity");
                     Thread t = new Thread(new Runnable() {
@@ -932,7 +910,7 @@ public class Items extends AppCompatActivity
                     });
                     t.start();
                 }
-                if (price_changed) {
+                if (price_changed && !usr_inf.getOffline_mode()) {
                     price_to_update = true;
                     Log.v(TAG,"new price");
                     Thread t = new Thread(new Runnable() {
@@ -1067,7 +1045,9 @@ public class Items extends AppCompatActivity
                         code_item = items_l.get(i).get(4);
                     }
                 }
-                send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
+                // TODO : ELSE DELETE FROM INTERNAL DB
+                if (!usr_inf.getOffline_mode())
+                    send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
             }
         });
 

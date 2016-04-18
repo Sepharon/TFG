@@ -117,11 +117,10 @@ public class Update_Server extends Service {
     }
 
     public void send_request (){
-        got_response = false;
-        if (!is_network_available())
-            Toast.makeText(getBaseContext(), "No network available", Toast.LENGTH_LONG).show();
-        else
+        if (is_network_available())
+            got_response = false;
             send_post_request(jsonEncoderClass.return_json());
+
     }
 
     public int get_objective(String objec){

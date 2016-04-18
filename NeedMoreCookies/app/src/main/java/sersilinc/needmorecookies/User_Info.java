@@ -19,6 +19,8 @@ public class User_Info {
     private String name;
     private String email;
 
+    private boolean offline_mode;
+
     //Array that contains the name of the list, type and code
     //List of list [[NAME,TYPE,CODE,Timestamp],[NAME,TYPE,CODE,Timestamp]..]
     List<List<String>> public_lists = new ArrayList<>();
@@ -53,6 +55,7 @@ public class User_Info {
     public String getEmail() {
         return email;
     }
+    public Boolean getOffline_mode() { return offline_mode;}
     public List<List<String>> getPrivate_lists() {
         return private_lists;
     }
@@ -71,7 +74,7 @@ public class User_Info {
     public void setEmail(String email) {
         this.email = email;
     }
-
+    public void setOffline_mode(Boolean status) {this.offline_mode = status;}
     // Values from list [Name,Type,Code,Timestamp]
     public void setPrivate_lists(List<String> private_list) {
         if (!private_lists.contains(private_list)){
