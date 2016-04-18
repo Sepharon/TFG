@@ -44,14 +44,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.Format;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 public class Items extends AppCompatActivity
@@ -247,7 +243,7 @@ public class Items extends AppCompatActivity
         /**[START Service binding]**/
         Intent in = new Intent(this, Update_Server.class);
         bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
-        Intent intent = new Intent(this, Update_List.class);
+        Intent intent = new Intent(this, Update_Android.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         /**[END Service binding]**/
 
@@ -1119,7 +1115,7 @@ public class Items extends AppCompatActivity
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+            Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "one_list");
             bundle.putString("GoogleAccount", user);
