@@ -102,6 +102,8 @@ public class ListViewAdapters extends BaseAdapter{
                     txtThird.setText(map.get(THIRD_COLUMN));
 
                 }
+
+
             }
             else {
                 txtFirst = (TextView) convertView.findViewById(R.id.shop_list);
