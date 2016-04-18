@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.Ringtone;
@@ -133,6 +134,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         //getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.material_deep_teal_500));
         setupActionBar();
         //getActionBar().setDisplayHomeAsUpEnabled(false);
+        if (!isXLargeTablet(getApplicationContext())){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
     }
     // Set up the {@link android.app.ActionBar}, if the API is available.
 
@@ -327,6 +333,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!isXLargeTablet(getApplicationContext())){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 }

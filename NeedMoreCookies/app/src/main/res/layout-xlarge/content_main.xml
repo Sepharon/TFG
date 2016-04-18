@@ -56,7 +56,8 @@
             android:text="Private"
             android:id="@+id/private_lists"
             android:background="@null"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
         <View android:id="@+id/separator"
             android:background="#ffffff"
             android:layout_width = "fill_parent"
@@ -89,7 +90,8 @@
             android:text="Public"
             android:id="@+id/public_lists"
             android:background="@null"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
         <View android:id="@+id/separator2"
             android:background="#ffffff"
             android:layout_width = "fill_parent"

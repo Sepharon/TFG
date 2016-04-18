@@ -27,7 +27,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:textAlignment="center" />
 
     <!--<Button
         android:layout_width="wrap_content"
@@ -45,7 +46,7 @@
         android:layout_height="wrap_content"
         android:text="@string/chose_public_priv"
         android:id="@+id/textView"
-        android:layout_marginTop="53dp"
+        android:layout_marginTop="33dp"
         android:textSize="18dp"
         android:layout_below="@+id/list_name"
         android:layout_alignParentLeft="true"
@@ -75,8 +76,8 @@
         android:text="@string/private_switch"
         android:id="@+id/private_switch_text"
         android:layout_alignBottom="@+id/private_switch"
-        android:layout_alignLeft="@+id/public_switch_text"
-        android:layout_alignStart="@+id/public_switch_text" />
+        android:layout_toRightOf="@+id/private_switch"
+        android:layout_marginLeft="20dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -85,15 +86,15 @@
         android:text="@string/public_switch"
         android:id="@+id/public_switch_text"
         android:layout_centerVertical="true"
-        android:layout_alignRight="@+id/textView"
-        android:layout_alignEnd="@+id/textView" />
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@+id/public_switch" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/private_text"
         android:id="@+id/private_switch_explanation"
-        android:layout_marginTop="58dp"
+        android:layout_marginTop="20dp"
         android:layout_below="@+id/private_switch_text"
         android:layout_alignLeft="@+id/private_switch_text"
         android:layout_alignStart="@+id/private_switch_text" />
@@ -103,7 +104,7 @@
         android:layout_height="wrap_content"
         android:text="@string/public_text"
         android:id="@+id/public_switch_explanation"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="20dp"
         android:layout_below="@+id/public_switch_text"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
