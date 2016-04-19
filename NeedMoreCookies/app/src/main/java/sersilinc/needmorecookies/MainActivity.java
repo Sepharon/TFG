@@ -32,6 +32,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -58,7 +59,12 @@ import com.google.android.gms.common.api.Status;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -127,15 +133,14 @@ public class MainActivity extends AppCompatActivity
     //Selected shopping list
     private int currentSelection;
 
+    //Database
+    DB_Helper db;
 
     //GCM
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private boolean isReceiverRegistered;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-
-
-    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
@@ -169,6 +174,10 @@ public class MainActivity extends AppCompatActivity
         first_layout = (View) findViewById(R.id.firstLayout);
         third_layout = (View) findViewById(R.id.thirdLayout);
         /**[END UI elements]**/
+
+        /**[START DataBase]**/
+        db = new DB_Helper(getApplicationContext());
+        /**[END DataBase]**/
 
         /**[START List view]**/
         adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
@@ -392,7 +401,8 @@ public class MainActivity extends AppCompatActivity
         if (!usr_inf.getOffline_mode())
             getAll_ShoppingLists(usr_inf.getEmail());
         // TODO : READ FROM INTERNAL DB
-        // else {
+         else
+            read_from_internal_DB();
         reload_ui(is_private_serlected);
     }
 
@@ -427,7 +437,9 @@ public class MainActivity extends AppCompatActivity
 
         //Unregister receiver
         unregisterReceiver(receiver);
+        db.destroy_class();
         timer.cancel();
+        if (timer2 != null) timer2.cancel();
     }
 
     // Binding Update List
@@ -575,14 +587,23 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.action_update:
                 if (!usr_inf.getOffline_mode()) {
+                    Log.v(TAG,"update online");
+                    Log.v(TAG,"" + usr_inf.getOffline_mode());
                     public_list.clear();
                     private_list.clear();
                     adapter.notifyDataSetChanged();
                     usr_inf.setOffline_mode(false);
                     getAll_ShoppingLists(usr_inf.getEmail());
                     Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
-                } else
-                    Toast.makeText(getBaseContext(),R.string.offline_update,Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.v(TAG,"update offline");
+                    Toast.makeText(getBaseContext(), R.string.offline_update, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(),R.string.offline_update_warning,Toast.LENGTH_SHORT).show();
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
+                    read_from_internal_DB();
+                }
                 return true;
 
             default:
@@ -653,7 +674,7 @@ public class MainActivity extends AppCompatActivity
                     case "true":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
-
+                        db.add_new_list(list_name,1);
                         //private_list.add(temp);
                         reload_ui(true);
                         if (!usr_inf.getOffline_mode())
@@ -662,6 +683,7 @@ public class MainActivity extends AppCompatActivity
                     case "false":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
+                        db.add_new_list(list_name,0);
                         reload_ui(false);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "0", "new_list","", "");
@@ -674,7 +696,6 @@ public class MainActivity extends AppCompatActivity
     //Send request to Update Server service
     private void send_request_server(String list_name,String status, final String Objective, String code, String set_value){
 
-        //Log.v("NOENTIENDO: ", "FUNC: "+server_service.get_objective(Objective)+" Objective: "+Objective+" VALUES:"+set_value);
         server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", status);
         server_service.set_items("_", "_", set_value, "_", "_");
         Thread t = new Thread(new Runnable() {
@@ -810,26 +831,77 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
+    // TODO : NEEDS TESTING
+    private void read_from_internal_DB(){
+        Log.d(TAG,"Reading from internal DB");
+        List<String> shopping_list_private = new ArrayList<>();
+        List<String> shopping_list_public = new ArrayList<>();
+        List<String[]> a = db.read_all_lists();
 
+        for (int i = 0; i < a.size();i++){
+            String[] b = a.get(i);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(b[1]));
+            int mYear = calendar.get(Calendar.YEAR);
+            int mMonth = calendar.get(Calendar.MONTH);
+            int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+            if (a.get(i)[3].equals("1")){
+                shopping_list_private.add(b[0]); // listname
+                shopping_list_private.add(b[3]); // Private
+                shopping_list_private.add(b[2]); // code
+                shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
+                Log.v(TAG,"year " + mYear);
+                if (!private_list.contains(b[0])) {
+                    temp = new HashMap<>();
+                    temp.put(FIRST_COLUMN, b[0]);
+                    temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
+                    private_list.add(temp);
+                }
+                usr_inf.setPrivate_lists(shopping_list_private);
+            }
+            else{
+                shopping_list_public.add(b[0]); // listname
+                shopping_list_public.add(b[3]); // Private
+                shopping_list_public.add(b[2]); // code
+                shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
+
+                if (!public_list.contains(b[0])) {
+                    temp = new HashMap<>();
+                    temp.put(FIRST_COLUMN, b[0]);
+                    temp.put(SECOND_COLUMN,mYear + "/" + mMonth + "/" + mDay);
+                    public_list.add(temp);
+                }
+                usr_inf.setPublic_lists(shopping_list_public);
+            }
+        }
+        Log.v(TAG,"private: " + String.valueOf(private_list.get(0)));
+    }
 
     //Create the loading and get all the shopping lists when finished
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
+            public_list.clear();
+            private_list.clear();
+            adapter.notifyDataSetChanged();
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
         }
         // TODO : IF OFFLINE READ FROM INTERNAL DB
         @Override
         protected Void doInBackground(Void... arg0) {
-            if (!usr_inf.getOffline_mode()) {
+            if (!usr_inf.getOffline_mode())
                 getAll_ShoppingLists(usr_inf.getEmail());
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            else
+                read_from_internal_DB();
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
             return null;
         }
 

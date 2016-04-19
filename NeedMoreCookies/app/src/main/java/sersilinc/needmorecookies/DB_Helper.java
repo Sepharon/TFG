@@ -30,6 +30,7 @@ public class DB_Helper {
     }
 
     public boolean add_new_list(String new_list,int type){
+        Log.v(TAG,"added new list with name: "+new_list);
         long result = DataBase.add_new_list(new_list,type);
         return result != -1;
     }
@@ -89,11 +90,28 @@ public class DB_Helper {
         Log.v(TAG,"read " + result);
         return result;
     }
-
-    public List<String> read_all_with_flag_set_list(){
+    public List<String[]> read_all_lists(){
         String table_name = SQLiteDB.Shopping_list_table_name;
         String query;
-        List<String> r = new ArrayList<>();
+        List<String[]> r = new ArrayList<>();
+
+        Cursor result;
+        query = "SELECT * FROM " + table_name;
+        result = DataBase.read_multiple_entries(query);
+        result.moveToFirst();
+        do {
+            // list name,timestamp , code,Public
+            String [] entry = new String[]{result.getString(1),result.getString(2),result.getString(3),
+                    result.getString(4)};
+            r.add(entry);
+        } while (result.moveToNext());
+
+        return r;
+    }
+    public List<String[]> read_all_with_flag_set_list(){
+        String table_name = SQLiteDB.Shopping_list_table_name;
+        String query;
+        List<String[]> r = new ArrayList<>();
 
         Cursor result;
         query = "SELECT * FROM " + table_name + "WHERE " +DataBase.KEY_FLAG + " = 1";
@@ -103,9 +121,9 @@ public class DB_Helper {
             // list name, code,Public, change type
             String [] entry = new String[]{result.getString(1),result.getString(3),result.getString(4),
                     result.getString(6)};
-            r.add(Arrays.toString(entry));
+            r.add(entry);
         } while (result.moveToNext());
-        Log.v(TAG,"read_all " + r.toString());
+        Log.v(TAG,"read_all_flag " + r.toString());
         return r;
     }
 
@@ -193,10 +211,10 @@ public class DB_Helper {
         return result;
     }
 
-    public List<String> read_all_with_flag_set_item(){
+    public List<String[]> read_all_with_flag_set_item(){
         String table_name = SQLiteDB.Items_table_name;
         String query;
-        List<String> r = new ArrayList<>();
+        List<String[]> r = new ArrayList<>();
 
         Cursor result;
         query = "SELECT * FROM " + table_name + "WHERE " +DataBase.KEY_FLAG + " = 1";
@@ -206,7 +224,7 @@ public class DB_Helper {
             // Product, type, quantity, price, code, change type
             String [] entry = new String[]{result.getString(1),result.getString(2),result.getString(3),
                     result.getString(4),result.getString(5),result.getString(7)};
-            r.add(Arrays.toString(entry));
+            r.add(entry);
         } while (result.moveToNext());
         Log.v(TAG,"read_all " + r.toString());
         return r;

@@ -7,9 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.util.List;
-
-// TODO : CHECK IF NECESSARY TO STORE TIMESTAMP IN INTERNAL DB
 public class SQLiteDB extends SQLiteOpenHelper{
 
     private final String TAG = "SQLiteDB";
@@ -27,7 +24,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
     public final String KEY_ID_LIST = "ID_List";
     public final String KEY_LIST_NAME = "List_Name";
     public final String KEY_UPDATE = "Last_Update";
-    public final String KEY_PUBLIC = "Public";
+    public final String KEY_PUBLIC = "Private";
     // Items
     public final String KEY_ID_ITEM = "ID_Item";
     public final String KEY_PRODUCT = "Product";
@@ -46,20 +43,21 @@ public class SQLiteDB extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.v(TAG,"Creating DB");
         // Prepare query for first table
         String SHOPPING_LIST_TABLE = "CREATE TABLE " + Shopping_list_table_name + " ( " +
-                "ID_List INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT, " +
+                "ID_List INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "List_Name TEXT NOT NULL, " +
                 "Last_Update TEXT NOT NULL, " +
                 "Code TEXT, " +
-                "Public INTEGER, " +
+                "Private INTEGER, " +
                 "Flag INTEGER DEFAULT 1, " +
                 "Change_type TEXT)";
         // Create table
         db.execSQL(SHOPPING_LIST_TABLE);
         // Prepare query for second table
         String ITEMS_TABLE = "CREATE TABLE " + Items_table_name + " ( " +
-                "ID_Item INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT, " +
+                "ID_Item INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "Product TEXT NOT NULL, " +
                 "Type TEXT NOT NULL, " +
                 "Quantity TEXT NOT NULL, " +
@@ -70,9 +68,9 @@ public class SQLiteDB extends SQLiteOpenHelper{
         db.execSQL(ITEMS_TABLE);
         String LIST_TABLE = "CREATE TABLE " + List_table_name + " ( " +
                 "ID_List INTEGER PRIMARY KEY, " +
-                "ID_Item INTEGER PRIMARY KEY, " +
-                "FOREIGN KEY (ID_List) REFERENCES" + Shopping_list_table_name + "(ID_List)," +
-                "FOREIGN KEY (ID_Ite,) REFERENCES" + Items_table_name + "(ID_Item))";
+                "ID_Item INTEGER, " +
+                "FOREIGN KEY (ID_List) REFERENCES " + Shopping_list_table_name + " (ID_List), " +
+                "FOREIGN KEY (ID_Item) REFERENCES " + Items_table_name + " (ID_Item))";
         db.execSQL(LIST_TABLE);
     }
 

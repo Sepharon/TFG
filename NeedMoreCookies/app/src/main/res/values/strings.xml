@@ -138,6 +138,7 @@
     <string name="write_email_msg">Write an email:</string>
     <string name="delete_list_alert">Delete the shopping list?</string>
     <string name="delete_list_msg">Do you really want to delete the shopping list</string>
-    <string name="offline_update">Can not connect to the server</string>
+    <string name="offline_update">Can not connect to the server. Reading from internal DB</string>
+    <string name="offline_update_warning">Shopping lists in offline mode might be outdated!</string>
 
 </resources>
