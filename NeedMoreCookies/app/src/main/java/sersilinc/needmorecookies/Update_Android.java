@@ -30,7 +30,7 @@ import android.os.Message;
 import javax.net.ssl.HttpsURLConnection;
 
 
-public class Update_List extends Service {
+public class Update_Android extends Service {
 
     //URL
     private static final String url = "https://www.tfg.centrethailam.com";
@@ -44,14 +44,14 @@ public class Update_List extends Service {
     private static HttpsURLConnection urlConnection;
 
     //TAG for Logs
-    private final String TAG = "Update List Service: ";
+    private final String TAG = "Update_Android ";
 
     //Bind service
     private final IBinder mBinder = new LocalBinder();
     public class LocalBinder extends Binder {
-        Update_List getService() {
+        Update_Android getService() {
             // Return this instance of LocalService so clients can call public methods
-            return Update_List.this;
+            return Update_Android.this;
         }
     }
 
@@ -107,14 +107,6 @@ public class Update_List extends Service {
 
                 broadcast.putExtra("One_list", listJSON.toString());
                 break;
-            case "shared_list":
-                JSONObject shared_list = json_obj.getJSONObject("list");
-                broadcast.putExtra("shared_list", shared_list.toString());
-                break;
-            case "share":
-                String result = mainJSON.getString("Result");
-                broadcast.putExtra("result", result);
-                break;
         }
         broadcast.putExtra("Request", request);
         sendBroadcast(broadcast);
@@ -136,40 +128,14 @@ public class Update_List extends Service {
                     switch (request) {
                         case "all":
                             json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "False");
-                            json_obj.put("request_code", "False");
                             json_obj.put("all", "True");
-                            json_obj.put("GoogleAccount", GoogleAccount);
-                            break;
-                        case "shared_list":
-                            json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "True");
-                            json_obj.put("request_code", "False");
-                            json_obj.put("all", "False");
-                            json_obj.put("Code", code_name);
-                            json_obj.put("GoogleAccount", GoogleAccount);
-                            break;
-                        case "code":
-                            json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "True");
-                            json_obj.put("request_code", "True");
-                            json_obj.put("all", "False");
-                            json_obj.put("list_name", code_name);
                             json_obj.put("GoogleAccount", GoogleAccount);
                             break;
                         case "one_list":
                             json_obj.put("Request", "Update Android");
-                            json_obj.put("shared_list", "False");
-                            json_obj.put("request_code", "False");
                             json_obj.put("all", "False");
                             json_obj.put("Code", code_name);
                             json_obj.put("GoogleAccount", GoogleAccount);
-                            break;
-                        case "share":
-                            json_obj.put("Request", "Share List");
-                            json_obj.put("Code", code_name);
-                            json_obj.put("GoogleAccount", GoogleAccount);
-                            json_obj.put("Friend", Friend);
                             break;
                     }
 
@@ -269,21 +235,8 @@ public class Update_List extends Service {
                                     String code_list = msg.getData().getString("code_list");
                                     send_post_request(request, GoogleAccount, code_list, "", source);
                                     break;
-                                case "shared_list":
-                                    String code_list2 = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list2, "", null);
-                                    break;
-                                case "code":
-                                    String list_name = msg.getData().getString("list_name");
-                                    send_post_request(request, GoogleAccount, list_name, "", null);
-                                    break;
                                 case "all":
                                     send_post_request(request, GoogleAccount, null, "", null);
-                                    break;
-                                case "share":
-                                    String code_list3 = msg.getData().getString("code_list");
-                                    String friend = msg.getData().getString("Friend");
-                                    send_post_request(request, GoogleAccount, code_list3, friend, null);
                                     break;
                             }
                         } catch (NullPointerException e) {

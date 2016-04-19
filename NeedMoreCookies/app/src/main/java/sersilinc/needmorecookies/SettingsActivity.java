@@ -206,7 +206,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("currency_list"));
-            bindPreferenceSummaryToValue(findPreference("size_text"));
+            //bindPreferenceSummaryToValue(findPreference("size_text"));
         }
 
         @Override

@@ -37,12 +37,9 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -151,7 +148,7 @@ public class MainActivity extends AppCompatActivity
         /**[END Intent-filter for receiving Broadcast]**/
 
         /**[START Bind service Update List]**/
-        Intent intent = new Intent(this, Update_List.class);
+        Intent intent = new Intent(this, Update_Android.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         /**[END Bind service Update List]**/
 
@@ -254,7 +251,7 @@ public class MainActivity extends AppCompatActivity
                 if (is_bound) {
                     // Create and send a message to the service, using a supported 'what' value
                     Log.v(TAG, "Getting ready");
-                    Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+                    Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
                     Bundle bundle = new Bundle();
                     bundle.putString("request", "one_list");
                     bundle.putString("Activity", "MainActivity");
@@ -497,14 +494,6 @@ public class MainActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     update_Users_data(list);
                     break;
-                case "shared_list":
-                    list = intent.getStringExtra("shared_list");
-                    changeActivity(main, list);
-                    break;
-                case "code":
-                    list = "";
-                    changeActivity(main, list);
-                    break;
                 case "new_list":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
@@ -739,7 +728,7 @@ public class MainActivity extends AppCompatActivity
         if (is_bound) {
             // Create and send a message to the service, using a supported 'what' value
             //Log.v(TAG, "Getting ready");
-            Message msg = Message.obtain(null, Update_List.MSG_GET_DATA);
+            Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "all");
             bundle.putString("GoogleAccount", GoogleAccount);
