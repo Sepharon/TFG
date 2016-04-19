@@ -16,10 +16,10 @@ public class User_Info {
 
     // Global variables for class
     // Name,email
-    private String name;
-    private String email;
+    private static String name;
+    private static String email;
 
-    private boolean offline_mode;
+    private static boolean offline_mode;
 
     //Array that contains the name of the list, type and code
     //List of list [[NAME,TYPE,CODE,Timestamp],[NAME,TYPE,CODE,Timestamp]..]
