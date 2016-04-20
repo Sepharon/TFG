@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.design.widget.NavigationView;
@@ -42,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -250,7 +252,8 @@ public class MapsActivity extends AppCompatActivity
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-            updatePlaces();
+
+
         }
     }
 
@@ -259,6 +262,32 @@ public class MapsActivity extends AppCompatActivity
         // Toast.makeText(this, R.string.location_enable, Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (mMap != null) {
+            locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+            try {
+                Location lastLoc = locMan.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                double lat = lastLoc.getLatitude();
+                double lng = lastLoc.getLongitude();
+                LatLng lastLatLng = new LatLng(lat, lng);
+                if (userMarker != null) userMarker.remove();
+                userMarker = mMap.addMarker(new MarkerOptions()
+                        .position(lastLatLng)
+                        .title("You are here")
+                        .icon(BitmapDescriptorFactory.fromResource(userIcon))
+                        .snippet("Your last recorded location"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(lastLatLng), 3000, null);
+                updatePlaces(lat, lng);
+            } catch (NullPointerException e) {
+                Toast.makeText(MapsActivity.this, "Please, enable My Location button", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        }
         return false;
     }
 
@@ -316,33 +345,13 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    private void updatePlaces() {
-        //update location
-        locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission to access the location is missing.
-            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, true);
-        } else if (mMap != null) {
-            Location lastLoc = locMan.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            double lat = lastLoc.getLatitude();
-            double lng = lastLoc.getLongitude();
-            LatLng lastLatLng = new LatLng(lat, lng);
-            if(userMarker!=null) userMarker.remove();
-            userMarker = mMap.addMarker(new MarkerOptions()
-                    .position(lastLatLng)
-                    .title("You are here")
-                    .icon(BitmapDescriptorFactory.fromResource(userIcon))
-                    .snippet("Your last recorded location"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(lastLatLng), 3000, null);
-            String placesSearchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/" +
-                    "json?location="+lat+","+lng+
-                    "&radius=1000&sensor=true" +
-                    "&types=food|bakery|store|city_hall|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store"+
-                    "&key=AIzaSyCluvWCx_dGHIXx0jd1pCEFrM6MkYKRAeA";
-            new GetPlaces().execute(placesSearchStr);
-        }
+    private void updatePlaces(double lat, double lng) {
+        String placesSearchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/" +
+                "json?location=" + lat + "," + lng +
+                "&radius=1000&sensor=true" +
+                "&types=food|bakery|store|city_hall|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store" +
+                "&key=AIzaSyCluvWCx_dGHIXx0jd1pCEFrM6MkYKRAeA";
+        new GetPlaces().execute(placesSearchStr);
 
     }
 
