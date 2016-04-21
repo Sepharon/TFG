@@ -772,7 +772,7 @@ public class MainActivity extends AppCompatActivity
             public_list.clear();
             private_list.clear();
             adapter.notifyDataSetChanged();
-            //Log.v(TAG, result);
+            Log.v(TAG,"UPDATE_USR");
             JSONObject json_obj = new JSONObject(result);
             //Log.v(TAG, "length: " + json_obj.length());
             Iterator<String> keys = json_obj.keys();
@@ -837,45 +837,44 @@ public class MainActivity extends AppCompatActivity
         List<String> shopping_list_private = new ArrayList<>();
         List<String> shopping_list_public = new ArrayList<>();
         List<String[]> a = db.read_all_lists();
+        if (a!=null) {
+            for (int i = 0; i < a.size(); i++) {
+                String[] b = a.get(i);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(b[1]));
+                int mYear = calendar.get(Calendar.YEAR);
+                int mMonth = calendar.get(Calendar.MONTH);
+                int mDay = calendar.get(Calendar.DAY_OF_MONTH);
 
-        for (int i = 0; i < a.size();i++){
-            String[] b = a.get(i);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(Long.parseLong(b[1]));
-            int mYear = calendar.get(Calendar.YEAR);
-            int mMonth = calendar.get(Calendar.MONTH);
-            int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+                if (a.get(i)[3].equals("1")) {
+                    shopping_list_private.add(b[0]); // listname
+                    shopping_list_private.add(b[3]); // Private
+                    shopping_list_private.add(b[2]); // code
+                    shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
+                    Log.v(TAG, "year " + mYear);
+                    if (!private_list.contains(b[0])) {
+                        temp = new HashMap<>();
+                        temp.put(FIRST_COLUMN, b[0]);
+                        temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
+                        private_list.add(temp);
+                    }
+                    usr_inf.setPrivate_lists(shopping_list_private);
+                } else {
+                    shopping_list_public.add(b[0]); // listname
+                    shopping_list_public.add(b[3]); // Private
+                    shopping_list_public.add(b[2]); // code
+                    shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
 
-            if (a.get(i)[3].equals("1")){
-                shopping_list_private.add(b[0]); // listname
-                shopping_list_private.add(b[3]); // Private
-                shopping_list_private.add(b[2]); // code
-                shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
-                Log.v(TAG,"year " + mYear);
-                if (!private_list.contains(b[0])) {
-                    temp = new HashMap<>();
-                    temp.put(FIRST_COLUMN, b[0]);
-                    temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
-                    private_list.add(temp);
+                    if (!public_list.contains(b[0])) {
+                        temp = new HashMap<>();
+                        temp.put(FIRST_COLUMN, b[0]);
+                        temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
+                        public_list.add(temp);
+                    }
+                    usr_inf.setPublic_lists(shopping_list_public);
                 }
-                usr_inf.setPrivate_lists(shopping_list_private);
-            }
-            else{
-                shopping_list_public.add(b[0]); // listname
-                shopping_list_public.add(b[3]); // Private
-                shopping_list_public.add(b[2]); // code
-                shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
-
-                if (!public_list.contains(b[0])) {
-                    temp = new HashMap<>();
-                    temp.put(FIRST_COLUMN, b[0]);
-                    temp.put(SECOND_COLUMN,mYear + "/" + mMonth + "/" + mDay);
-                    public_list.add(temp);
-                }
-                usr_inf.setPublic_lists(shopping_list_public);
             }
         }
-        Log.v(TAG,"private: " + String.valueOf(private_list.get(0)));
     }
 
     //Create the loading and get all the shopping lists when finished
@@ -888,7 +887,7 @@ public class MainActivity extends AppCompatActivity
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
         }
-        // TODO : IF OFFLINE READ FROM INTERNAL DB
+        // TODO : CHECK IF THERE ARE ENTIRES TO BE SYNC IN THE DB IF ONLINE
         @Override
         protected Void doInBackground(Void... arg0) {
             if (!usr_inf.getOffline_mode())

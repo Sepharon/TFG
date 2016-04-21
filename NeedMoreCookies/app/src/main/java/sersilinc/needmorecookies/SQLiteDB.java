@@ -106,14 +106,13 @@ public class SQLiteDB extends SQLiteOpenHelper{
 
     // Update list name
     public int update_list(String[] key_value,String code){
-        long update_time = System.currentTimeMillis();
-        Log.v(TAG,"Changing list name at " + update_time);
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         // New name might be empty, meaning we just want to update timestamp
-        if (key_value != null)
-            values.put(key_value[0], key_value[1]);
-        values.put(KEY_UPDATE,update_time);
+
+        values.put(key_value[0], key_value[1]);
+
         int count = db.update(
                 Shopping_list_table_name,
                 values,

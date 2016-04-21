@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,10 +49,18 @@ public class DB_Helper {
         return result != 0;
     }
 
-    public boolean update_timestamp(String code){
-        int result = DataBase.update_list(null,code);
+    public boolean update_timestamp_android(String code){
+        long update_time = System.currentTimeMillis();
+        Log.v(TAG,"Changing list name at " + update_time);
+        int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(update_time)},code);
         return result!=0;
     }
+    public boolean update_timestamp_server(String code,String time){
+        Log.v(TAG,"Changing list name at " + time);
+        int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(time)},code);
+        return result!=0;
+    }
+
 
     public boolean set_list_flag(String code, int flag){
         int result = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"" + flag},code);
@@ -99,13 +106,17 @@ public class DB_Helper {
         query = "SELECT * FROM " + table_name;
         result = DataBase.read_multiple_entries(query);
         result.moveToFirst();
-        do {
-            // list name,timestamp , code,Public
-            String [] entry = new String[]{result.getString(1),result.getString(2),result.getString(3),
-                    result.getString(4)};
-            r.add(entry);
-        } while (result.moveToNext());
-
+        try {
+            do {
+                // list name,timestamp , code,Public
+                String[] entry = new String[]{result.getString(1), result.getString(2), result.getString(3),
+                        result.getString(4)};
+                r.add(entry);
+            } while (result.moveToNext());
+        } catch (android.database.CursorIndexOutOfBoundsException e){
+            e.printStackTrace();
+            Log.w(TAG,"Empty DB");
+        }
         return r;
     }
     public List<String[]> read_all_with_flag_set_list(){
@@ -136,7 +147,7 @@ public class DB_Helper {
         long result = DataBase.add_new_item(Product,Type,Quantity,Price);
         ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + "FROM " + SQLiteDB.Items_table_name +"ORDER BY column DESC LIMIT 1");
         // Update timestamp
-        update_timestamp(shopping_list_code);
+        update_timestamp_android(shopping_list_code);
         add_new_relation(Integer.parseInt(ID_List),Integer.parseInt(ID_Item));
         return result!=-1;
     }

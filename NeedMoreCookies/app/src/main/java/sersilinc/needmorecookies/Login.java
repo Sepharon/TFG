@@ -161,37 +161,34 @@ public class Login extends AppCompatActivity implements
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            if (!is_network_available()){
-                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle(R.string.offline_alert);
-                alert.setMessage(R.string.offline_question);
-                alert.setPositiveButton(android.R.string.yes,new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog,int which){
-                        usr_inf.setOffline_mode(true);
-                        launch_next_activity();
-                    }
-                });
-                alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+        if (!is_network_available()){
+            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle(R.string.offline_alert);
+            alert.setMessage(R.string.offline_question);
+            alert.setPositiveButton(android.R.string.yes,new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog,int which){
+                    usr_inf.setOffline_mode(true);
+                    launch_next_activity();
+                }
+            });
+            alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-                    }
-                });
-                alert.show();
-            }
-            else {
-                // acct stores data from the user (email,name...)
-                GoogleSignInAccount acct = result.getSignInAccount();
-                Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());
-                // Set email and name for user
-                usr_inf.setOffline_mode(false);
-                usr_inf.setEmail(acct.getEmail());
-                usr_inf.setName(acct.getDisplayName());
-                //usr_inf.setmAPIClient(mGoogleApiClient);
-                launch_next_activity();
-                Log.v(TAG, usr_inf.toFormat());
-            }
+                }
+            });
+            alert.show();
+        }
+        if (result.isSuccess()) {
+            // acct stores data from the user (email,name...)
+            GoogleSignInAccount acct = result.getSignInAccount();
+            Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());
+            // Set email and name for user
+            usr_inf.setOffline_mode(false);
+            usr_inf.setEmail(acct.getEmail());
+            usr_inf.setName(acct.getDisplayName());
+            //usr_inf.setmAPIClient(mGoogleApiClient);
+            launch_next_activity();
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
