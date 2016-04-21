@@ -2,6 +2,7 @@ package sersilinc.needmorecookies;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -28,39 +29,53 @@ public class DB_Helper {
         DataBase = null;
     }
 
-    public boolean add_new_list(String new_list,int type){
+    public String add_new_list(String new_list,int type){
         Log.v(TAG,"added new list with name: "+new_list);
-        long result = DataBase.add_new_list(new_list,type);
-        return result != -1;
+        DataBase.add_new_list(new_list,type);
+        return get_code_last_list();
     }
 
     public boolean update_list_name(String new_name,String code){
         int result;
+        Log.d(TAG,"Updating name: " + new_name + " "+ code);
         String flag_status;
         flag_status = read_shopping_list(2,code);
         // List still need to synchronize
-        if (flag_status.equals("0")){
-            Log.v(TAG,"Flag is 0");
+        if (flag_status.equals("0") && !User_Info.getInstance().getOffline_mode()){
+            Log.d(TAG,"Flag is 0");
             DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, "change_list_name"},code);
             DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
         }
         result = DataBase.update_list(new String[]{DataBase.KEY_LIST_NAME, new_name},code);
-        Log.v(TAG,"Result of update is " + result);
         return result != 0;
+    }
+
+    public boolean update_list_code(String new_code,String code){
+        Log.d(TAG,"Updating code");
+        int result = DataBase.update_list(new String[]{DataBase.KEY_CODE, new_code},code);
+        return result!=0;
+    }
+
+    public boolean update_list_change(String new_change,String code){
+        Log.d(TAG,"Updating list change type to: " + new_change);
+        int result  = DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code);
+        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
+        return (result&result2)!=0;
     }
 
     public boolean update_timestamp_android(String code){
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Changing list name at " + update_time);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(update_time)},code);
-        return result!=0;
+        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);;
+        return (result&result2)!=0;
     }
     public boolean update_timestamp_server(String code,String time){
         Log.v(TAG,"Changing list name at " + time);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(time)},code);
-        return result!=0;
+        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
+        return (result&result2)!=0;
     }
-
 
     public boolean set_list_flag(String code, int flag){
         int result = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"" + flag},code);
@@ -68,9 +83,22 @@ public class DB_Helper {
     }
 
     public void delete_list(String code){
+        String ID_List = read_shopping_list(0,code);
         DataBase.delete_list(code);
+        DataBase.delete_list_relation(Integer.parseInt(ID_List));
+    }
+    public String get_code_last_list(){
+        String query = "SELECT " + DataBase.KEY_CODE + " FROM " +DataBase.Shopping_list_table_name +
+                " WHERE ID_List=(SELECT MAX(ID_List) FROM " + DataBase.Shopping_list_table_name +")";
+        return DataBase.read_shopping_lists(query);
     }
 
+    public String read_code(String list_name){
+        String query = "SELECT " + DataBase.KEY_CODE + " FROM " + DataBase.Shopping_list_table_name
+                + " WHERE " + DataBase.KEY_LIST_NAME + String.format("='%s'",list_name);
+        String result = DataBase.read_shopping_lists(query);
+        return result;
+    }
     public String read_shopping_list(int value,String code){
         String table_name = SQLiteDB.Shopping_list_table_name;
         String key,query,result;
@@ -91,10 +119,9 @@ public class DB_Helper {
                 return null;
         }
 
-        query = "SELECT " + key + "FROM " + table_name + "WHERE " + DataBase.KEY_CODE + "=" + code;
+        query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
         result = DataBase.read_shopping_lists(query);
         if (result == null) return "Error";
-        Log.v(TAG,"read " + result);
         return result;
     }
     public List<String[]> read_all_lists(){
@@ -108,10 +135,13 @@ public class DB_Helper {
         result.moveToFirst();
         try {
             do {
-                // list name,timestamp , code,Public
-                String[] entry = new String[]{result.getString(1), result.getString(2), result.getString(3),
-                        result.getString(4)};
-                r.add(entry);
+                Log.d(TAG,"type: " + result.getString(3));
+                if (!result.getString(6).equals("delete_list")) {
+                    // list name,timestamp , code,Public
+                    String[] entry = new String[]{result.getString(1), result.getString(2), result.getString(3),
+                            result.getString(4),result.getString(5)};
+                    r.add(entry);
+                }
             } while (result.moveToNext());
         } catch (android.database.CursorIndexOutOfBoundsException e){
             e.printStackTrace();
@@ -125,15 +155,20 @@ public class DB_Helper {
         List<String[]> r = new ArrayList<>();
 
         Cursor result;
-        query = "SELECT * FROM " + table_name + "WHERE " +DataBase.KEY_FLAG + " = 1";
+        query = "SELECT * FROM " + table_name + " WHERE " +DataBase.KEY_FLAG + " = 1";
         result = DataBase.read_multiple_entries(query);
         result.moveToFirst();
-        do {
-            // list name, code,Public, change type
-            String [] entry = new String[]{result.getString(1),result.getString(3),result.getString(4),
-                    result.getString(6)};
-            r.add(entry);
-        } while (result.moveToNext());
+        try {
+            do {
+                // list name, code,Public, change type
+                String [] entry = new String[]{result.getString(1),result.getString(3),result.getString(4),
+                        result.getString(6)};
+                r.add(entry);
+            } while (result.moveToNext());
+        } catch (android.database.CursorIndexOutOfBoundsException e){
+            e.printStackTrace();
+            Log.w(TAG,"Empty DB");
+        }
         Log.v(TAG,"read_all_flag " + r.toString());
         return r;
     }
@@ -145,7 +180,7 @@ public class DB_Helper {
         if (ID_List.equals("Error")) return false;
         // Add new item
         long result = DataBase.add_new_item(Product,Type,Quantity,Price);
-        ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + "FROM " + SQLiteDB.Items_table_name +"ORDER BY column DESC LIMIT 1");
+        ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + " FROM " + SQLiteDB.Items_table_name +" ORDER BY column DESC LIMIT 1");
         // Update timestamp
         update_timestamp_android(shopping_list_code);
         add_new_relation(Integer.parseInt(ID_List),Integer.parseInt(ID_Item));
@@ -215,7 +250,7 @@ public class DB_Helper {
                 Log.v(TAG,"unknown value in read_item");
                 return "Error";
         }
-        query = "SELECT " + key + "FROM " + table_name + "WHERE " + DataBase.KEY_CODE + " = " +code;
+        query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
         result = DataBase.read_item(query);
         if (result == null) return "Error";
         Log.v(TAG,"read " + result);
@@ -228,7 +263,7 @@ public class DB_Helper {
         List<String[]> r = new ArrayList<>();
 
         Cursor result;
-        query = "SELECT * FROM " + table_name + "WHERE " +DataBase.KEY_FLAG + " = 1";
+        query = "SELECT * FROM " + table_name + " WHERE " +DataBase.KEY_FLAG + " = 1";
         result = DataBase.read_multiple_entries(query);
         result.moveToFirst();
         do {

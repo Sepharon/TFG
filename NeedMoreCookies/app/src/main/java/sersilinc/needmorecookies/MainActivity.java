@@ -63,6 +63,7 @@ import java.security.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity
     private String update_product;
     public MyReceiver receiver;
     private IntentFilter filter;
+    private boolean received = false;
 
     // UI elements
     private Button private_lists;
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity
     //Lists
     private List<List<String>> private_l;
     private List<List<String>> public_l;
-    private String [] last_list = new String[2];
+    private String old_codes;
 
     // ListView
     private ListView listview;
@@ -330,15 +332,35 @@ public class MainActivity extends AppCompatActivity
             }
         }.start();
         if (usr_inf.getOffline_mode()){
-            timer2 = new CountDownTimer(60000,1000) {
+            // every minute
+            timer2 = new CountDownTimer(30000,1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {}
                 @Override
                 public void onFinish() {
                     if (is_network_available()) {
-                        usr_inf.setOffline_mode(false);
-                        timer2.cancel();
+                        final AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                        alert.setTitle(R.string.go_online_alert);
+                        alert.setMessage(R.string.go_online_question);
+                        alert.setPositiveButton(android.R.string.yes,new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog,int which){
+                                Toast.makeText(MainActivity.this,R.string.shutting_down,Toast.LENGTH_SHORT).show();
+                                finish();
+                                System.exit(0);
+                            }
+                        });
+                        alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                timer2.cancel();
+                            }
+                        });
+                        alert.show();
+
                     }
+                    else
+                        usr_inf.setOffline_mode(true);
+                    // Start timer again
                     start();
                 }
             }.start();
@@ -400,7 +422,6 @@ public class MainActivity extends AppCompatActivity
         //new ProgressTask().execute();
         if (!usr_inf.getOffline_mode())
             getAll_ShoppingLists(usr_inf.getEmail());
-        // TODO : READ FROM INTERNAL DB
          else
             read_from_internal_DB();
         reload_ui(is_private_serlected);
@@ -472,6 +493,8 @@ public class MainActivity extends AppCompatActivity
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
             is_bound_server = true;
+            if (!usr_inf.getOffline_mode())
+                send_unsynced_entries();
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
@@ -511,9 +534,17 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        public_list.clear();
-                        private_list.clear();
-                        adapter.notifyDataSetChanged();
+                        received = true;
+                        Log.v(TAG,"adding new code: " + main);
+                        Log.v(TAG,"old_code: " + old_codes);
+                        db.update_list_code(main,old_codes);
+                        try {
+                            db.delete_list(old_codes);
+                        } catch (android.database.CursorIndexOutOfBoundsException e){
+                            e.printStackTrace();
+                        }
+                        db.set_list_flag(main,0);
+                        print_db();
                         getAll_ShoppingLists(usr_inf.getEmail());
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
@@ -584,14 +615,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        public_list.clear();
+        private_list.clear();
+        adapter.notifyDataSetChanged();
         switch (item.getItemId()) {
             case R.id.action_update:
                 if (!usr_inf.getOffline_mode()) {
                     Log.v(TAG,"update online");
                     Log.v(TAG,"" + usr_inf.getOffline_mode());
-                    public_list.clear();
-                    private_list.clear();
-                    adapter.notifyDataSetChanged();
                     usr_inf.setOffline_mode(false);
                     getAll_ShoppingLists(usr_inf.getEmail());
                     Toast.makeText(MainActivity.this,R.string.update,Toast.LENGTH_SHORT).show();
@@ -599,19 +630,17 @@ public class MainActivity extends AppCompatActivity
                     Log.v(TAG,"update offline");
                     Toast.makeText(getBaseContext(), R.string.offline_update, Toast.LENGTH_SHORT).show();
                     Toast.makeText(getBaseContext(),R.string.offline_update_warning,Toast.LENGTH_SHORT).show();
-                    public_list.clear();
-                    private_list.clear();
-                    adapter.notifyDataSetChanged();
                     read_from_internal_DB();
+                    reload_ui(is_private_serlected);
                 }
                 return true;
-
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
+
     }
     //Navigation
     @Override
@@ -669,24 +698,28 @@ public class MainActivity extends AppCompatActivity
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
                 //Check which type of list the user wants to add
-                // TODO : ADD LISTS TO INTERNAL DB
                 switch (Type){
+                    // private
                     case "true":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
-                        db.add_new_list(list_name,1);
+                        old_codes = db.add_new_list(list_name,1);
                         //private_list.add(temp);
-                        reload_ui(true);
+                        Log.v(TAG,"name: " + list_name);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "1", "new_list", "", "");
+
+                        reload_ui(true);
                         break;
+                    // public
                     case "false":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
-                        db.add_new_list(list_name,0);
+                        old_codes = db.add_new_list(list_name,0);
                         reload_ui(false);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "0", "new_list","", "");
+
                         break;
                 }
             }
@@ -694,9 +727,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Send request to Update Server service
-    private void send_request_server(String list_name,String status, final String Objective, String code, String set_value){
-
-        server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", status);
+    private void send_request_server(String list_name,String is_private, final String Objective, String code, String set_value){
+        Log.v(TAG,"objective: " + server_service.get_objective(Objective));
+        server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", is_private);
         server_service.set_items("_", "_", set_value, "_", "_");
         Thread t = new Thread(new Runnable() {
             @Override
@@ -769,6 +802,7 @@ public class MainActivity extends AppCompatActivity
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
+            int i = 0;
             public_list.clear();
             private_list.clear();
             adapter.notifyDataSetChanged();
@@ -825,13 +859,14 @@ public class MainActivity extends AppCompatActivity
                         //reload_ui(Boolean.TRUE);
                         break;
                 }
+                i++;
             }
 
         } catch (JSONException e){
             e.printStackTrace();
         }
     }
-    // TODO : NEEDS TESTING
+
     private void read_from_internal_DB(){
         Log.d(TAG,"Reading from internal DB");
         List<String> shopping_list_private = new ArrayList<>();
@@ -845,7 +880,7 @@ public class MainActivity extends AppCompatActivity
                 int mYear = calendar.get(Calendar.YEAR);
                 int mMonth = calendar.get(Calendar.MONTH);
                 int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-
+                Log.v(TAG,"List: " + b[0]);
                 if (a.get(i)[3].equals("1")) {
                     shopping_list_private.add(b[0]); // listname
                     shopping_list_private.add(b[3]); // Private
@@ -887,7 +922,6 @@ public class MainActivity extends AppCompatActivity
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
         }
-        // TODO : CHECK IF THERE ARE ENTIRES TO BE SYNC IN THE DB IF ONLINE
         @Override
         protected Void doInBackground(Void... arg0) {
             if (!usr_inf.getOffline_mode())
@@ -917,6 +951,7 @@ public class MainActivity extends AppCompatActivity
             welcome.setVisibility(View.VISIBLE);
             welcome.setAnimation(fadein);
             welcome.setAnimation(fadeOut);
+            reload_ui(is_private_serlected);
             fadeOut.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -974,7 +1009,10 @@ public class MainActivity extends AppCompatActivity
                     break;
                 }
                 case R.id.share:{
-                    share_shoppingList();
+                    if (!usr_inf.getOffline_mode())
+                        share_shoppingList();
+                    else
+                        Toast.makeText(MainActivity.this,R.string.offline_share, Toast.LENGTH_LONG).show();
                     mode.finish();
                     //System.out.println(" share ");
                     break;
@@ -1093,8 +1131,21 @@ public class MainActivity extends AppCompatActivity
                         status = public_l.get(i).get(1);
                     }
                 }
-
-                send_request_server(list_name,status,"delete_list",code_list,"_");
+                // fake delete until synchronize
+                if (!usr_inf.getOffline_mode()) {
+                    send_request_server(list_name, status, "delete_list", code_list, "_");
+                    Log.v(TAG,"code_list: " + code_list);
+                    print_db();
+                    db.delete_list(code_list);
+                }
+                else {
+                    db.update_list_change("delete_list",code_list);
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
+                    read_from_internal_DB();
+                    reload_ui(is_private_serlected);
+                }
             }
         });
 
@@ -1141,7 +1192,24 @@ public class MainActivity extends AppCompatActivity
                             code=public_l.get(i).get(2);
                         }
                     }
-                    send_request_server(list_name, list_type, "change_list_name", code, input.getText().toString());
+                    print_db();
+                    if (usr_inf.getOffline_mode())
+                        code = db.read_code(list_name);
+                    db.update_list_name(input.getText().toString(),code);
+                    print_db();
+                    if (!usr_inf.getOffline_mode()) {
+                        db.set_list_flag(code, 0);
+                        Log.v(TAG,"Changing list name");
+                        send_request_server(list_name, list_type, "change_list_name", code, input.getText().toString());
+                    }
+                    else {
+                        db.set_list_flag(code, 1);
+                        public_list.clear();
+                        private_list.clear();
+                        adapter.notifyDataSetChanged();
+                        read_from_internal_DB();
+                        reload_ui(is_private_serlected);
+                    }
                 }
             }
         });
@@ -1152,6 +1220,49 @@ public class MainActivity extends AppCompatActivity
         });
 
         alert.show();
+    }
+
+    private boolean send_unsynced_entries(){
+        Log.d(TAG,"We are online");
+        Log.d(TAG,"Synchronizing entries from DB");
+        // Get all items with sync flag set
+        List<String[]> entries = db.read_all_with_flag_set_list();
+        print_db();
+        if (entries == null) return true;
+        String entry[];
+        Log.v(TAG,"Size: "+entries.size());
+        for (int i = 0; i< entries.size(); i++){
+            entry = entries.get(i);
+            Log.d(TAG,"entry: " + Arrays.toString(entry));
+            // listname, is_private,objective,code,set_value
+            db.set_list_flag(entry[1],0);
+            Log.v(TAG,"COntents: " + entry[2]);
+            Log.v(TAG,"COntents: " + entry[3]);
+            if (entry[3].equals("new_list")) old_codes = entry[1];
+            if (entry[3].equals("change_list_name"))
+                send_request_server("_",entry[2],entry[3],entry[1],entry[0]);
+            else
+                send_request_server(entry[0],entry[2],entry[3],entry[1],"_");
+            // delete list really.
+            if (entry[2].equals("delete_list")) db.delete_list(entry[1]);
+            // wait
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        print_db();
+        return true;
+    }
+
+    private void print_db(){
+        List<String[]> entries = db.read_all_lists();
+        Log.v(TAG,"STARTING THE PRINT DB");
+        for (int i=0; i<entries.size();i++){
+            Log.v(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[2] +" " + entries.get(i)[4]);
+        }
+        Log.v(TAG,"END");
     }
 
     private boolean is_network_available(){

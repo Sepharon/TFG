@@ -140,5 +140,9 @@
     <string name="delete_list_msg">Do you really want to delete the shopping list</string>
     <string name="offline_update">Can not connect to the server. Reading from internal DB</string>
     <string name="offline_update_warning">Shopping lists in offline mode might be outdated!</string>
+    <string name="offline_share">Unable to share Shopping Lists while in offline</string>
+    <string name="go_online_alert">Connection reestablished</string>
+    <string name="go_online_question">Do you want to reaster the app in order to go online?</string>
+    <string name="shutting_down">Shutting down</string>
 
 </resources>

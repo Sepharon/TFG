@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.UUID;
+
 public class SQLiteDB extends SQLiteOpenHelper{
 
     private final String TAG = "SQLiteDB";
@@ -89,12 +91,19 @@ public class SQLiteDB extends SQLiteOpenHelper{
         // Get current time since epoch
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Creating new list at " + update_time);
-
+        Log.v(TAG,"With name: " + list_name);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_LIST_NAME,list_name);
         values.put(KEY_UPDATE,update_time);
-        values.put(KEY_FLAG,1);
+        if (User_Info.getInstance().getOffline_mode())
+            values.put(KEY_FLAG,1);
+        else
+            values.put(KEY_FLAG,0);
+        /* For the time being we generate a temporary code,
+        this code will be changed once the list is sent to the server
+        */
+        values.put(KEY_CODE, UUID.randomUUID().toString().replaceAll("-", ""));
         values.put(KEY_PUBLIC,Public);
         values.put(KEY_CHANGE_TYPE,"new_list");
         // Insert values
@@ -106,7 +115,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
 
     // Update list name
     public int update_list(String[] key_value,String code){
-
+        Log.d(TAG,"Updating list: " + code);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         // New name might be empty, meaning we just want to update timestamp
@@ -121,6 +130,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
 
         db.close();
         values.clear();
+        Log.v(TAG,"count: " + count);
         return count;
     }
     // Delete list
@@ -132,6 +142,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 KEY_CODE + "= ?",
                 new String[]{code});
         db.close();
+
     }
     // Reads the values from shopping list table
     public String read_shopping_lists(String query){
@@ -163,7 +174,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         values.put(KEY_TYPE,Type);
         values.put(KEY_QUANTITY,Quantity);
         values.put(KEY_PRICE,Price);
-        values.put(KEY_FLAG,1);
+        if (!User_Info.getInstance().getOffline_mode())
+            values.put(KEY_FLAG,1);
+        else
+            values.put(KEY_FLAG,0);
         values.put(KEY_CHANGE_TYPE,"new_item");
         newRowID = db.insert(Items_table_name,null,values);
 
@@ -180,7 +194,8 @@ public class SQLiteDB extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         Log.v(TAG,"Updating " + key + " with " + new_value);
         values.put(key,new_value);
-        values.put(KEY_FLAG,1);
+        if (User_Info.getInstance().getOffline_mode())
+            values.put(KEY_FLAG,1);
         values.put(KEY_CHANGE_TYPE,change_type);
         int count = db.update(Items_table_name,
                 values,
@@ -230,13 +245,13 @@ public class SQLiteDB extends SQLiteOpenHelper{
     }
 
     // Delete relation
-    public void delete_list_relation(int ID_Item){
+    public void delete_list_relation(int ID){
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Erasing item at " + update_time);
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(List_table_name,
                 KEY_ID_ITEM + "= ?",
-                new String[]{String.valueOf(ID_Item)});
+                new String[]{String.valueOf(ID)});
         db.close();
     }
 

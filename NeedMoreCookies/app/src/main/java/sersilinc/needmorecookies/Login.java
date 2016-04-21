@@ -105,6 +105,7 @@ public class Login extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
         if (!is_network_available()){
+            Log.v(TAG,"Network4");
             final AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.offline_alert);
             alert.setMessage(R.string.offline_question);
@@ -122,7 +123,6 @@ public class Login extends AppCompatActivity implements
             });
         }
         else {
-            usr_inf.setOffline_mode(false);
             //Check if the user has signed in before
             OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
             if (opr.isDone()) {
@@ -162,6 +162,7 @@ public class Login extends AppCompatActivity implements
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (!is_network_available()){
+            Log.v(TAG,"Network3");
             final AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.offline_alert);
             alert.setMessage(R.string.offline_question);
@@ -180,6 +181,25 @@ public class Login extends AppCompatActivity implements
             alert.show();
         }
         if (result.isSuccess()) {
+            if (!is_network_available()) {
+                Log.v(TAG,"Network2");
+                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle(R.string.offline_alert);
+                alert.setMessage(R.string.offline_question);
+                alert.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        usr_inf.setOffline_mode(true);
+                        launch_next_activity();
+                    }
+                });
+                alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                alert.show();
+            }
             // acct stores data from the user (email,name...)
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());
@@ -255,12 +275,37 @@ public class Login extends AppCompatActivity implements
 
     private void launch_next_activity(){
         // Start new activity
-        Intent intent = new Intent(Login.this,MainActivity.class);
+        final Intent intent = new Intent(Login.this,MainActivity.class);
         Log.v(TAG,"Launching next activity");
         // Start next activity
-        startActivity(intent);
-        // Finish current activity
-        finish();
+        Log.v(TAG,is_network_available()+"");
+        if (!is_network_available()) {
+            Log.v(TAG,"Network1");
+            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle(R.string.offline_alert);
+            alert.setMessage(R.string.offline_question);
+            alert.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    usr_inf.setOffline_mode(true);
+                    startActivity(intent);
+                    // Finish current activity
+                    finish();
+                }
+            });
+            alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            alert.show();
+        }
+        else {
+            usr_inf.setOffline_mode(false);
+            startActivity(intent);
+            // Finish current activity
+            finish();
+        }
     }
 
     /**
