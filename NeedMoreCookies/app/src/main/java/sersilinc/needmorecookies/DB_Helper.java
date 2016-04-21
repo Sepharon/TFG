@@ -56,6 +56,12 @@ public class DB_Helper {
         return result!=0;
     }
 
+    public boolean update_list_public(int pub,String code){
+        Log.d(TAG,"Updating code");
+        int result = DataBase.update_list(new String[]{DataBase.KEY_PUBLIC, String.valueOf(pub)},code);
+        return result!=0;
+    }
+
     public boolean update_list_change(String new_change,String code){
         Log.d(TAG,"Updating list change type to: " + new_change);
         int result  = DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code);

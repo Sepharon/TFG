@@ -1056,23 +1056,8 @@ public class MainActivity extends AppCompatActivity
                         String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
 
                         String tmp_code = "";
-                        private_l = usr_inf.getPrivate_lists();
-                        public_l = usr_inf.getPublic_lists();
-                        for (int i = 0; i < private_l.size(); i++) {
-                            if (private_l.get(i).get(0).equals(list_name)) {
-                                list_type = "1";
-                                tmp_code = private_l.get(i).get(2);
-                                Log.v("CODELIST: ", ""+tmp_code);
-                            }
-                        }
-                        for (int i = 0; i < public_l.size(); i++) {
-                            //Log.v(TAG, "LIST: " + public_l.get(i));
-                            if (public_l.get(i).get(0).equals(list_name)) {
-                                list_type = "0";
-                                tmp_code = public_l.get(i).get(2);
-                                Log.v("CODELIST: ", ""+tmp_code);
-                            }
-                        }
+                        tmp_code = db.read_code(list_name);
+                        db.update_list_public(0,tmp_code);
                         send_request_server(list_name, list_type,
                                 "add_usr_to_list", tmp_code, input.getText().toString());
                     }
@@ -1110,27 +1095,12 @@ public class MainActivity extends AppCompatActivity
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                String code_list="";
+                String code_list;
                 String status="";
                 Object shop_list = adapter.getItem(currentSelection);
                 String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
 
-                private_l = usr_inf.getPrivate_lists();
-                public_l = usr_inf.getPublic_lists();
-                for (int i = 0; i < private_l.size(); i++) {
-                    Log.v(TAG, "LIST: " + private_l.get(i));
-                    if (private_l.get(i).get(0).equals(list_name)) {
-                        code_list = private_l.get(i).get(2);
-                        status = private_l.get(i).get(1);
-                    }
-                }
-                for (int i = 0; i < public_l.size(); i++) {
-                    //Log.v(TAG, "LIST: " + public_l.get(i));
-                    if (public_l.get(i).get(0).equals(list_name)) {
-                        code_list = public_l.get(i).get(2);
-                        status = public_l.get(i).get(1);
-                    }
-                }
+                code_list = db.read_code(list_name);
                 // fake delete until synchronize
                 if (!usr_inf.getOffline_mode()) {
                     send_request_server(list_name, status, "delete_list", code_list, "_");
@@ -1177,24 +1147,8 @@ public class MainActivity extends AppCompatActivity
                     Object shop_list = adapter.getItem(currentSelection);
                     String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
 
-                    private_l = usr_inf.getPrivate_lists();
-                    public_l = usr_inf.getPublic_lists();
-                    Log.v(TAG, "PRIVATELIST: "+private_l);
-                    for (int i = 0; i < private_l.size(); i++) {
-                        if (private_l.get(i).get(0).equals(list_name)) {
-                            list_type="1";
-                            code=private_l.get(i).get(2);
-                        }
-                    }
-                    for (int i = 0; i < public_l.size(); i++) {
-                        if (public_l.get(i).get(0).equals(list_name)) {
-                            list_type="0";
-                            code=public_l.get(i).get(2);
-                        }
-                    }
                     print_db();
-                    if (usr_inf.getOffline_mode())
-                        code = db.read_code(list_name);
+                    code = db.read_code(list_name);
                     db.update_list_name(input.getText().toString(),code);
                     print_db();
                     if (!usr_inf.getOffline_mode()) {
