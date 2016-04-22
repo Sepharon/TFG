@@ -65,7 +65,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 "Quantity TEXT NOT NULL, " +
                 "Price TEXT, " +
                 "Code TEXT, " +
-                "Flag INTEGER DEFAULT 1, " +
+                "Flag INTEGER DEFAULT 0, " +
                 "Change_type TEXT)";
         db.execSQL(ITEMS_TABLE);
         String LIST_TABLE = "CREATE TABLE " + List_table_name + " ( " +
@@ -96,8 +96,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         values.put(KEY_LIST_NAME,list_name);
         values.put(KEY_UPDATE,update_time);
-        if (User_Info.getInstance().getOffline_mode())
-            values.put(KEY_FLAG,1);
+        if (User_Info.getInstance().getOffline_mode()) {
+            Log.v(TAG,"We are offline");
+            values.put(KEY_FLAG, 1);
+        }
         else
             values.put(KEY_FLAG,0);
         /* For the time being we generate a temporary code,

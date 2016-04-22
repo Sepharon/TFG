@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.Timestamp;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -422,8 +423,6 @@ public class MainActivity extends AppCompatActivity
         //new ProgressTask().execute();
         if (!usr_inf.getOffline_mode())
             getAll_ShoppingLists(usr_inf.getEmail());
-         else
-            read_from_internal_DB();
         reload_ui(is_private_serlected);
     }
 
@@ -523,6 +522,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     break;
                 case "all":
+                    Log.v(TAG,"Getting lists");
                     list = intent.getStringExtra("all");
                     public_list.clear();
                     private_list.clear();
@@ -545,7 +545,10 @@ public class MainActivity extends AppCompatActivity
                         }
                         db.set_list_flag(main,0);
                         print_db();
+                        if (!usr_inf.getOffline_mode())
+                            send_unsynced_entries();
                         getAll_ShoppingLists(usr_inf.getEmail());
+                        reload_ui(is_private_serlected);
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
                     break;
@@ -703,7 +706,8 @@ public class MainActivity extends AppCompatActivity
                     case "true":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
-                        old_codes = db.add_new_list(list_name,1);
+                        if (usr_inf.getOffline_mode())
+                            old_codes = db.add_new_list(list_name,1);
                         //private_list.add(temp);
                         Log.v(TAG,"name: " + list_name);
                         if (!usr_inf.getOffline_mode())
@@ -829,6 +833,7 @@ public class MainActivity extends AppCompatActivity
                 //Check type of shopping list and store them in the User_Info class
                 //The format is the following: [[List_name, Type, Code, Timestamp], [List_name2, Type, Code, Timestamp],...]
                 c.add(code);
+                Log.v(TAG,"List name: " + list_name);
                 switch (type) {
                     case 0:
                         shopping_list_public.add(list_name);
@@ -842,16 +847,16 @@ public class MainActivity extends AppCompatActivity
                             public_list.add(temp);
 
                         }
+                        print_db();
                        // If server timestamp is newer than ours update name
                         if (db.read_shopping_list(0,code).equals("Error")) {
+                            Log.v(TAG,"Item not found. Adding to DB");
+                            Log.v(TAG,"List name: " + list_name);
                             String old_code = db.add_new_list(list_name, 0);
                             db.set_list_flag(code,0);
                             db.update_list_code(code,old_code);
                         }
-                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
-                            db.update_list_name(list_name, code);
-                        }
-                        db.update_timestamp_server(code, timestamp);
+                        print_db();
                         usr_inf.setPublic_lists(shopping_list_public);
                         //reload_ui(Boolean.TRUE);
                         break;
@@ -866,21 +871,22 @@ public class MainActivity extends AppCompatActivity
                             temp.put(SECOND_COLUMN, timestamp);
                             private_list.add(temp);
                         }
-
-                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
-                            db.update_list_name(list_name, code);
-                        }
                         // If list not in DB insert it (might be added by someone else)
                         if (db.read_shopping_list(0,code).equals("Error")) {
+                            Log.v(TAG,"Item not found. Adding to DB");
+                            Log.v(TAG,"List name: " + list_name);
                             String old_code = db.add_new_list(list_name, 1);
                             db.set_list_flag(code,0);
                             db.update_list_code(code,old_code);
                         }
-                        db.update_timestamp_server(code, timestamp);
                         usr_inf.setPrivate_lists(shopping_list_private);
                         //reload_ui(Boolean.TRUE);
                         break;
                 }
+                if (!db.read_shopping_list(1,code).equals(list_name))
+                    db.update_list_name(list_name,code);
+                db.update_timestamp_server(code, timestamp);
+                db.set_list_flag(code,0);
                 i++;
             }
             remove_deleted_SL(c);
@@ -888,6 +894,7 @@ public class MainActivity extends AppCompatActivity
         } catch (JSONException e){
             e.printStackTrace();
         }
+        reload_ui(is_private_serlected);
     }
 
     private void read_from_internal_DB(){
@@ -898,20 +905,20 @@ public class MainActivity extends AppCompatActivity
         if (a!=null) {
             for (int i = 0; i < a.size(); i++) {
                 String[] b = a.get(i);
-                Calendar calendar = Calendar.getInstance();
+                /*Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(Long.parseLong(b[1]));
                 int mYear = calendar.get(Calendar.YEAR);
                 int mMonth = calendar.get(Calendar.MONTH);
-                int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+                int mDay = calendar.get(Calendar.DAY_OF_MONTH);*/
                 if (a.get(i)[3].equals("1")) {
                     shopping_list_private.add(b[0]); // listname
                     shopping_list_private.add(b[3]); // Private
                     shopping_list_private.add(b[2]); // code
-                    shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
+                    shopping_list_private.add(b[1]); // timestamp
                     if (!private_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
-                        temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
+                        temp.put(SECOND_COLUMN,b[1]);
                         private_list.add(temp);
                     }
                     usr_inf.setPrivate_lists(shopping_list_private);
@@ -919,11 +926,11 @@ public class MainActivity extends AppCompatActivity
                     shopping_list_public.add(b[0]); // listname
                     shopping_list_public.add(b[3]); // Private
                     shopping_list_public.add(b[2]); // code
-                    shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
+                    shopping_list_private.add(b[1]); // timestamp
                     if (!public_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
-                        temp.put(SECOND_COLUMN, mYear + "/" + mMonth + "/" + mDay);
+                        temp.put(SECOND_COLUMN, b[1]);
                         public_list.add(temp);
                     }
                     usr_inf.setPublic_lists(shopping_list_public);
@@ -931,33 +938,43 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-    // TODO : NEEDS TESTING
+    // removes unused lists.
     private void remove_deleted_SL(List<String> c){
         int i;
-        List<String[]> internal_db_lists = new ArrayList<>();
+        boolean deleted_flag = false;
+        Log.v(TAG,"Removing lists");
+        List<String[]> internal_db_lists;
         List<String> internal_codes = new ArrayList<>();
         // Grab all entries from DB
+        print_db();
         internal_db_lists = db.read_all_lists();
         // Add all codes from entries into a list
         for (i = 0;i < internal_db_lists.size();i++)
             internal_codes.add(internal_db_lists.get(i)[2]);
         // If one of the received codes is inside the DB remove it form the list
-        for (i = 0;i < internal_codes.size(); i++){
+        for (i = 0;i < c.size(); i++){
+            Log.d(TAG,"received lists: " + c.get(i));
             if (internal_codes.contains(c.get(i)))
                 internal_codes.remove(c.get(i));
         }
         // In case there are still codes in the DB that are not on the server remove them from the DB
         if (internal_codes.size() > 0){
             for (i = 0;i < internal_codes.size(); i++){
+                deleted_flag = true;
+                Log.d(TAG,"Removing lists: " + internal_codes.get(i));
                 db.delete_list(internal_codes.get(i));
             }
         }
+        if (deleted_flag)
+            Toast.makeText(MainActivity.this,R.string.external_delete,Toast.LENGTH_SHORT).show();
+        print_db();
     }
 
     //Create the loading and get all the shopping lists when finished
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
+            Log.v(TAG,"STARTING EXECUTION OF APP");
             public_list.clear();
             private_list.clear();
             adapter.notifyDataSetChanged();
@@ -970,7 +987,6 @@ public class MainActivity extends AppCompatActivity
                 getAll_ShoppingLists(usr_inf.getEmail());
             else
                 read_from_internal_DB();
-
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -1233,7 +1249,7 @@ public class MainActivity extends AppCompatActivity
             // listname, is_private,objective,code,set_value
             db.set_list_flag(entry[1],0);
             Log.v(TAG,"COntents: " + entry[2]);
-            Log.v(TAG,"COntents: " + entry[3]);
+            Log.v(TAG,"Change type: " + entry[3]);
             if (entry[3].equals("new_list")) old_codes = entry[1];
             if (entry[3].equals("change_list_name"))
                 send_request_server("_",entry[2],entry[3],entry[1],entry[0]);
@@ -1248,6 +1264,7 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
+
         print_db();
         return true;
     }

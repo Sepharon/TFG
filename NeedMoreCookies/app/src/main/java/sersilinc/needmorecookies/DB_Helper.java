@@ -41,7 +41,7 @@ public class DB_Helper {
         String flag_status;
         flag_status = read_shopping_list(2,code);
         // List still need to synchronize
-        if (flag_status.equals("0") && !User_Info.getInstance().getOffline_mode()){
+        if (flag_status.equals("0") && User_Info.getInstance().getOffline_mode()){
             Log.d(TAG,"Flag is 0");
             DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, "change_list_name"},code);
             DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
@@ -73,23 +73,26 @@ public class DB_Helper {
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Changing list name at " + update_time);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(update_time)},code);
-        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);;
-        return (result&result2)!=0;
+        if (!User_Info.getInstance().getOffline_mode())
+            DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
+        return result!=0;
     }
     public boolean update_timestamp_server(String code,String time){
         Log.v(TAG,"Changing list name at " + time);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(time)},code);
-        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
-        return (result&result2)!=0;
+        return result!=0;
     }
 
     public boolean set_list_flag(String code, int flag){
+        if (!User_Info.getInstance().getOffline_mode() && flag == 1) return false;
         int result = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"" + flag},code);
         return result!=0;
     }
 
     public void delete_list(String code){
         String ID_List = read_shopping_list(0,code);
+        if (ID_List.equals("Error"))
+            ID_List = "-1";
         DataBase.delete_list(code);
         DataBase.delete_list_relation(Integer.parseInt(ID_List));
     }
@@ -129,8 +132,12 @@ public class DB_Helper {
         }
 
         query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
-        result = DataBase.read_shopping_lists(query);
-        if (result == null) return "Error";
+        try {
+            result = DataBase.read_shopping_lists(query);
+            if (result == null) return "Error";
+        } catch(android.database.CursorIndexOutOfBoundsException e){
+            return "Error";
+        }
         return result;
     }
     public List<String[]> read_all_lists(){
