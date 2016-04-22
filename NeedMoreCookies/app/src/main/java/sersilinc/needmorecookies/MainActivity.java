@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Show the products of the selected shopping list in a new activity
-        // TODO : SWITCH THIS TO INTERNAL DB
+        // TODO : SWITCH THIS TO INTERNAL DB AND REMOVE IS BOUND MARK
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -719,13 +719,19 @@ public class MainActivity extends AppCompatActivity
                     case "false":
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
-                        old_codes = db.add_new_list(list_name,0);
+                        if (usr_inf.getOffline_mode())
+                            old_codes = db.add_new_list(list_name,0);
                         reload_ui(false);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "0", "new_list","", "");
 
                         break;
                 }
+                public_list.clear();
+                private_list.clear();
+                adapter.notifyDataSetChanged();
+                if (usr_inf.getOffline_mode())
+                    read_from_internal_DB();
             }
         }
     }

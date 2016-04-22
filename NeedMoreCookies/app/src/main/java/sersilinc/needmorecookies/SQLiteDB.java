@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.UUID;
 
 public class SQLiteDB extends SQLiteOpenHelper{
@@ -89,13 +91,14 @@ public class SQLiteDB extends SQLiteOpenHelper{
     // Add a new list to the DB
     public long add_new_list(String list_name,int Public){
         // Get current time since epoch
-        long update_time = System.currentTimeMillis();
-        Log.v(TAG,"Creating new list at " + update_time);
+        //long update_time = System.currentTimeMillis();
+        String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+        Log.v(TAG,"Creating new list at " + timeStamp);
         Log.v(TAG,"With name: " + list_name);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_LIST_NAME,list_name);
-        values.put(KEY_UPDATE,update_time);
+        values.put(KEY_UPDATE,timeStamp);
         if (User_Info.getInstance().getOffline_mode()) {
             Log.v(TAG,"We are offline");
             values.put(KEY_FLAG, 1);
