@@ -54,7 +54,7 @@ public class Items extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //TAG for Logs
-    private final String TAG = "Items Activity: ";
+    private final String TAG = "Items_Activity: ";
 
     //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
@@ -129,8 +129,12 @@ public class Items extends AppCompatActivity
     public MyReceiver receiver;
     private IntentFilter filter;
 
+    //Database
+    DB_Helper db;
+
     // Info
     String main = null;
+    String old_item_code;
     String list_type;
     int current_tab = 1;
     private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
@@ -229,6 +233,7 @@ public class Items extends AppCompatActivity
 
         /**[START AddItem activity]**/
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab2);
+        assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -840,9 +845,16 @@ public class Items extends AppCompatActivity
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                // TODO : ADD ITEM TO INTERNAL DB
+
+                old_item_code = db.add_new_item(product,type,quantity,price,code);
+                // New item added
+                print_db();
+                Log.d(TAG,"Adding new Item");
+                // If we have connection send request to server
                 if (!usr_inf.getOffline_mode())
                     send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
+                // If we don't add the item now to internal DB
+
             }
         }
         // Edit products
@@ -1108,13 +1120,18 @@ public class Items extends AppCompatActivity
             // Create and send a message to the service, using a supported 'what' value
             //Log.v(TAG, "Getting ready");
             try {
-                //Log.v(TAG, "MAAAIN"+main);
                 JSONObject rsp = new JSONObject(main);
                 code = rsp.getString("Code");
                 user = rsp.getString("GoogleAccount");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            // Update item code
+            Log.d(TAG,"Updating item code");
+            print_db();
+            db.update_item_itemcode(code,old_item_code);
+            Log.d(TAG,"Done updating");
+            print_db();
             Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "one_list");
@@ -1269,6 +1286,15 @@ public class Items extends AppCompatActivity
 
         // Start next activity
         startActivityForResult(intent, 2);
+    }
+    // Prints DB entries
+    private void print_db(){
+        List<String[]> entries = db.read_all_items();
+        Log.v(TAG,"STARTING THE PRINT DB");
+        for (int i=0; i<entries.size();i++){
+            Log.v(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[1] +" " + entries.get(i)[2]+" " + entries.get(i)[3]);
+        }
+        Log.v(TAG,"END");
     }
 
     /**

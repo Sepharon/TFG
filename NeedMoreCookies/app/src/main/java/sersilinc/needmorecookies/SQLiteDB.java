@@ -187,20 +187,19 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return newRowID;
     }
 
-    public int update_item(String change_type,String key,String new_value,String code){
+    public int update_item(String[] key_value,String code){
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Updating item at " + update_time);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        Log.v(TAG,"Updating " + key + " with " + new_value);
-        values.put(key,new_value);
-        if (User_Info.getInstance().getOffline_mode())
-            values.put(KEY_FLAG,1);
-        values.put(KEY_CHANGE_TYPE,change_type);
+        Log.v(TAG,"Updating " + key_value[0] + " with " + key_value[1]);
+        values.put(key_value[0],key_value[1]);
+
         int count = db.update(Items_table_name,
                 values,
                 KEY_CODE + "=?",
                 new String[]{code});
+
         values.clear();
         db.close();
         // Number of affected rows

@@ -798,7 +798,6 @@ public class MainActivity extends AppCompatActivity
         }
         //else Log.v(TAG,"NOT BOUND");
     }
-    // TODO : QUE COI FEM AMB ELS QUE S'HAN ELIMINAT DE PRIVATS?????
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
@@ -843,14 +842,14 @@ public class MainActivity extends AppCompatActivity
                             public_list.add(temp);
 
                         }
-                        // If server timestamp is newer than ours update name
-                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
-                            db.update_list_name(list_name, code);
-                        }
+                       // If server timestamp is newer than ours update name
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             String old_code = db.add_new_list(list_name, 0);
                             db.set_list_flag(code,0);
                             db.update_list_code(code,old_code);
+                        }
+                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
+                            db.update_list_name(list_name, code);
                         }
                         db.update_timestamp_server(code, timestamp);
                         usr_inf.setPublic_lists(shopping_list_public);
