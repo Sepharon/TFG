@@ -121,6 +121,9 @@ public class DB_Helper {
             case 3:
                 key = DataBase.KEY_CHANGE_TYPE;
                 break;
+            case 4:
+                key = DataBase.KEY_UPDATE;
+                break;
             default:
                 return null;
         }

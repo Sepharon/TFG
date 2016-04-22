@@ -798,7 +798,7 @@ public class MainActivity extends AppCompatActivity
         }
         //else Log.v(TAG,"NOT BOUND");
     }
-
+    // TODO : QUE COI FEM AMB ELS QUE S'HAN ELIMINAT DE PRIVATS?????
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
@@ -810,6 +810,7 @@ public class MainActivity extends AppCompatActivity
             JSONObject json_obj = new JSONObject(result);
             //Log.v(TAG, "length: " + json_obj.length());
             Iterator<String> keys = json_obj.keys();
+            List<String> c = new ArrayList<>();
             while (keys.hasNext()) {
                 //Get list name
                 String list_name = String.valueOf(keys.next());
@@ -828,6 +829,7 @@ public class MainActivity extends AppCompatActivity
                 int type = list1.getInt("TypeList");
                 //Check type of shopping list and store them in the User_Info class
                 //The format is the following: [[List_name, Type, Code, Timestamp], [List_name2, Type, Code, Timestamp],...]
+                c.add(code);
                 switch (type) {
                     case 0:
                         shopping_list_public.add(list_name);
@@ -841,6 +843,16 @@ public class MainActivity extends AppCompatActivity
                             public_list.add(temp);
 
                         }
+                        // If server timestamp is newer than ours update name
+                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
+                            db.update_list_name(list_name, code);
+                        }
+                        if (db.read_shopping_list(0,code).equals("Error")) {
+                            String old_code = db.add_new_list(list_name, 0);
+                            db.set_list_flag(code,0);
+                            db.update_list_code(code,old_code);
+                        }
+                        db.update_timestamp_server(code, timestamp);
                         usr_inf.setPublic_lists(shopping_list_public);
                         //reload_ui(Boolean.TRUE);
                         break;
@@ -855,12 +867,24 @@ public class MainActivity extends AppCompatActivity
                             temp.put(SECOND_COLUMN, timestamp);
                             private_list.add(temp);
                         }
+
+                        if (Integer.parseInt(db.read_shopping_list(4,code)) < Integer.parseInt(timestamp)) {
+                            db.update_list_name(list_name, code);
+                        }
+                        // If list not in DB insert it (might be added by someone else)
+                        if (db.read_shopping_list(0,code).equals("Error")) {
+                            String old_code = db.add_new_list(list_name, 1);
+                            db.set_list_flag(code,0);
+                            db.update_list_code(code,old_code);
+                        }
+                        db.update_timestamp_server(code, timestamp);
                         usr_inf.setPrivate_lists(shopping_list_private);
                         //reload_ui(Boolean.TRUE);
                         break;
                 }
                 i++;
             }
+            remove_deleted_SL(c);
 
         } catch (JSONException e){
             e.printStackTrace();
@@ -880,13 +904,11 @@ public class MainActivity extends AppCompatActivity
                 int mYear = calendar.get(Calendar.YEAR);
                 int mMonth = calendar.get(Calendar.MONTH);
                 int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-                Log.v(TAG,"List: " + b[0]);
                 if (a.get(i)[3].equals("1")) {
                     shopping_list_private.add(b[0]); // listname
                     shopping_list_private.add(b[3]); // Private
                     shopping_list_private.add(b[2]); // code
                     shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
-                    Log.v(TAG, "year " + mYear);
                     if (!private_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
@@ -899,7 +921,6 @@ public class MainActivity extends AppCompatActivity
                     shopping_list_public.add(b[3]); // Private
                     shopping_list_public.add(b[2]); // code
                     shopping_list_private.add(mYear + "/" + mMonth + "/" + mDay); // timestamp
-
                     if (!public_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
@@ -908,6 +929,28 @@ public class MainActivity extends AppCompatActivity
                     }
                     usr_inf.setPublic_lists(shopping_list_public);
                 }
+            }
+        }
+    }
+    // TODO : NEEDS TESTING
+    private void remove_deleted_SL(List<String> c){
+        int i;
+        List<String[]> internal_db_lists = new ArrayList<>();
+        List<String> internal_codes = new ArrayList<>();
+        // Grab all entries from DB
+        internal_db_lists = db.read_all_lists();
+        // Add all codes from entries into a list
+        for (i = 0;i < internal_db_lists.size();i++)
+            internal_codes.add(internal_db_lists.get(i)[2]);
+        // If one of the received codes is inside the DB remove it form the list
+        for (i = 0;i < internal_codes.size(); i++){
+            if (internal_codes.contains(c.get(i)))
+                internal_codes.remove(c.get(i));
+        }
+        // In case there are still codes in the DB that are not on the server remove them from the DB
+        if (internal_codes.size() > 0){
+            for (i = 0;i < internal_codes.size(); i++){
+                db.delete_list(internal_codes.get(i));
             }
         }
     }
