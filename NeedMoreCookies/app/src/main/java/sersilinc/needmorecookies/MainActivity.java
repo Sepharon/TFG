@@ -811,6 +811,7 @@ public class MainActivity extends AppCompatActivity
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
+            boolean name_change_flag = false;
             int i = 0;
             public_list.clear();
             private_list.clear();
@@ -889,12 +890,16 @@ public class MainActivity extends AppCompatActivity
                         //reload_ui(Boolean.TRUE);
                         break;
                 }
-                if (!db.read_shopping_list(1,code).equals(list_name))
-                    db.update_list_name(list_name,code);
+                if (!db.read_shopping_list(1,code).equals(list_name)) {
+                    db.update_list_name(list_name, code);
+                    name_change_flag = true;
+                }
                 db.update_timestamp_server(code, timestamp);
                 db.set_list_flag(code,0);
                 i++;
             }
+            if (name_change_flag)
+                Toast.makeText(MainActivity.this,R.string.external_name_change,Toast.LENGTH_SHORT).show();
             remove_deleted_SL(c);
 
         } catch (JSONException e){

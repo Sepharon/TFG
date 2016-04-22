@@ -145,5 +145,6 @@
     <string name="go_online_question">Do you want to reaster the app in order to go online?</string>
     <string name="shutting_down">Shutting down</string>
     <string name="external_delete">A list has been deleted externally</string>
+    <string name="external_name_change">The name of a shopping list has been updated</string>
 
 </resources>
