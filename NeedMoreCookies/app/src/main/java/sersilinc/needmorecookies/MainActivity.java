@@ -268,26 +268,9 @@ public class MainActivity extends AppCompatActivity
                     bundle.putString("request", "one_list");
                     bundle.putString("Activity", "MainActivity");
 
-                    //Get the private and public shopping lists of the user
-                    //and check which one has been selected
-                    private_l = usr_inf.getPrivate_lists();
-                    public_l = usr_inf.getPublic_lists();
-                    for (int i = 0; i < private_l.size(); i++) {
-                        Log.v(TAG, "LIST: " + private_l.get(i));
-                        if (private_l.get(i).get(0).equals(selected)) {
-                            list_type = "1";
-                            bundle.putString("code_list", private_l.get(i).get(2));
-                        }
-                    }
-
-                    for (int i = 0; i < public_l.size(); i++) {
-                        //Log.v(TAG, "LIST: " + public_l.get(i));
-                        if (public_l.get(i).get(0).equals(selected)) {
-                            list_type = "0";
-                            bundle.putString("code_list", public_l.get(i).get(2));
-                        }
-                    }
-
+                    // Get the code of the list from the DB
+                    Log.v(TAG,"Code: " + db.read_code(selected));
+                    bundle.putString("code_list",db.read_code(selected));
                     bundle.putString("GoogleAccount", usr_inf.getEmail());
                     msg.setData(bundle);
 
@@ -545,8 +528,7 @@ public class MainActivity extends AppCompatActivity
                         }
                         db.set_list_flag(main,0);
                         print_db();
-                        if (!usr_inf.getOffline_mode())
-                            send_unsynced_entries();
+
                         getAll_ShoppingLists(usr_inf.getEmail());
                         reload_ui(is_private_serlected);
                         Log.v(TAG, "Added new Shopping List correctly");
@@ -833,8 +815,8 @@ public class MainActivity extends AppCompatActivity
                 String timestamp = list1.getString("Timestamp");
 
                 //Variables to store the list name, type and code
-                List<String> shopping_list_private = new ArrayList<>();
-                List<String> shopping_list_public = new ArrayList<>();
+                //List<String> shopping_list_private = new ArrayList<>();
+                //List<String> shopping_list_public = new ArrayList<>();
 
                 int type = list1.getInt("TypeList");
                 //Check type of shopping list and store them in the User_Info class
@@ -843,7 +825,7 @@ public class MainActivity extends AppCompatActivity
                 Log.v(TAG,"List name: " + list_name);
                 switch (type) {
                     case 0:
-                        shopping_list_public.add(list_name);
+                  /*      shopping_list_public.add(list_name);
                         shopping_list_public.add("0");
                         shopping_list_public.add(code);
                         shopping_list_public.add(timestamp);
@@ -853,7 +835,7 @@ public class MainActivity extends AppCompatActivity
                             temp.put(SECOND_COLUMN, timestamp);
                             public_list.add(temp);
 
-                        }
+                        }*/
                         print_db();
                        // If server timestamp is newer than ours update name
                         if (db.read_shopping_list(0,code).equals("Error")) {
@@ -864,11 +846,11 @@ public class MainActivity extends AppCompatActivity
                             db.update_list_code(code,old_code);
                         }
                         print_db();
-                        usr_inf.setPublic_lists(shopping_list_public);
+                        //usr_inf.setPublic_lists(shopping_list_public);
                         //reload_ui(Boolean.TRUE);
                         break;
                     case 1:
-                        shopping_list_private.add(list_name);
+                        /*shopping_list_private.add(list_name);
                         shopping_list_private.add("1");
                         shopping_list_private.add(code);
                         shopping_list_private.add(timestamp);
@@ -877,7 +859,7 @@ public class MainActivity extends AppCompatActivity
                             temp.put(FIRST_COLUMN, list_name);
                             temp.put(SECOND_COLUMN, timestamp);
                             private_list.add(temp);
-                        }
+                        }*/
                         // If list not in DB insert it (might be added by someone else)
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             Log.v(TAG,"Item not found. Adding to DB");
@@ -886,7 +868,7 @@ public class MainActivity extends AppCompatActivity
                             db.set_list_flag(code,0);
                             db.update_list_code(code,old_code);
                         }
-                        usr_inf.setPrivate_lists(shopping_list_private);
+                        //usr_inf.setPrivate_lists(shopping_list_private);
                         //reload_ui(Boolean.TRUE);
                         break;
                 }
@@ -905,6 +887,7 @@ public class MainActivity extends AppCompatActivity
         } catch (JSONException e){
             e.printStackTrace();
         }
+        read_from_internal_DB();
         reload_ui(is_private_serlected);
     }
 
@@ -932,6 +915,7 @@ public class MainActivity extends AppCompatActivity
                         temp.put(SECOND_COLUMN,b[1]);
                         private_list.add(temp);
                     }
+                    Log.v(TAG,"Lists: " + String.valueOf(private_list));
                     usr_inf.setPrivate_lists(shopping_list_private);
                 } else {
                     shopping_list_public.add(b[0]); // listname

@@ -127,6 +127,9 @@ public class DB_Helper {
             case 4:
                 key = DataBase.KEY_UPDATE;
                 break;
+            case 5:
+                key = DataBase.KEY_PUBLIC;
+                break;
             default:
                 return null;
         }

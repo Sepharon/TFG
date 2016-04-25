@@ -846,9 +846,9 @@ public class Items extends AppCompatActivity
                     e.printStackTrace();
                 }
 
-                old_item_code = db.add_new_item(product,type,quantity,price,code);
+                //old_item_code = db.add_new_item(product,type,quantity,price,code);
                 // New item added
-                print_db();
+                //print_db();
                 Log.d(TAG,"Adding new Item");
                 // If we have connection send request to server
                 if (!usr_inf.getOffline_mode())
@@ -1128,10 +1128,10 @@ public class Items extends AppCompatActivity
             }
             // Update item code
             Log.d(TAG,"Updating item code");
-            print_db();
-            db.update_item_itemcode(code,old_item_code);
+            //print_db();
+            //db.update_item_itemcode(code,old_item_code);
             Log.d(TAG,"Done updating");
-            print_db();
+            //print_db();
             Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "one_list");
