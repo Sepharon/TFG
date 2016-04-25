@@ -317,19 +317,25 @@ public class MainActivity extends AppCompatActivity
         }.start();
         if (usr_inf.getOffline_mode()){
             // every minute
+            Log.v(TAG,"Starting offline counter");
             timer2 = new CountDownTimer(30000,1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {}
                 @Override
                 public void onFinish() {
                     if (is_network_available()) {
+                        Log.d(TAG,"Internet back");
                         final AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
                         alert.setTitle(R.string.go_online_alert);
                         alert.setMessage(R.string.go_online_question);
                         alert.setPositiveButton(android.R.string.yes,new DialogInterface.OnClickListener(){
                             public void onClick(DialogInterface dialog,int which){
                                 Toast.makeText(MainActivity.this,R.string.shutting_down,Toast.LENGTH_SHORT).show();
+                                Intent i = getBaseContext().getPackageManager()
+                                        .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 finish();
+                                startActivity(i);
                                 System.exit(0);
                             }
                         });
@@ -342,10 +348,12 @@ public class MainActivity extends AppCompatActivity
                         alert.show();
 
                     }
-                    else
+                    else {
+                        Log.d(TAG, "Internet back");
                         usr_inf.setOffline_mode(true);
-                    // Start timer again
-                    start();
+                        // Start timer again
+                        start();
+                    }
                 }
             }.start();
         }
