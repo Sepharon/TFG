@@ -181,7 +181,7 @@ public class Login extends AppCompatActivity implements
             alert.show();
         }
         if (result.isSuccess()) {
-            if (!is_network_available()) {
+            /*if (!is_network_available()) {
                 Log.v(TAG,"Network2");
                 final AlertDialog.Builder alert = new AlertDialog.Builder(this);
                 alert.setTitle(R.string.offline_alert);
@@ -199,7 +199,7 @@ public class Login extends AppCompatActivity implements
                     }
                 });
                 alert.show();
-            }
+            }*/
             // acct stores data from the user (email,name...)
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());

@@ -5,7 +5,9 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -70,9 +72,9 @@ public class DB_Helper {
     }
 
     public boolean update_timestamp_android(String code){
-        long update_time = System.currentTimeMillis();
-        Log.v(TAG,"Changing list name at " + update_time);
-        int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(update_time)},code);
+        String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+        Log.v(TAG,"Changing list name at " + timeStamp);
+        int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(timeStamp)},code);
         if (!User_Info.getInstance().getOffline_mode())
             DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
         return result!=0;
