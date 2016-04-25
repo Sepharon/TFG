@@ -231,6 +231,8 @@ public class DB_Helper {
                 change_type = "new_quantity";
                 key = DataBase.KEY_QUANTITY;
                 break;
+            case 3:
+                change_type = "delete_item";
             default:
                 Log.w(TAG,"Unknown update item. This should never happen");
                 return false;

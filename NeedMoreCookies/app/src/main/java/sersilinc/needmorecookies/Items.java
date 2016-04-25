@@ -137,7 +137,7 @@ public class Items extends AppCompatActivity
     // Info
     String main = null;
     String code;
-    String old_item_code;
+    String list;
     String list_type;
     int current_tab = 1;
     private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
@@ -252,6 +252,48 @@ public class Items extends AppCompatActivity
         });
         /**[END AddItem activity]**/
 
+        /**[START User_Info]**/
+        //Get User info
+        usr_inf = User_Info.getInstance();
+        /**[END User_Info]**/
+
+        if (!usr_inf.getOffline_mode()) {
+            /**[START Get intent extras]**/
+            Bundle extras = getIntent().getExtras();
+            //Get JSON Strings from the MainActivity
+            try {
+                main = extras.getString("Main");
+                list = extras.getString("List");
+                list_type = extras.getString("Type");
+                try {
+                    JSONObject rsp = new JSONObject(main);
+                    code = rsp.getString("Code");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.v(TAG, main + list + "Type: " + list_type);
+                Log.v(TAG, main);
+
+
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        } else{
+            Bundle extras = getIntent().getExtras();
+            try {
+                code = extras.getString("Code");
+                list_type = extras.getString("Type");
+                Log.v(TAG, "CODE LIST: "+code);
+                List<String[]> list_items = db.read_all_items(code);
+                Log.v(TAG, "ITEMS: " + list_items);
+
+                read_from_internal_DB();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+        /**[END Get intent extras]**/
+
         /**[START Service binding]**/
         Intent in = new Intent(this, Update_Server.class);
         bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
@@ -348,47 +390,8 @@ public class Items extends AppCompatActivity
         });
         /**[END onClickListeners]**/
 
-        /**[START User_Info]**/
-        //Get User info
-        usr_inf = User_Info.getInstance();
-        /**[END User_Info]**/
 
-        if (!usr_inf.getOffline_mode()) {
-            /**[START Get intent extras]**/
-            Bundle extras = getIntent().getExtras();
-            //Get JSON Strings from the MainActivity
-            try {
-                main = extras.getString("Main");
-                String list = extras.getString("List");
-                list_type = extras.getString("Type");
-                try {
-                    JSONObject rsp = new JSONObject(main);
-                    code = rsp.getString("Code");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.v(TAG, main + list + "Type: " + list_type);
-                Log.v(TAG, main);
 
-                update_ShoppingList(list);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        } else{
-            Bundle extras = getIntent().getExtras();
-            try {
-                code = extras.getString("Code");
-                list_type = extras.getString("Type");
-                Log.v(TAG, "CODE LIST: "+code);
-                List<String[]> list_items = db.read_all_items(code);
-                Log.v(TAG, "ITEMS: " + list_items);
-
-                read_from_internal_DB();
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        }
-        /**[END Get intent extras]**/
 
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -886,6 +889,9 @@ public class Items extends AppCompatActivity
                     send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
                 }
                 else if (usr_inf.getOffline_mode()) {
+                    if (price.equals(" ")){
+                        price="null";
+                    }
                     old_codes=db.add_new_item(product, type, quantity, price, code, usr_inf.getName(),"");
                     read_from_internal_DB();
                 }
@@ -1006,8 +1012,10 @@ public class Items extends AppCompatActivity
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
             is_bound_server = true;
-            if (!usr_inf.getOffline_mode())
+            if (!usr_inf.getOffline_mode()) {
                 send_unsynced_entries();
+                update_ShoppingList(list);
+            }
         }
 
         @Override
@@ -1079,7 +1087,7 @@ public class Items extends AppCompatActivity
 
                 //Log.v(TAG, "DELETE: "+Product+Quantity+Price+type);
 
-                String code_item="";
+                String code_item = "";
                 items_l = usr_inf.getItems_lists();
                 //Log.v(TAG, "LIST: "+items_l);
                 for (int i = 0; i < items_l.size(); i++) {
@@ -1087,9 +1095,22 @@ public class Items extends AppCompatActivity
                         code_item = items_l.get(i).get(4);
                     }
                 }
-                // TODO : ELSE DELETE FROM INTERNAL DB
-                if (!usr_inf.getOffline_mode())
+
+                /*
+
+                else {
+                    db.update_list_change("delete_list",code_list);
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
+                    read_from_internal_DB();
+                    reload_ui(is_private_serlected);
+                }
+                 */
+                if (!usr_inf.getOffline_mode()) {
                     send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
+                    db.delete_item(code_item);
+                }
                 else {
                     db.delete_item(code_item);
                     read_from_internal_DB();
@@ -1196,15 +1217,15 @@ public class Items extends AppCompatActivity
                         Toast.makeText(Items.this,R.string.add_item_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        Log.v(TAG, "adding new code: " + main);
+                        Log.v(TAG, "adding new code: " + main_receiver);
                         Log.v(TAG, "old_code: " + old_codes);
-                        db.update_item_itemcode(main, old_codes);
+                        db.update_item_itemcode(main_receiver, old_codes);
                         try {
                             db.delete_item(old_codes);
                         } catch (android.database.CursorIndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
-                        db.set_item_flag(main, 0);
+                        db.set_item_flag(main_receiver, 0);
                         print_db();
 
                         all_items_l.clear();
@@ -1322,10 +1343,11 @@ public class Items extends AppCompatActivity
     }
     // Prints DB entries
     private void print_db(){
+        // Product, Quantity, Price, Type, Last_User, Code_item
         List<String[]> entries = db.read_all_items(code);
         Log.v(TAG,"STARTING THE PRINT DB");
         for (int i=0; i<entries.size();i++){
-            Log.v(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[1] +" " + entries.get(i)[2]+" " + entries.get(i)[3]);
+            Log.v(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[1] +" " + entries.get(i)[2]+" " + entries.get(i)[3]+ " "+entries.get(i)[5]);
         }
         Log.v(TAG,"END");
     }
