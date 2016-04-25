@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity
         /**[START List view]**/
         adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
 
-        listview.setAdapter(adapter);
+        //listview.setAdapter(adapter);
         listview.setAdapter(adapter);
         //registerForContextMenu(listview);
         /**[END List view]**/
@@ -261,25 +261,33 @@ public class MainActivity extends AppCompatActivity
                 Object shop_list = adapter.getItem(position);
                 String selected = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
                 if (is_bound) {
-                    // Create and send a message to the service, using a supported 'what' value
-                    Log.v(TAG, "Getting ready");
-                    Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("request", "one_list");
-                    bundle.putString("Activity", "MainActivity");
+                    if (!usr_inf.getOffline_mode()) {
+                        // Create and send a message to the service, using a supported 'what' value
+                        Log.v(TAG, "Getting ready");
+                        Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("request", "one_list");
+                        bundle.putString("Activity", "MainActivity");
 
-                    // Get the code of the list from the DB
-                    Log.v(TAG,"Code: " + db.read_code(selected));
-                    bundle.putString("code_list",db.read_code(selected));
-                    bundle.putString("GoogleAccount", usr_inf.getEmail());
-                    msg.setData(bundle);
+                        // Get the code of the list from the DB
+                        Log.v(TAG, "Code: " + db.read_code(selected));
+                        bundle.putString("code_list", db.read_code(selected));
+                        bundle.putString("GoogleAccount", usr_inf.getEmail());
+                        msg.setData(bundle);
 
-                    //Send message
-                    try {
-                        mService.send(msg);
-                        //Log.v(TAG, "Message sent");
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
+                        //Send message
+                        try {
+                            mService.send(msg);
+                            //Log.v(TAG, "Message sent");
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        Intent in = new Intent(MainActivity.this, Items.class);
+                        in.putExtra("Code", db.read_code(selected));
+                        in.putExtra("Type", list_type);
+                        startActivity(in);
                     }
                 }
             }
@@ -697,7 +705,7 @@ public class MainActivity extends AppCompatActivity
                         //temp = new HashMap<String, String>();
                         //temp.put(FIRST_COLUMN, list_name);
                         if (usr_inf.getOffline_mode())
-                            old_codes = db.add_new_list(list_name,1);
+                            old_codes =db.add_new_list(list_name,1);
                         //private_list.add(temp);
                         Log.v(TAG,"name: " + list_name);
                         if (!usr_inf.getOffline_mode())
@@ -753,12 +761,14 @@ public class MainActivity extends AppCompatActivity
     private void reload_ui(Boolean type){
         if (type){
             is_private_serlected = true;
+            list_type="1";
             adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
         }
         else {
             is_private_serlected = false;
+            list_type="0";
             adapter = new ListViewAdapters(this, public_list, "MainActivity", list_type);
             separator2.setVisibility(View.VISIBLE);
             separator1.setVisibility(View.INVISIBLE);

@@ -194,17 +194,22 @@ public class DB_Helper {
         return r;
     }
     // Afegeix un item nou i retorna el codi de aquest. Tambe afegeix una relacio entre llista i item
-    public String add_new_item(String Product, String Type, String Quantity, String Price,String shopping_list_code){
+    public String add_new_item(String Product, String Type, String Quantity, String Price,String shopping_list_code,String user,String Code_item){
         String ID_List,ID_Item;
 
-        ID_List = read_shopping_list(0,shopping_list_code);
-        if (ID_List.equals("Error")) return "Error";
+        //ID_List = read_shopping_list(0,shopping_list_code);
+        //if (ID_List.equals("Error")) return "Error";
         // Add new item
-        long result = DataBase.add_new_item(Product,Type,Quantity,Price);
-        ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + " FROM " + SQLiteDB.Items_table_name +" ORDER BY column DESC LIMIT 1");
+        long result;
+        if (Code_item.equals("")) {
+            result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user, "");
+        } else {
+            result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user, Code_item);
+        }
+        //ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + " FROM " + SQLiteDB.Items_table_name +" ORDER BY column DESC LIMIT 1");
         // Update timestamp
         update_timestamp_android(shopping_list_code);
-        add_new_relation(Integer.parseInt(ID_List),Integer.parseInt(ID_Item));
+        //add_new_relation(Integer.parseInt(ID_List),Integer.parseInt(ID_Item));
         return get_code_last_item();
     }
 
@@ -255,14 +260,14 @@ public class DB_Helper {
     // Quant afegeixes un item nou ja et retorna el codi
     public String get_code_last_item(){
         String query = "SELECT " + DataBase.KEY_CODE + " FROM " +DataBase.Items_table_name +
-                " WHERE ID_Item=(SELECT MAX(ID_List) FROM " + DataBase.Items_table_name +")";
+                " WHERE ID_Item=(SELECT MAX(ID_Item) FROM " + DataBase.Items_table_name +")";
         return DataBase.read_item(query);
     }
     // Esborra un item
     public void delete_item(String code){
         String ID_Item;
-        ID_Item = read_item(0,code);
-        delete_relation(Integer.parseInt(ID_Item));
+        //ID_Item = read_item(0,code);
+        //delete_relation(Integer.parseInt(ID_Item));
         DataBase.delete_item(code);
     }
     //Llegeix un item
@@ -303,22 +308,35 @@ public class DB_Helper {
         return result;
     }
     // Llegeix tots els items
-    public List<String[]> read_all_items(){
+    public List<String[]> read_all_items(String code){
         String table_name = SQLiteDB.Items_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
 
         Cursor result;
-        query = "SELECT * FROM " + table_name;
+        query = "SELECT * FROM " + table_name+" WHERE "+DataBase.KEY_CODE_LIST+String.format("='%s'",code);
         result = DataBase.read_multiple_entries(query);
         result.moveToFirst();
         try {
             do {
                 Log.d(TAG,"code: " + result.getString(5));
                 if (!result.getString(7).equals("delete_item")) {
-                    // Product, item_code, list_code,flag, change type
-                    String[] entry = new String[]{result.getString(1), result.getString(5), result.getString(6),
-                            result.getString(7)};
+
+                    /*
+                    "ID_Item INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "Product TEXT NOT NULL, " +
+                "Type TEXT NOT NULL, " +
+                "Quantity TEXT NOT NULL, " +
+                "Price TEXT, " +
+                "Code TEXT, " +
+                "Flag INTEGER DEFAULT 0, " +
+                "Change_type TEXT, "+
+                "Code_List TEXT NOT NULL,"+
+                "Last_User TEXT)";
+                     */
+                    // Product, Quantity, Price, Type, Last_User, Code_item
+                    String[] entry = new String[]{result.getString(1), result.getString(3), result.getString(4),
+                            result.getString(2), result.getString(9), result.getString(5)};
                     r.add(entry);
                 }
             } while (result.moveToNext());
@@ -338,21 +356,39 @@ public class DB_Helper {
         query = "SELECT * FROM " + table_name + " WHERE " +DataBase.KEY_FLAG + " = 1";
         result = DataBase.read_multiple_entries(query);
         result.moveToFirst();
-        do {
-            // Product, type, quantity, price, code, change type
-            String [] entry = new String[]{result.getString(1),result.getString(2),result.getString(3),
-                    result.getString(4),result.getString(5),result.getString(7)};
-            r.add(entry);
-        } while (result.moveToNext());
+        try {
+            do {
+            /*
+                "ID_Item INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "Product TEXT NOT NULL, " +
+                "Type TEXT NOT NULL, " +
+                "Quantity TEXT NOT NULL, " +
+                "Price TEXT, " +
+                "Code TEXT, " +
+                "Flag INTEGER DEFAULT 0, " +
+                "Change_type TEXT, "+
+                "Code_List TEXT NOT NULL,"+
+                "Last_User TEXT)";
+                     */
+                // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
+                String[] entry = new String[]{result.getString(1), result.getString(3), result.getString(4),
+                        result.getString(2), result.getString(9), result.getString(5), result.getString(7), result.getString(8)};
+                r.add(entry);
+            } while (result.moveToNext());
+        } catch (android.database.CursorIndexOutOfBoundsException e) {
+            e.printStackTrace();
+            Log.w(TAG, "Empty DB");
+        }
         Log.v(TAG,"read_all " + r.toString());
         return r;
-    }
 
+    }
+    /*
     public boolean add_new_relation(int ID_List,int ID_Item){
         return DataBase.new_list(ID_List,ID_Item) != -1;
     }
 
     public void delete_relation(int ID_Item){
         DataBase.delete_list_relation(ID_Item);
-    }
+    }*/
 }

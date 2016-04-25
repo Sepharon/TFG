@@ -35,6 +35,9 @@ public class SQLiteDB extends SQLiteOpenHelper{
     public final String KEY_TYPE = "Type";
     public final String KEY_QUANTITY = "Quantity";
     public final String KEY_PRICE = "Price";
+    public final String KEY_CODE_LIST = "Code_List";
+    public final String KEY_LAST_USER = "Last_User";
+
     // Others
     public final String KEY_CODE = "Code";
     public final String KEY_FLAG = "Flag";
@@ -53,7 +56,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 "ID_List INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "List_Name TEXT NOT NULL, " +
                 "Last_Update TEXT NOT NULL, " +
-                "Code TEXT, " +
+                "Code TEXT UNIQUE, " +
                 "Private INTEGER, " +
                 "Flag INTEGER DEFAULT 1, " +
                 "Change_type TEXT)";
@@ -66,9 +69,11 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 "Type TEXT NOT NULL, " +
                 "Quantity TEXT NOT NULL, " +
                 "Price TEXT, " +
-                "Code TEXT, " +
+                "Code TEXT UNIQUE, " +
                 "Flag INTEGER DEFAULT 0, " +
-                "Change_type TEXT)";
+                "Change_type TEXT, "+
+                "Code_List TEXT NOT NULL, "+
+                "Last_User TEXT)";
         db.execSQL(ITEMS_TABLE);
         String LIST_TABLE = "CREATE TABLE " + List_table_name + " ( " +
                 "ID_List INTEGER PRIMARY KEY, " +
@@ -167,7 +172,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return cursor;
     }
 
-    public long add_new_item(String Product, String Type, String Quantity, String Price){
+    public long add_new_item(String Product, String Type, String Quantity, String Price, String Code_list, String user,String Code_item){
         long update_time = System.currentTimeMillis();
         long newRowID;
         Log.v(TAG,"Creating new item at " + update_time);
@@ -175,12 +180,21 @@ public class SQLiteDB extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        if (Code_item.equals("")){
+            values.put(KEY_CODE, UUID.randomUUID().toString().replaceAll("-", ""));
+        } else{
+            values.put(KEY_CODE, Code_item);
+        }
         values.put(KEY_PRODUCT,Product);
         values.put(KEY_TYPE,Type);
         values.put(KEY_QUANTITY,Quantity);
         values.put(KEY_PRICE,Price);
-        if (!User_Info.getInstance().getOffline_mode())
-            values.put(KEY_FLAG,1);
+        values.put(KEY_CODE_LIST, Code_list);
+        values.put(KEY_LAST_USER, user);
+        if (User_Info.getInstance().getOffline_mode()) {
+            Log.v(TAG,"We are offline");
+            values.put(KEY_FLAG, 1);
+        }
         else
             values.put(KEY_FLAG,0);
         values.put(KEY_CHANGE_TYPE,"new_item");
@@ -210,7 +224,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         // Number of affected rows
         return count;
     }
-    // Delete list
+    // Delete item
     public void delete_item(String code){
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Erasing item at " + update_time);
@@ -220,6 +234,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 new String[]{code});
         db.close();
     }
+
 
     // Reads the values from item table
     public String read_item(String query){
