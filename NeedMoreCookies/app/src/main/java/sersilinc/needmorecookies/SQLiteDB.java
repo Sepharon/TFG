@@ -172,7 +172,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return cursor;
     }
 
-    public long add_new_item(String Product, String Type, String Quantity, String Price, String Code_list, String user,String Code_item){
+    public long add_new_item(String Product, String Type, String Quantity, String Price, String Code_list, String user){
         long update_time = System.currentTimeMillis();
         long newRowID;
         Log.v(TAG,"Creating new item at " + update_time);
@@ -180,11 +180,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        if (Code_item.equals("")){
-            values.put(KEY_CODE, UUID.randomUUID().toString().replaceAll("-", ""));
-        } else{
-            values.put(KEY_CODE, Code_item);
-        }
+
+        values.put(KEY_CODE, UUID.randomUUID().toString().replaceAll("-", ""));
+
+
         values.put(KEY_PRODUCT,Product);
         values.put(KEY_TYPE,Type);
         values.put(KEY_QUANTITY,Quantity);
@@ -246,6 +245,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         cursor.close();
         return result;
     }
+
 
     public long new_list(int ID_List, int ID_Item){
         long newRowID;

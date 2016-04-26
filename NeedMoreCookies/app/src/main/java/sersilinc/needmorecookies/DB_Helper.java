@@ -192,18 +192,14 @@ public class DB_Helper {
         return r;
     }
     // Afegeix un item nou i retorna el codi de aquest. Tambe afegeix una relacio entre llista i item
-    public String add_new_item(String Product, String Type, String Quantity, String Price,String shopping_list_code,String user,String Code_item){
-        String ID_List,ID_Item;
+    public String add_new_item(String Product, String Type, String Quantity, String Price,String shopping_list_code,String user){
+        //String ID_List,ID_Item;
 
         //ID_List = read_shopping_list(0,shopping_list_code);
         //if (ID_List.equals("Error")) return "Error";
         // Add new item
-        long result;
-        if (Code_item.equals("")) {
-            result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user, "");
-        } else {
-            result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user, Code_item);
-        }
+        long result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user);
+
         //ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + " FROM " + SQLiteDB.Items_table_name +" ORDER BY column DESC LIMIT 1");
         // Update timestamp
         update_timestamp_android(shopping_list_code);
@@ -211,9 +207,23 @@ public class DB_Helper {
         return get_code_last_item();
     }
 
+    /*
+    public boolean update_list_change(String new_change,String code){
+        Log.d(TAG,"Updating list change type to: " + new_change);
+        int result  = DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code);
+        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
+        return (result&result2)!=0;
+    }
+     */
+    public boolean update_item_change(String new_change, String code_item){
+        int result  = DataBase.update_item(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code_item);
+        int result2 = DataBase.update_item(new String[]{DataBase.KEY_FLAG,"1"},code_item);
+        return (result&result2)!=0;
+    }
+
     /* Edita el nom, preu o quantitat de un item. Si el item te la sync flag activa i el ultim change type
      es new_name nomes canvia el nom,preu o quantitat */
-    public boolean update_item_change (int update_value,String value,String code){
+    public boolean update_item_value(int update_value,String value,String code){
         String key;
         String change_type;
         switch (update_value){
@@ -229,8 +239,6 @@ public class DB_Helper {
                 change_type = "new_quantity";
                 key = DataBase.KEY_QUANTITY;
                 break;
-            case 3:
-                change_type = "delete_item";
             default:
                 Log.w(TAG,"Unknown update item. This should never happen");
                 return false;
@@ -299,14 +307,18 @@ public class DB_Helper {
                 break;
             default:
                 Log.v(TAG,"unknown value in read_item");
-                return "Error";
+                return null;
         }
         query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
-        result = DataBase.read_item(query);
-        if (result == null) return "Error";
-        Log.v(TAG,"read " + result);
+        try {
+            result = DataBase.read_item(query);
+            if (result == null) return "Error";
+        } catch(android.database.CursorIndexOutOfBoundsException e){
+            return "Error";
+        }
         return result;
     }
+
     // Llegeix tots els items
     public List<String[]> read_all_items(String code){
         String table_name = SQLiteDB.Items_table_name;

@@ -11,7 +11,11 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -29,9 +33,12 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -77,6 +84,10 @@ public class Items extends AppCompatActivity
     private View separator6;
     private View separator7;
 
+    private ProgressBar loading;
+
+    private CountDownTimer timer;
+    private CountDownTimer timer2;
 
     /**
      * [START ListView]
@@ -159,6 +170,10 @@ public class Items extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_items);
 
+        /**[START DataBase]**/
+        db = new DB_Helper(getApplicationContext());
+        /**[END DataBase]**/
+
         /**[START UI elements]**/
         all_items = (Button) findViewById(R.id.all);
         meat_items = (Button) findViewById(R.id.meat);
@@ -167,6 +182,7 @@ public class Items extends AppCompatActivity
         dairy_items = (Button) findViewById(R.id.dairy);
         sweet_items = (Button) findViewById(R.id.sweet);
         others_items = (Button) findViewById(R.id.others);
+        loading = (ProgressBar) findViewById(R.id.progressBar2);
 
 
         separator1 = findViewById(R.id.separator_items);
@@ -233,9 +249,7 @@ public class Items extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         /**[END Navigation]**/
 
-        /**[START DataBase]**/
-        db = new DB_Helper(getApplicationContext());
-        /**[END DataBase]**/
+
 
 
         /**[START AddItem activity]**/
@@ -287,7 +301,16 @@ public class Items extends AppCompatActivity
                 List<String[]> list_items = db.read_all_items(code);
                 Log.v(TAG, "ITEMS: " + list_items);
 
+                /*all_items_l.clear();
+                meat_items_l.clear();
+                vegetables_items_l.clear();
+                cereals_items_l.clear();
+                dairy_items_l.clear();
+                sweet_items_l.clear();
+                others_items_l.clear();
+                adapter.notifyDataSetChanged();
                 read_from_internal_DB();
+                reload_ui(1);*/
             } catch (NullPointerException e) {
                 e.printStackTrace();
             }
@@ -295,10 +318,10 @@ public class Items extends AppCompatActivity
         /**[END Get intent extras]**/
 
         /**[START Service binding]**/
-        Intent in = new Intent(this, Update_Server.class);
-        bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
         Intent intent = new Intent(this, Update_Android.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Intent in = new Intent(this, Update_Server.class);
+        bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
         /**[END Service binding]**/
 
         /**[START GoogleApiClient]**/
@@ -399,12 +422,24 @@ public class Items extends AppCompatActivity
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
 
-        //Reload UI
+
+        /**[START Counter]**/
+        //Counter to reload the activity every 2 minutes
+        timer = new CountDownTimer(120000, 1000) { //2min
+            public void onTick(long millisUntilFinished) {}
+            public void onFinish() {
+                //Log.v(TAG, "timer");
+                if (!usr_inf.getOffline_mode())
+                    getAll_products();
+                start();
+            }
+        }.start();
+
         reload_ui(1);
     }
 
 
-    // Binding Update List
+    // Binding Update Android
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
@@ -412,6 +447,9 @@ public class Items extends AppCompatActivity
             Log.v(TAG, "Binding service");
             mService = new Messenger(service);
             is_bound = true;
+
+            new ProgressTask().execute();
+
         }
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
@@ -420,6 +458,31 @@ public class Items extends AppCompatActivity
             is_bound = false;
         }
     };
+
+    // Binding Update Server
+    private ServiceConnection mConnection2 = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Log.v(TAG, "Binding service");
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
+            server_service = binder.getService();
+            is_bound_server = true;
+            if (!usr_inf.getOffline_mode())
+                send_unsynced_entries();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            is_bound_server = false;
+        }
+    };
+
+
+
+
+
 
     @Override
     protected void onDestroy() {
@@ -435,6 +498,8 @@ public class Items extends AppCompatActivity
             is_bound_server = false;
         }
 
+        timer.cancel();
+        db.destroy_class();
         //Unregister receiver
         unregisterReceiver(receiver);
     }
@@ -444,6 +509,10 @@ public class Items extends AppCompatActivity
         super.onResume();
         //Register receiver
         registerReceiver(receiver, filter);
+        timer.start();
+        if (!usr_inf.getOffline_mode())
+            getAll_products();
+        reload_ui(1);
     }
 
 
@@ -459,12 +528,14 @@ public class Items extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.action_update_items:
                 if (!usr_inf.getOffline_mode()) {
+                    usr_inf.setOffline_mode(false);
                     getAll_products();
                     Toast.makeText(Items.this, R.string.update_products, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Toast.makeText(getBaseContext(), R.string.offline_update, Toast.LENGTH_SHORT).show();
                     read_from_internal_DB();
+                    reload_ui(1);
                 }
                 return true;
 
@@ -481,6 +552,14 @@ public class Items extends AppCompatActivity
         super.onStart();
         mGoogleApiClient.connect();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        timer.cancel();
+    }
+
+
 
     @Override
     public void onBackPressed() {
@@ -511,17 +590,7 @@ public class Items extends AppCompatActivity
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_share) {
-            Log.d(TAG,"Sharing shopping");
-            Intent mail_intent = new Intent(Intent.ACTION_SEND);
-            mail_intent.setType("text/plain");
-            // Body of mail
-            mail_intent.putExtra(Intent.EXTRA_SUBJECT,R.string.mail_subject);
-            mail_intent.putExtra(Intent.EXTRA_TEXT,"I invite you to try this awesome app! You will be able to write and share shopping lists " +
-                    "with your friends! \nDownload it here: test.com \nYour friend: " + usr_inf.getName());
-            Intent final_intent = Intent.createChooser(mail_intent,"Choose mail client");
-            final_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            // Start Mail chooser
-            startActivity(final_intent);
+            //share();
 
         } else if (id == R.id.nav_logout) {
             signOut();
@@ -612,7 +681,7 @@ public class Items extends AppCompatActivity
                         JSONArray products = json_obj.getJSONArray(type);
                         while (i < products.length()) {
                             JSONArray rec = products.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                        /*    temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -626,7 +695,7 @@ public class Items extends AppCompatActivity
                             }
 
                             all_items_l.add(temp);
-
+                            */
                             i = i + 1;
 
                             c.add(rec.getString(3));
@@ -638,7 +707,7 @@ public class Items extends AppCompatActivity
                         JSONArray products2 = json_obj.getJSONArray(type);
                         while (i < products2.length()) {
                             JSONArray rec = products2.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -664,8 +733,15 @@ public class Items extends AppCompatActivity
 
                             usr_inf.setItems_lists(item_list_temp);
 
-
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            */
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -677,7 +753,7 @@ public class Items extends AppCompatActivity
                         JSONArray products3 = json_obj.getJSONArray(type);
                         while (i < products3.length()) {
                             JSONArray rec = products3.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -702,8 +778,15 @@ public class Items extends AppCompatActivity
                             item_list_temp.add(rec.getString(4));
 
                             usr_inf.setItems_lists(item_list_temp);
-
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            */
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -715,7 +798,7 @@ public class Items extends AppCompatActivity
                         JSONArray products4 = json_obj.getJSONArray(type);
                         while (i < products4.length()) {
                             JSONArray rec = products4.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -739,10 +822,17 @@ public class Items extends AppCompatActivity
                             item_list_temp.add(rec.getString(3));
                             item_list_temp.add(rec.getString(4));
 
-                            usr_inf.setItems_lists(item_list_temp);
+                            usr_inf.setItems_lists(item_list_temp);*/
 
 
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -754,7 +844,7 @@ public class Items extends AppCompatActivity
                         JSONArray products5 = json_obj.getJSONArray(type);
                         while (i < products5.length()) {
                             JSONArray rec = products5.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -778,10 +868,17 @@ public class Items extends AppCompatActivity
                             item_list_temp.add(rec.getString(3));
                             item_list_temp.add(rec.getString(4));
 
-                            usr_inf.setItems_lists(item_list_temp);
+                            usr_inf.setItems_lists(item_list_temp);*/
 
 
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -793,7 +890,7 @@ public class Items extends AppCompatActivity
                         JSONArray products6 = json_obj.getJSONArray(type);
                         while (i < products6.length()) {
                             JSONArray rec = products6.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -817,9 +914,16 @@ public class Items extends AppCompatActivity
                             item_list_temp.add(rec.getString(3));
                             item_list_temp.add(rec.getString(4));
 
-                            usr_inf.setItems_lists(item_list_temp);
+                            usr_inf.setItems_lists(item_list_temp);*/
 
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -831,7 +935,7 @@ public class Items extends AppCompatActivity
                         JSONArray products7 = json_obj.getJSONArray(type);
                         while (i < products7.length()) {
                             JSONArray rec = products7.getJSONArray(i);
-                            temp = new HashMap<String, String>();
+                            /*temp = new HashMap<String, String>();
                             if (rec.getString(2).equals("null")) {
                                 temp.put(THIRD_COLUMN, "-" + currency);
                             } else {
@@ -855,10 +959,17 @@ public class Items extends AppCompatActivity
                             item_list_temp.add(rec.getString(3));
                             item_list_temp.add(rec.getString(4));
 
-                            usr_inf.setItems_lists(item_list_temp);
+                            usr_inf.setItems_lists(item_list_temp);*/
 
 
-                            db.add_new_item(rec.getString(0), type,rec.getString(1),rec.getString(2),code,rec.getString(4), rec.getString(3));
+                            if (db.read_item(0,rec.getString(3)).equals("Error")) {
+                                Log.v(TAG,"Item not found. Adding to DB");
+                                Log.v(TAG,"Product: " + rec.getString(0));
+                                String old_code = db.add_new_item(rec.getString(0),type,rec.getString(1),rec.getString(2),code,rec.getString(4));
+                                db.set_item_flag(rec.getString(3),0);
+                                db.update_item_itemcode(rec.getString(3),old_code);
+                            }
+                            //print_db();
 
                             i = i + 1;
                             //Log.v(TAG, "" + rec.toString());
@@ -876,6 +987,8 @@ public class Items extends AppCompatActivity
             Log.v(TAG, "Error JSON");
             e.printStackTrace();
         }
+        read_from_internal_DB();
+        reload_ui(1);
     }
 
 
@@ -896,15 +1009,29 @@ public class Items extends AppCompatActivity
                 String type = data.getStringExtra("type");
                 Log.v(TAG, product + quantity + price + type);
                 if (!usr_inf.getOffline_mode()) {
-                    send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
-                }
-                else if (usr_inf.getOffline_mode()) {
                     if (price.equals(" ")){
                         price="null";
                     }
-                    old_codes=db.add_new_item(product, type, quantity, price, code, usr_inf.getName(),"");
-                    read_from_internal_DB();
+                    //old_codes = db.add_new_item(product,type,quantity,price,code,usr_inf.getEmail());
+                    send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
                 }
+                if (usr_inf.getOffline_mode()) {
+                    if (price.equals(" ")){
+                        price="null";
+                    }
+                    old_codes = db.add_new_item(product, type, quantity, price, code, usr_inf.getName());
+                }
+                reload_ui(1);
+                all_items_l.clear();
+                meat_items_l.clear();
+                vegetables_items_l.clear();
+                cereals_items_l.clear();
+                dairy_items_l.clear();
+                sweet_items_l.clear();
+                others_items_l.clear();
+                adapter.notifyDataSetChanged();
+                if (usr_inf.getOffline_mode())
+                    read_from_internal_DB();
                 // New item added
                 print_db();
                 Log.d(TAG,"Adding new Item");
@@ -992,7 +1119,7 @@ public class Items extends AppCompatActivity
 
     //Send request to Update Server service
     private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity, String code_item) {
-
+        Log.v(TAG, "objective: "+Objective+" Product: "+product);
         server_service.set_values(server_service.get_objective(Objective), code, "_", "True", status);
         server_service.set_items(type, product, price, quantity, code_item);
         Thread t = new Thread(new Runnable() {
@@ -1012,27 +1139,7 @@ public class Items extends AppCompatActivity
         t.start();
     }
 
-    // Binding Update Server
-    private ServiceConnection mConnection2 = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            Log.v(TAG, "Binding service");
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
-            server_service = binder.getService();
-            is_bound_server = true;
-            if (!usr_inf.getOffline_mode()) {
-                send_unsynced_entries();
-                update_ShoppingList(list);
-            }
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            is_bound_server = false;
-        }
-    };
 
 
     //On long pressed in a shopping list, display options
@@ -1095,7 +1202,7 @@ public class Items extends AppCompatActivity
                 }
                 String type = get_Product_Type(adapter.getItem(currentSelection).toString());
 
-                //Log.v(TAG, "DELETE: "+Product+Quantity+Price+type);
+                Log.v(TAG, "DELETE: "+Product+Quantity+Price+type);
 
                 String code_item = "";
                 items_l = usr_inf.getItems_lists();
@@ -1106,24 +1213,27 @@ public class Items extends AppCompatActivity
                     }
                 }
 
-                /*
 
-                else {
-                    db.update_list_change("delete_list",code_list);
-                    public_list.clear();
-                    private_list.clear();
-                    adapter.notifyDataSetChanged();
-                    read_from_internal_DB();
-                    reload_ui(is_private_serlected);
-                }
-                 */
                 if (!usr_inf.getOffline_mode()) {
                     send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
+                    print_db();
                     db.delete_item(code_item);
                 }
                 else {
-                    db.delete_item(code_item);
+                    db.update_item_change("delete_item", code_item);
+
+
+                    //print_db();
+                    all_items_l.clear();
+                    meat_items_l.clear();
+                    vegetables_items_l.clear();
+                    cereals_items_l.clear();
+                    dairy_items_l.clear();
+                    sweet_items_l.clear();
+                    others_items_l.clear();
+                    adapter.notifyDataSetChanged();
                     read_from_internal_DB();
+                    reload_ui(1);
                 }
             }
         });
@@ -1176,14 +1286,13 @@ public class Items extends AppCompatActivity
 
     private void getAll_products() {
         if (is_bound) {
-            String user="";
             // Create and send a message to the service, using a supported 'what' value
             //Log.v(TAG, "Getting ready");
             // Update item code
-            Log.d(TAG,"Updating item code");
+            //Log.d(TAG,"Updating item code");
             //print_db();
             //db.update_item_itemcode(code,old_item_code);
-            Log.d(TAG,"Done updating");
+            //Log.d(TAG,"Done updating");
             //print_db();
             Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
@@ -1213,12 +1322,21 @@ public class Items extends AppCompatActivity
             main_receiver = intent.getStringExtra("Main");
             GoogleAccount = intent.getStringExtra("GoogleAccount");
 
+            Log.v(TAG, "REQUEST TYPE: "+request_type);
             //Check type of request
             switch(request_type){
                 case "one_list":
                     update_product = intent.getStringExtra("Update_Products");
                     if (update_product.equals("True")) {
                         list_items = intent.getStringExtra("One_list");
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
                         update_ShoppingList(list_items);
                     }
                     break;
@@ -1238,15 +1356,8 @@ public class Items extends AppCompatActivity
                         db.set_item_flag(main_receiver, 0);
                         print_db();
 
-                        all_items_l.clear();
-                        meat_items_l.clear();
-                        vegetables_items_l.clear();
-                        cereals_items_l.clear();
-                        dairy_items_l.clear();
-                        sweet_items_l.clear();
-                        others_items_l.clear();
-                        adapter.notifyDataSetChanged();
                         getAll_products();
+                        reload_ui(1);
                         Log.v(TAG, "Added new product correctly");
                     }
 
@@ -1264,6 +1375,7 @@ public class Items extends AppCompatActivity
                         sweet_items_l.clear();
                         others_items_l.clear();
                         adapter.notifyDataSetChanged();
+                        //getAll_products();
                         getAll_products();
                         Log.v(TAG, "Deleted product correctly");
                     }
@@ -1389,15 +1501,15 @@ public class Items extends AppCompatActivity
 
     private void read_from_internal_DB() {
         Log.d(TAG, "Reading from internal DB");
-        // Product, Quantity, Price, Type, Last_User, Code_item
-        all_items_l.clear();
+        /*all_items_l.clear();
         meat_items_l.clear();
         vegetables_items_l.clear();
         cereals_items_l.clear();
         dairy_items_l.clear();
         sweet_items_l.clear();
         others_items_l.clear();
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();*/
+        // Product, Quantity, Price, Type, Last_User, Code_item
         List<String[]> a = db.read_all_items(code);
         if (a != null) {
             for (int i = 0; i < a.size(); i++) {
@@ -1593,6 +1705,7 @@ public class Items extends AppCompatActivity
                         //Log.v(TAG, "" + products.toString());
                         break;
                 }
+                reload_ui(1);
 
             }
         }
@@ -1603,13 +1716,12 @@ public class Items extends AppCompatActivity
         Log.d(TAG,"We are online");
         Log.d(TAG,"Synchronizing entries from DB");
         // Get all items with sync flag set
-        // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
         List<String[]> entries = db.read_all_with_flag_set_item();
         print_db();
         if (entries == null) return true;
         String entry[];
         Log.v(TAG,"Size: "+entries.size());
-        for (int i = 0; i< entries.size(); i++){
+        for (int i = 0; i< entries.size(); i++) {
             entry = entries.get(i);
             //If it is from this shopping list
             if (code.equals(entry[7])) {
@@ -1617,22 +1729,27 @@ public class Items extends AppCompatActivity
                 db.set_item_flag(entry[5], 0);
                 Log.v(TAG, "Contents: " + entry[0] + entry[1] + entry[2]);
                 Log.v(TAG, "Change type: " + entry[6]);
-                if (entry[6].equals("new_item")) old_codes = entry[5];
-                if (!entry[6].equals("delete_item")) {
-                    if (entry[6].equals("new_item"))
-                        send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], User_Info.getInstance().getName());
-                    else
-                        send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], entry[5]);
+                // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
+                if (entry[6].equals("new_item"))
+                    old_codes = entry[5];
+                Log.v(TAG, "OLDCODE: "+old_codes);
+                if (entry[6].equals("new_item")){
+                    send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], usr_inf.getName());
                 }
-                // delete item.
-                else if (entry[6].equals("delete_item")) db.delete_item(entry[5]);
+                else{
+                    send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], entry[5]);
+                }
+                // delete list really.
+                if (entry[6].equals("delete_item")) db.delete_item(entry[5]);
                 // wait
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
 
         print_db();
@@ -1658,8 +1775,9 @@ public class Items extends AppCompatActivity
         // If one of the received codes is inside the DB remove it form the list
         for (i = 0;i < c.size(); i++){
             Log.d(TAG,"received items: " + c.get(i));
-            if (internal_codes.contains(c.get(i)))
+            if (internal_codes.contains(c.get(i))) {
                 internal_codes.remove(c.get(i));
+            }
         }
         // In case there are still codes in the DB that are not on the server remove them from the DB
         if (internal_codes.size() > 0){
@@ -1673,4 +1791,78 @@ public class Items extends AppCompatActivity
             Toast.makeText(Items.this,R.string.external_delete_item,Toast.LENGTH_SHORT).show();
         print_db();
     }
+
+
+
+
+
+    //Create the loading and get all the shopping lists when finished
+    class ProgressTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            Log.v(TAG,"STARTING EXECUTION OF APP");
+            all_items_l.clear();
+            meat_items_l.clear();
+            vegetables_items_l.clear();
+            cereals_items_l.clear();
+            dairy_items_l.clear();
+            sweet_items_l.clear();
+            others_items_l.clear();
+            adapter.notifyDataSetChanged();
+            loading.setVisibility(View.VISIBLE);
+            //listview_items.setVisibility(View.GONE);
+            //listview_header.setVisibility(View.GONE);
+        }
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            if (!usr_inf.getOffline_mode())
+                getAll_products();
+            else
+                read_from_internal_DB();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            loading.setVisibility(View.GONE);
+            /*final Animation fadein = new AlphaAnimation(0,1);
+            fadein.setDuration(1000);
+            Animation fadeOut = new AlphaAnimation(1, 0);
+            fadeOut.setStartOffset(2000);
+            fadeOut.setDuration(1000);
+            reload_ui(1);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    listview_items.setVisibility(View.VISIBLE);
+                    listview_header.setVisibility(View.VISIBLE);
+                    listview_items.setAnimation(fadein);
+                    listview_header.setAnimation(fadein);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });*/
+        }
+    }
+
+
+    private boolean is_network_available(){
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 }
+

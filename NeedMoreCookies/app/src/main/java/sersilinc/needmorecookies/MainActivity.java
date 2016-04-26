@@ -461,7 +461,7 @@ public class MainActivity extends AppCompatActivity
         if (timer2 != null) timer2.cancel();
     }
 
-    // Binding Update List
+    // Binding Update Android
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
@@ -1043,7 +1043,7 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setVisibility(View.VISIBLE);
                     first_layout.setAnimation(fadein);
                     third_layout.setAnimation(fadein);
-                    if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", "_");
+                    if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", usr_inf.getName());
                 }
 
                 @Override
