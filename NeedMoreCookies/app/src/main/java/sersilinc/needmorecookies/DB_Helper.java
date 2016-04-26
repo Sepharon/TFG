@@ -75,8 +75,6 @@ public class DB_Helper {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
         Log.v(TAG,"Changing list name at " + timeStamp);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(timeStamp)},code);
-        if (!User_Info.getInstance().getOffline_mode())
-            DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
         return result!=0;
     }
     public boolean update_timestamp_server(String code,String time){

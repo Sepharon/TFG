@@ -138,6 +138,9 @@ public class MapsActivity extends AppCompatActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+
+        if (User_Info.getInstance().getOffline_mode())
+            Toast.makeText(MapsActivity.this,R.string.no_connection_maps,Toast.LENGTH_SHORT).show();
     }
 
 
@@ -198,7 +201,17 @@ public class MapsActivity extends AppCompatActivity
             // Start next activity
             startActivity(intent);
         } else if (id == R.id.nav_share) {
-            //share();
+            Log.d(TAG,"Sharing shopping");
+            Intent mail_intent = new Intent(Intent.ACTION_SEND);
+            mail_intent.setType("text/plain");
+            // Body of mail
+            mail_intent.putExtra(Intent.EXTRA_SUBJECT,R.string.mail_subject);
+            mail_intent.putExtra(Intent.EXTRA_TEXT,"I invite you to try this awesome app! You will be able to write and share shopping lists " +
+                    "with your friends! \nDownload it here: test.com \nYour friend: " + User_Info.getInstance().getName());
+            Intent final_intent = Intent.createChooser(mail_intent,"Choose mail client");
+            final_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // Start Mail chooser
+            startActivity(final_intent);
 
         } else if (id == R.id.nav_logout) {
             signOut();
@@ -251,7 +264,7 @@ public class MapsActivity extends AppCompatActivity
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
-            mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
         }

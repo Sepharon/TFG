@@ -53,6 +53,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="currency">Currency</string>
+    <string name="currency_description">Select the currency that you whish to use</string>
     <!--<string name="size_text">Size text</string>-->
 
     <string name="about">About</string>
@@ -76,7 +77,7 @@
     <string name="permission_required_toast">Location permission is required for this application.</string>
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_enable">Please, turn on the Location</string>
-
+    <string name="no_connection_maps">Un able to access supermarkets locations. Please switch to Online mode if possible</string>
 
 
     <string name="title_activity_items"><b>"Products"</b></string>
@@ -147,5 +148,11 @@
     <string name="external_delete">A list has been deleted externally</string>
     <string name="external_delete_item">A product has been deleted externally</string>
     <string name="external_name_change">The name of a shopping list has been updated</string>
+
+    <!-- Share APP -->
+    <string name="mail_subject">Join me in Need More Cookies!</string>
+    <string name="mail_text">I invite you to try this awesome app! You will be able to write and share shopping lists
+    with your friends! \n Download it here: test.com \n Your friend: </string>
+    <string name="choose_mail">Send mail with...</string>
 
 </resources>
