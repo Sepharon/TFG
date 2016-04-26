@@ -221,35 +221,24 @@ public class DB_Helper {
         return (result&result2)!=0;
     }
 
-    /* Edita el nom, preu o quantitat de un item. Si el item te la sync flag activa i el ultim change type
-     es new_name nomes canvia el nom,preu o quantitat */
-    public boolean update_item_value(int update_value,String value,String code){
+    /* Edita el nom, preu i quantitat de un item. Si el item te la sync flag activa i el ultim change type
+     es new_item nomes canvia el nom,preu i quantitat */
+    public boolean update_item_value(String product, String quantity, String price,String code_item){
         String key;
-        String change_type;
-        switch (update_value){
-            case 0:
-                change_type = "new_name";
-                key = DataBase.KEY_PRODUCT;
-                break;
-            case 1:
-                change_type = "new_price";
-                key = DataBase.KEY_PRICE;
-                break;
-            case 2:
-                change_type = "new_quantity";
-                key = DataBase.KEY_QUANTITY;
-                break;
-            default:
-                Log.w(TAG,"Unknown update item. This should never happen");
-                return false;
-        }
+        String change_type="update_item";
+
         // If sync flag is active do not change type
-        if (read_item(5,code).equals("1") && read_item(6,code).equals("new_item")) change_type = "new_item";
+        if (read_item(5,code_item).equals("1") && read_item(6,code_item).equals("new_item")) change_type = "new_item";
         // set values
-        int result1 = DataBase.update_item(new String[]{key,value},code);
+        key= DataBase.KEY_PRODUCT;
+        int result1 = DataBase.update_item(new String[]{key,product},code_item);
+        key= DataBase.KEY_PRICE;
+        int result2 = DataBase.update_item(new String[]{key,price},code_item);
+        key= DataBase.KEY_QUANTITY;
+        int result3 = DataBase.update_item(new String[]{key,quantity},code_item);
         // change type
-        int result2 = DataBase.update_item(new String[]{DataBase.KEY_CHANGE_TYPE,change_type},code);
-        return ((result1 > 0) && (result2 > 0));
+        int result4 = DataBase.update_item(new String[]{DataBase.KEY_CHANGE_TYPE,change_type},code_item);
+        return ((result1 > 0) && (result2 > 0)&& (result3 > 0)&& (result4 > 0));
     }
 
     // Canvia el codi de un item
@@ -273,9 +262,6 @@ public class DB_Helper {
     }
     // Esborra un item
     public void delete_item(String code){
-        String ID_Item;
-        //ID_Item = read_item(0,code);
-        //delete_relation(Integer.parseInt(ID_Item));
         DataBase.delete_item(code);
     }
     //Llegeix un item
@@ -333,19 +319,6 @@ public class DB_Helper {
             do {
                 Log.d(TAG,"code: " + result.getString(5));
                 if (!result.getString(7).equals("delete_item")) {
-
-                    /*
-                    "ID_Item INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "Product TEXT NOT NULL, " +
-                "Type TEXT NOT NULL, " +
-                "Quantity TEXT NOT NULL, " +
-                "Price TEXT, " +
-                "Code TEXT, " +
-                "Flag INTEGER DEFAULT 0, " +
-                "Change_type TEXT, "+
-                "Code_List TEXT NOT NULL,"+
-                "Last_User TEXT)";
-                     */
                     // Product, Quantity, Price, Type, Last_User, Code_item
                     String[] entry = new String[]{result.getString(1), result.getString(3), result.getString(4),
                             result.getString(2), result.getString(9), result.getString(5)};
@@ -370,18 +343,6 @@ public class DB_Helper {
         result.moveToFirst();
         try {
             do {
-            /*
-                "ID_Item INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "Product TEXT NOT NULL, " +
-                "Type TEXT NOT NULL, " +
-                "Quantity TEXT NOT NULL, " +
-                "Price TEXT, " +
-                "Code TEXT, " +
-                "Flag INTEGER DEFAULT 0, " +
-                "Change_type TEXT, "+
-                "Code_List TEXT NOT NULL,"+
-                "Last_User TEXT)";
-                     */
                 // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
                 String[] entry = new String[]{result.getString(1), result.getString(3), result.getString(4),
                         result.getString(2), result.getString(9), result.getString(5), result.getString(7), result.getString(8)};
@@ -403,4 +364,8 @@ public class DB_Helper {
     public void delete_relation(int ID_Item){
         DataBase.delete_list_relation(ID_Item);
     }*/
+
+    public void delete_all_items_of_one_list(String code_list){
+        DataBase.delete_all_items(code_list);
+    }
 }

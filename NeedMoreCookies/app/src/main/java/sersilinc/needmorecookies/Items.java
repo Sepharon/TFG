@@ -138,7 +138,7 @@ public class Items extends AppCompatActivity
     private String list_items;
     private String main_receiver;
     private String update_product;
-    public MyReceiver receiver;
+    public MyReceiver receiver_items;
     private IntentFilter filter;
 
     //Database
@@ -151,12 +151,12 @@ public class Items extends AppCompatActivity
     String list;
     String list_type;
     int current_tab = 1;
-    private final String[] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
+    private final String[] objectives = {"update_item","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user","add_token"};
 
     // Update items flags
-    private boolean product_to_update = false;
-    private boolean quantity_to_update = false;
-    private boolean price_to_update = false;
+    //private boolean product_to_update = false;
+    //private boolean quantity_to_update = false;
+    //private boolean price_to_update = false;
 
     //Selected Item
     private int currentSelection;
@@ -205,8 +205,8 @@ public class Items extends AppCompatActivity
 
         /**[START Intent-filter for receiving Broadcast]**/
         filter = new IntentFilter("broadcast_service");
-        receiver = new MyReceiver();
-        this.registerReceiver(receiver, filter);
+        receiver_items = new MyReceiver();
+        this.registerReceiver(receiver_items, filter);
         /**[END Intent-filter for receiving Broadcast]**/
 
         /**[START List View]**/
@@ -469,8 +469,9 @@ public class Items extends AppCompatActivity
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
             is_bound_server = true;
-            if (!usr_inf.getOffline_mode())
+            if (!usr_inf.getOffline_mode()) {
                 send_unsynced_entries();
+            }
         }
 
         @Override
@@ -499,16 +500,16 @@ public class Items extends AppCompatActivity
         }
 
         timer.cancel();
-        db.destroy_class();
+        //db.destroy_class();
         //Unregister receiver
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         //Register receiver
-        registerReceiver(receiver, filter);
+        registerReceiver(receiver_items, filter);
         timer.start();
         if (!usr_inf.getOffline_mode())
             getAll_products();
@@ -557,6 +558,7 @@ public class Items extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         timer.cancel();
+        unregisterReceiver(receiver_items);
     }
 
 
@@ -663,17 +665,13 @@ public class Items extends AppCompatActivity
     private void update_ShoppingList(String list) {
         try {
             int i = 0;
-            all_items_l.clear();
-            meat_items_l.clear();
-            vegetables_items_l.clear();
-            cereals_items_l.clear();
-            dairy_items_l.clear();
-            sweet_items_l.clear();
-            others_items_l.clear();
-            adapter.notifyDataSetChanged();
             List<String> c = new ArrayList<>();
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
+            print_db();
+            Log.v(TAG, "Deleting all items of one list");
+            db.delete_all_items_of_one_list(code);
+            print_db();
             while (keys.hasNext()) {
                 String type = String.valueOf(keys.next());
                 switch (type) {
@@ -681,25 +679,10 @@ public class Items extends AppCompatActivity
                         JSONArray products = json_obj.getJSONArray(type);
                         while (i < products.length()) {
                             JSONArray rec = products.getJSONArray(i);
-                        /*    temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
 
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            all_items_l.add(temp);
-                            */
                             i = i + 1;
 
                             c.add(rec.getString(3));
-                            //Log.v(TAG, "" + rec.toString());
                         }
                         i = 0;
                         break;
@@ -707,33 +690,7 @@ public class Items extends AppCompatActivity
                         JSONArray products2 = json_obj.getJSONArray(type);
                         while (i < products2.length()) {
                             JSONArray rec = products2.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
 
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            meat_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);
-
-                            */
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
                                 Log.v(TAG,"Item not found. Adding to DB");
                                 Log.v(TAG,"Product: " + rec.getString(0));
@@ -753,32 +710,7 @@ public class Items extends AppCompatActivity
                         JSONArray products3 = json_obj.getJSONArray(type);
                         while (i < products3.length()) {
                             JSONArray rec = products3.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
 
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            vegetables_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);
-                            */
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
                                 Log.v(TAG,"Item not found. Adding to DB");
                                 Log.v(TAG,"Product: " + rec.getString(0));
@@ -798,31 +730,6 @@ public class Items extends AppCompatActivity
                         JSONArray products4 = json_obj.getJSONArray(type);
                         while (i < products4.length()) {
                             JSONArray rec = products4.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
-
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            cereals_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);*/
 
 
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
@@ -844,31 +751,6 @@ public class Items extends AppCompatActivity
                         JSONArray products5 = json_obj.getJSONArray(type);
                         while (i < products5.length()) {
                             JSONArray rec = products5.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
-
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            dairy_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);*/
 
 
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
@@ -890,31 +772,7 @@ public class Items extends AppCompatActivity
                         JSONArray products6 = json_obj.getJSONArray(type);
                         while (i < products6.length()) {
                             JSONArray rec = products6.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
 
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            sweet_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);*/
 
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
                                 Log.v(TAG,"Item not found. Adding to DB");
@@ -935,31 +793,6 @@ public class Items extends AppCompatActivity
                         JSONArray products7 = json_obj.getJSONArray(type);
                         while (i < products7.length()) {
                             JSONArray rec = products7.getJSONArray(i);
-                            /*temp = new HashMap<String, String>();
-                            if (rec.getString(2).equals("null")) {
-                                temp.put(THIRD_COLUMN, "-" + currency);
-                            } else {
-                                temp.put(THIRD_COLUMN, rec.getString(2) + currency);
-                            }
-                            temp.put(FIRST_COLUMN, rec.getString(0));
-                            temp.put(SECOND_COLUMN, rec.getString(1));
-
-                            if (list_type.equals("0")){
-                                temp.put(FOURTH_COLUMN, rec.getString(4));
-                            }
-
-                            others_items_l.add(temp);
-
-                            //Variables to store the product name, quantity, price, type, code and last_user
-                            List<String> item_list_temp = new ArrayList<>();
-                            item_list_temp.add(rec.getString(0));
-                            item_list_temp.add(rec.getString(1));
-                            item_list_temp.add(rec.getString(2));
-                            item_list_temp.add(type);
-                            item_list_temp.add(rec.getString(3));
-                            item_list_temp.add(rec.getString(4));
-
-                            usr_inf.setItems_lists(item_list_temp);*/
 
 
                             if (db.read_item(0,rec.getString(3)).equals("Error")) {
@@ -980,7 +813,7 @@ public class Items extends AppCompatActivity
                 }
                 //Log.v(TAG, usr_inf.getItems_lists().toString());
             }
-            remove_deleted_products(c);
+            //remove_deleted_products(c);
 
 
         } catch (JSONException e) {
@@ -1048,10 +881,6 @@ public class Items extends AppCompatActivity
                 String price = data.getStringExtra("price");
                 if (price.equals("")) price = " ";
 
-                Boolean product_changed = data.getBooleanExtra("product_changed", false);
-                Boolean quantity_changed = data.getBooleanExtra("quantity_changed", false);
-                Boolean price_changed = data.getBooleanExtra("price_changed", false);
-
                 String type = data.getStringExtra("type");
                 Log.v(TAG, product + quantity + price + type);
 
@@ -1073,46 +902,26 @@ public class Items extends AppCompatActivity
                         code_item = items_l.get(i).get(4);
                     }
                 }
-                final String finalCode = code;
-                final String finalPrice = price;
-                final String finalCode_item = code_item;
-                final String finalType = type;
-                final String finalProduct = product;
-                final String finalQuantity = quantity;
 
-                // TODO : EDIT ITEMS IN INTERNAL DB
-                if (product_changed && !usr_inf.getOffline_mode()){
-                    product_to_update = true;
-                    Log.v(TAG,"new name");
-                    Log.v("Thread2","product changing");
-                    send_request_server("new_name", list_type,finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
+                if (!usr_inf.getOffline_mode()){
+                    send_request_server("update_item", list_type, code, type, product, price, quantity, code_item);
                 }
-                if (quantity_changed && !usr_inf.getOffline_mode()) {
-                    quantity_to_update = true;
-                    Log.v(TAG,"new quantity");
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (product_to_update);
-                            Log.v("Thread2","quantity changing");
-                            send_request_server("new_quantity", list_type, finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
-                        }
-                    });
-                    t.start();
+                if (usr_inf.getOffline_mode()){
+                    db.update_item_value(product,quantity,price,code_item);
+                    db.set_item_flag(code_item,1);
                 }
-                if (price_changed && !usr_inf.getOffline_mode()) {
-                    price_to_update = true;
-                    Log.v(TAG,"new price");
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (quantity_to_update || product_to_update);
-                            Log.v("Thread2","price changing");
-                            send_request_server("new_price", list_type, finalCode, finalType, finalProduct, finalPrice, finalQuantity, finalCode_item);
-                        }
-                    });
-                    t.start();
-                }
+                print_db();
+                reload_ui(1);
+                all_items_l.clear();
+                meat_items_l.clear();
+                vegetables_items_l.clear();
+                cereals_items_l.clear();
+                dairy_items_l.clear();
+                sweet_items_l.clear();
+                others_items_l.clear();
+                adapter.notifyDataSetChanged();
+                if (usr_inf.getOffline_mode())
+                    read_from_internal_DB();
             }
         }
     }
@@ -1318,6 +1127,8 @@ public class Items extends AppCompatActivity
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.v(TAG, "INTENT: "+intent.getStringExtra("Main"));
+            main_receiver=null;
             request_type = intent.getStringExtra("Request");
             main_receiver = intent.getStringExtra("Main");
             GoogleAccount = intent.getStringExtra("GoogleAccount");
@@ -1356,7 +1167,7 @@ public class Items extends AppCompatActivity
                         db.set_item_flag(main_receiver, 0);
                         print_db();
 
-                        getAll_products();
+                        update_ShoppingList(list);
                         reload_ui(1);
                         Log.v(TAG, "Added new product correctly");
                     }
@@ -1381,11 +1192,12 @@ public class Items extends AppCompatActivity
                     }
 
                     break;
-                case "new_name":
+                case "update_item":
                     if (main_receiver.equals("False"))
-                        Toast.makeText(Items.this, R.string.new_name_item_error, Toast.LENGTH_SHORT)
+                        Toast.makeText(Items.this,R.string.update_item_error,Toast.LENGTH_SHORT)
                                 .show();
-                    else{
+                    else {
+                        adapter.notifyDataSetChanged();
                         all_items_l.clear();
                         meat_items_l.clear();
                         vegetables_items_l.clear();
@@ -1395,49 +1207,10 @@ public class Items extends AppCompatActivity
                         others_items_l.clear();
                         adapter.notifyDataSetChanged();
                         getAll_products();
-                        product_to_update = false;
-                        Log.v(TAG, "Name of the product changed correctly");
+                        Log.v(TAG, "Product updated correctly");
                     }
-
                     break;
-                case "new_quantity":
-                    if (main_receiver.equals("False"))
-                        Toast.makeText(Items.this, R.string.new_quantity_item_error, Toast.LENGTH_SHORT)
-                                .show();
-                    else{
-                        all_items_l.clear();
-                        meat_items_l.clear();
-                        vegetables_items_l.clear();
-                        cereals_items_l.clear();
-                        dairy_items_l.clear();
-                        sweet_items_l.clear();
-                        others_items_l.clear();
-                        adapter.notifyDataSetChanged();
-                        getAll_products();
-                        quantity_to_update = false;
-                        Log.v(TAG, "Quantity of the product changed correctly");
-                    }
 
-                    break;
-                case "new_price":
-                    if (main_receiver.equals("False"))
-                        Toast.makeText(Items.this,R.string.new_price_item_error,Toast.LENGTH_SHORT)
-                                .show();
-                    else{
-                        all_items_l.clear();
-                        meat_items_l.clear();
-                        vegetables_items_l.clear();
-                        cereals_items_l.clear();
-                        dairy_items_l.clear();
-                        sweet_items_l.clear();
-                        others_items_l.clear();
-                        adapter.notifyDataSetChanged();
-                        getAll_products();
-                        price_to_update = false;
-                        Log.v(TAG, "Price of the product changed correctly");
-                    }
-
-                    break;
             }
         }
     }
@@ -1705,7 +1478,7 @@ public class Items extends AppCompatActivity
                         //Log.v(TAG, "" + products.toString());
                         break;
                 }
-                reload_ui(1);
+                //reload_ui(1);
 
             }
         }
@@ -1719,10 +1492,10 @@ public class Items extends AppCompatActivity
         List<String[]> entries = db.read_all_with_flag_set_item();
         print_db();
         if (entries == null) return true;
-        String entry[];
+        //String entry[];
         Log.v(TAG,"Size: "+entries.size());
         for (int i = 0; i< entries.size(); i++) {
-            entry = entries.get(i);
+            final String entry[] = entries.get(i);
             //If it is from this shopping list
             if (code.equals(entry[7])) {
                 Log.d(TAG, "entry: " + Arrays.toString(entry));
@@ -1732,9 +1505,14 @@ public class Items extends AppCompatActivity
                 // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
                 if (entry[6].equals("new_item"))
                     old_codes = entry[5];
-                Log.v(TAG, "OLDCODE: "+old_codes);
+                //Log.v(TAG, "OLDCODE: "+old_codes);
                 if (entry[6].equals("new_item")){
-                    send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], usr_inf.getName());
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], usr_inf.getName());
+                        }
+                    }); t.start();
                 }
                 else{
                     send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], entry[5]);
@@ -1745,7 +1523,7 @@ public class Items extends AppCompatActivity
 
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -1810,8 +1588,6 @@ public class Items extends AppCompatActivity
             others_items_l.clear();
             adapter.notifyDataSetChanged();
             loading.setVisibility(View.VISIBLE);
-            //listview_items.setVisibility(View.GONE);
-            //listview_header.setVisibility(View.GONE);
         }
         @Override
         protected Void doInBackground(Void... arg0) {
@@ -1831,29 +1607,6 @@ public class Items extends AppCompatActivity
         @Override
         protected void onPostExecute(Void result) {
             loading.setVisibility(View.GONE);
-            /*final Animation fadein = new AlphaAnimation(0,1);
-            fadein.setDuration(1000);
-            Animation fadeOut = new AlphaAnimation(1, 0);
-            fadeOut.setStartOffset(2000);
-            fadeOut.setDuration(1000);
-            reload_ui(1);
-            fadeOut.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    listview_items.setVisibility(View.VISIBLE);
-                    listview_header.setVisibility(View.VISIBLE);
-                    listview_items.setAnimation(fadein);
-                    listview_header.setAnimation(fadein);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                }
-            });*/
         }
     }
 

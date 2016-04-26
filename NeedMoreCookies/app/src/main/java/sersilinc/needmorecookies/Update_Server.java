@@ -45,7 +45,7 @@ public class Update_Server extends Service {
     private final String [] keys = {"Objective","Code","list_name","Update","GoogleAccount","status"};
     private String [] values = new String[6];
     private String [] items = new String[5];
-    private final String [] objectives = {"new_name","new_price","new_quantity","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user", "add_token"};
+    private final String [] objectives = {"update_item","new_item","delete_item","new_list","delete_list","change_list_name","set_public","add_usr_to_list","add_user", "add_token"};
     private String request_result;
 
     //Flag
@@ -92,7 +92,7 @@ public class Update_Server extends Service {
     }
     // Sets the values for the values array
     public boolean set_values(int objective_code,String list_code,String list_name,String update,String status){
-        if (objective_code > 11) return false;
+        if (objective_code > 9) return false;
         values[0] = objectives[objective_code];
         values[1] = list_code;
         values[2] = list_name;
@@ -119,6 +119,7 @@ public class Update_Server extends Service {
     public void send_request (){
         if (is_network_available())
             got_response = false;
+            Log.v(TAG, "JSON TO SEND: "+jsonEncoderClass.return_json());
             send_post_request(jsonEncoderClass.return_json());
 
     }
@@ -229,7 +230,7 @@ public class Update_Server extends Service {
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
             String message = intent.getStringExtra("message");
-            //Log.d(TAG, "Got message: " + message);
+            Log.d(TAG, "Got message: " + message);
             process_message(message);
         }
     }

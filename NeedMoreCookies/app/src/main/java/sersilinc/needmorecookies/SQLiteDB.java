@@ -234,6 +234,17 @@ public class SQLiteDB extends SQLiteOpenHelper{
         db.close();
     }
 
+    // Delete all items of a shopping list
+    public void delete_all_items(String code_list){
+        long update_time = System.currentTimeMillis();
+        Log.v(TAG,"Erasing item at " + update_time);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(Items_table_name,
+                KEY_CODE_LIST + "= ?",
+                new String[]{code_list});
+        db.close();
+    }
+
 
     // Reads the values from item table
     public String read_item(String query){

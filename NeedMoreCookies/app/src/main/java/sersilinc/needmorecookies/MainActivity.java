@@ -404,6 +404,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         timer.cancel();
+        unregisterReceiver(receiver);
         if (timer2 != null) timer2.cancel();
     }
 
@@ -455,7 +456,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         //Unregister receiver
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
         db.destroy_class();
         timer.cancel();
         if (timer2 != null) timer2.cancel();

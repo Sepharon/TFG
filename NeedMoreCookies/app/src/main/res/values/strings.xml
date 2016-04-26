@@ -123,6 +123,7 @@
     <string name="change_list_name_error">An error occurred while changing the name of the Shopping List</string>
     <string name="new_name_item_error">A problem occurred while changing the name of the Item</string>
     <string name="new_price_item_error">A problem occurred while changing the price of the Item</string>
+    <string name="update_item_error">A problem occurred while updating the product</string>
     <string name="new_quantity_item_error">A problem occurred while changing the quantity of the Item</string>
     <string name="delete_item_error">A problem occurred while deleting the Item</string>
     <string name="add_item_error">A problem occurred while adding the Item</string>

@@ -144,9 +144,9 @@ public class AddItem extends AppCompatActivity
                     result_data.putExtra("price", Price.getText().toString());
                     result_data.putExtra("type", type.getSelectedItem().toString());
 
-                    result_data.putExtra("product_changed", product_changed);
-                    result_data.putExtra("quantity_changed", quantity_changed);
-                    result_data.putExtra("price_changed", price_changed);
+                    //result_data.putExtra("product_changed", product_changed);
+                    //result_data.putExtra("quantity_changed", quantity_changed);
+                    //result_data.putExtra("price_changed", price_changed);
                 } else {
                     result_data.putExtra("product", Product.getText().toString());
                     result_data.putExtra("quantity", Quantity.getText().toString());
