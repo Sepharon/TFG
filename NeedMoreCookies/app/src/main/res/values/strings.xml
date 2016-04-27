@@ -10,6 +10,8 @@
     <string name="public_name">Public</string>
     <string name="private_name">Private</string>
     <string name="chose_public_priv">Choose between a private or public list</string>
+    <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="banner_ad_unit_id">ca-app-pub-8635557220130823/6092317993</string>
     <string name="server_client_id">428986930300-6p5aokuc8rjh4unijhi3a5hcimilo4mt.apps.googleusercontent.com</string>
     <string name="cookie_desciption_login">cookie_image_login</string>
     <string name="title_activity_list__contacts"><b>"Contacts List"</b></string>

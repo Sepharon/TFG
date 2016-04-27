@@ -110,15 +110,14 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AddList"
+            android:windowSoftInputMode="adjustPan"
             android:label="@string/title_activity_add_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AddItem"
             android:label="@string/title_activity_add_item"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".List_Contacts"
-            android:label="@string/title_activity_list__contacts" />
 
         <!-- [START gcm_receiver] -->
         <receiver

@@ -74,7 +74,9 @@ public class SQLiteDB extends SQLiteOpenHelper{
                 "Flag INTEGER DEFAULT 0, " +
                 "Change_type TEXT, "+
                 "Code_List TEXT NOT NULL, "+
-                "Last_User TEXT)";
+                "Last_User TEXT," +
+                " FOREIGN KEY (Code_List) REFERENCES " + Shopping_list_table_name + " (" + KEY_CODE +
+                ") ON DELETE CASCADE);";
         db.execSQL(ITEMS_TABLE);
     }
 
@@ -85,6 +87,15 @@ public class SQLiteDB extends SQLiteOpenHelper{
         db.execSQL("DROP TABLE IF EXISTS " + Items_table_name);
         onCreate(db);
         DATABASE_VERSION = newVersion;
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if (!db.isReadOnly()) {
+            // Enable foreign key constraints
+            db.execSQL("PRAGMA foreign_keys=ON;");
+        }
     }
 
     // Add a new list to the DB

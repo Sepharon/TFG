@@ -47,6 +47,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -95,6 +99,7 @@ public class MainActivity extends AppCompatActivity
     private ProgressBar loading;
     private View first_layout;
     private View third_layout;
+    private AdView mAdView;
 
     //Lists
     private String old_codes;
@@ -103,7 +108,7 @@ public class MainActivity extends AppCompatActivity
     private ListView listview;
     // Private and public list names
     private ArrayList<HashMap<String, String>> private_list = new ArrayList<>();
-    private ArrayList<HashMap<String, String>> public_list = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> public_list = new ArrayList<>();
     HashMap<String, String> temp;
     //Columns
     private static final String FIRST_COLUMN = "First";
@@ -127,6 +132,9 @@ public class MainActivity extends AppCompatActivity
 
     //Database
     DB_Helper db;
+
+    // Ads
+    private InterstitialAd mInterstitialAd;
 
     //GCM
     private BroadcastReceiver mRegistrationBroadcastReceiver;
@@ -218,6 +226,12 @@ public class MainActivity extends AppCompatActivity
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         /**[END GoogleApiClient]**/
+
+        /** [START Advertisements] **/
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+        /** [END Advertisements] **/
 
         /**[START OnClickListeners]**/
         //Change to private or public view
@@ -931,6 +945,8 @@ public class MainActivity extends AppCompatActivity
             adapter.notifyDataSetChanged();
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
+            mAdView.setVisibility(View.GONE);
+
         }
         @Override
         protected Void doInBackground(Void... arg0) {
@@ -973,6 +989,8 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setVisibility(View.VISIBLE);
                     first_layout.setAnimation(fadein);
                     third_layout.setAnimation(fadein);
+                    mAdView.setVisibility(View.VISIBLE);
+                    mAdView.setAnimation(fadein);
                     if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", usr_inf.getName());
                 }
                 @Override
