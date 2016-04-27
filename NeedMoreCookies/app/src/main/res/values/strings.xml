@@ -17,7 +17,6 @@
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General</string>
 
-
     <string-array name="currency_array">
         <item>€</item>
         <item>DKK</item>
@@ -71,6 +70,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="locationSuper">Supermarket\'s Location</string>
     <string name="home">Home</string>
+    <string name="tools">Settings</string>
 
     <!--Location-->
     <string name="location_permission_denied">This application requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'Google Maps API Demos\'.</string>
@@ -85,7 +85,9 @@
     <string name="title_activity_help"><b>"Help"</b></string>
     <string name="title_activity_contact_us"><b>"Contact us"</b></string>
     <string name="contact">If you want to contact us, you can send an email pressing the button below</string>
-    <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roomates...\n</string>
+    <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)
+        \n\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roomates...
+    </string>
     <string name="title_activity_add_list"><b>"Add Shopping List"</b></string>
     <string name="title_activity_add_item"><b>"Add Product"</b></string>
 
@@ -152,9 +154,11 @@
     <string name="external_name_change">The name of a shopping list has been updated</string>
 
     <!-- Share APP -->
+    <string name="offline_mail">Unable to send an invitation while in offline mode</string>
     <string name="mail_subject">Join me in Need More Cookies!</string>
     <string name="mail_text">I invite you to try this awesome app! You will be able to write and share shopping lists
     with your friends! \n Download it here: test.com \n Your friend: </string>
     <string name="choose_mail">Send mail with...</string>
+
 
 </resources>
