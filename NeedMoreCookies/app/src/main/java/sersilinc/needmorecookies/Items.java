@@ -845,16 +845,26 @@ public class Items extends AppCompatActivity
                     if (price.equals(" ")){
                         price="null";
                     }
-                    //old_codes = db.add_new_item(product,type,quantity,price,code,usr_inf.getEmail());
+                    adapter.notifyDataSetChanged();
+                    all_items_l.clear();
+                    meat_items_l.clear();
+                    vegetables_items_l.clear();
+                    cereals_items_l.clear();
+                    dairy_items_l.clear();
+                    sweet_items_l.clear();
+                    others_items_l.clear();
                     send_request_server("new_item", list_type, code, type, product, price, quantity, usr_inf.getName());
                 }
                 if (usr_inf.getOffline_mode()) {
                     if (price.equals(" ")){
                         price="null";
                     }
+
+                    read_from_internal_DB();
                     old_codes = db.add_new_item(product, type, quantity, price, code, usr_inf.getName());
                 }
                 reload_ui(1);
+                adapter.notifyDataSetChanged();
                 all_items_l.clear();
                 meat_items_l.clear();
                 vegetables_items_l.clear();
@@ -862,9 +872,6 @@ public class Items extends AppCompatActivity
                 dairy_items_l.clear();
                 sweet_items_l.clear();
                 others_items_l.clear();
-                adapter.notifyDataSetChanged();
-                if (usr_inf.getOffline_mode())
-                    read_from_internal_DB();
                 // New item added
                 print_db();
                 Log.d(TAG,"Adding new Item");
@@ -1165,9 +1172,16 @@ public class Items extends AppCompatActivity
                             e.printStackTrace();
                         }
                         db.set_item_flag(main_receiver, 0);
-                        print_db();
-
-                        update_ShoppingList(list);
+                        all_items_l.clear();
+                        meat_items_l.clear();
+                        vegetables_items_l.clear();
+                        cereals_items_l.clear();
+                        dairy_items_l.clear();
+                        sweet_items_l.clear();
+                        others_items_l.clear();
+                        adapter.notifyDataSetChanged();
+                        //update_ShoppingList(list);
+                        getAll_products();
                         reload_ui(1);
                         Log.v(TAG, "Added new product correctly");
                     }
@@ -1587,6 +1601,7 @@ public class Items extends AppCompatActivity
             sweet_items_l.clear();
             others_items_l.clear();
             adapter.notifyDataSetChanged();
+            listview_items.setVisibility(View.GONE);
             loading.setVisibility(View.VISIBLE);
         }
         @Override
@@ -1607,6 +1622,7 @@ public class Items extends AppCompatActivity
         @Override
         protected void onPostExecute(Void result) {
             loading.setVisibility(View.GONE);
+            listview_items.setVisibility(View.VISIBLE);
         }
     }
 

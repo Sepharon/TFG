@@ -105,8 +105,12 @@ public class DB_Helper {
     public String read_code(String list_name){
         String query = "SELECT " + DataBase.KEY_CODE + " FROM " + DataBase.Shopping_list_table_name
                 + " WHERE " + DataBase.KEY_LIST_NAME + String.format("='%s'",list_name);
+
         String result = DataBase.read_shopping_lists(query);
+        if (result == null) return "Error";
         return result;
+
+
     }
     public String read_shopping_list(int value,String code){
         String table_name = SQLiteDB.Shopping_list_table_name;
@@ -135,12 +139,8 @@ public class DB_Helper {
         }
 
         query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
-        try {
-            result = DataBase.read_shopping_lists(query);
-            if (result == null) return "Error";
-        } catch(android.database.CursorIndexOutOfBoundsException e){
-            return "Error";
-        }
+        result = DataBase.read_shopping_lists(query);
+        if (result == null) return "Error";
         return result;
     }
     public List<String[]> read_all_lists(){
@@ -166,6 +166,7 @@ public class DB_Helper {
             e.printStackTrace();
             Log.w(TAG,"Empty DB");
         }
+        result.close();
         return r;
     }
     public List<String[]> read_all_with_flag_set_list(){
@@ -189,6 +190,7 @@ public class DB_Helper {
             Log.w(TAG,"Empty DB");
         }
         Log.v(TAG,"read_all_flag " + r.toString());
+        result.close();
         return r;
     }
     // Afegeix un item nou i retorna el codi de aquest. Tambe afegeix una relacio entre llista i item
@@ -296,12 +298,9 @@ public class DB_Helper {
                 return null;
         }
         query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
-        try {
-            result = DataBase.read_item(query);
-            if (result == null) return "Error";
-        } catch(android.database.CursorIndexOutOfBoundsException e){
-            return "Error";
-        }
+
+        result = DataBase.read_item(query);
+        if (result == null) return "Error";
         return result;
     }
 
@@ -310,7 +309,7 @@ public class DB_Helper {
         String table_name = SQLiteDB.Items_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
-
+        Log.v(TAG,"COde: " + code);
         Cursor result;
         query = "SELECT * FROM " + table_name+" WHERE "+DataBase.KEY_CODE_LIST+String.format("='%s'",code);
         result = DataBase.read_multiple_entries(query);

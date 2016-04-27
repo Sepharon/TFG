@@ -112,6 +112,7 @@
     <string name="public_text">A public Shopping List can be accessed by users that you choose. Choose this option if you
     wish to share this Shopping List with more people</string>
     <string name="no_name_toast">You must write a name for your list</string>
+    <string name="list_name_error">A shopping list with this name already exists</string>
 
     <!-- Login -->
     <string name="offline_alert">Can not connect to the server</string>

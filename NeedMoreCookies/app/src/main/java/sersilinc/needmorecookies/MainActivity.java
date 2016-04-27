@@ -254,7 +254,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Show the products of the selected shopping list in a new activity
-        // TODO : SWITCH THIS TO INTERNAL DB AND REMOVE IS BOUND MARK
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -418,7 +417,7 @@ public class MainActivity extends AppCompatActivity
         //Register receiver
         registerReceiver(receiver, filter);
         registerReceiver();
-
+        db = new DB_Helper(getApplicationContext());
         //Get shopping lists
         //new ProgressTask().execute();
         if (!usr_inf.getOffline_mode())
@@ -546,7 +545,8 @@ public class MainActivity extends AppCompatActivity
                         db.set_list_flag(main,0);
                         print_db();
 
-                        getAll_ShoppingLists(usr_inf.getEmail());
+                        //getAll_ShoppingLists(usr_inf.getEmail());
+                        new ProgressTask_Back().execute();
                         reload_ui(is_private_serlected);
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
@@ -557,10 +557,7 @@ public class MainActivity extends AppCompatActivity
                                 .show();
                     else {
                         Toast.makeText(MainActivity.this, "Shopping List name changed", Toast.LENGTH_SHORT).show();
-                        public_list.clear();
-                        private_list.clear();
-                        adapter.notifyDataSetChanged();
-                        getAll_ShoppingLists(usr_inf.getEmail());
+                        new ProgressTask_Back().execute();
                         Log.v(TAG, "Name changed correctly");
                     }
                     break;
@@ -570,10 +567,11 @@ public class MainActivity extends AppCompatActivity
                     } else{
                         Log.v(TAG,"Shared list");
                         Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
-                        public_list.clear();
-                        private_list.clear();
-                        adapter.notifyDataSetChanged();
-                        getAll_ShoppingLists(usr_inf.getEmail());
+                        //public_list.clear();
+                        //private_list.clear();
+                        //adapter.notifyDataSetChanged();
+                        //getAll_ShoppingLists(usr_inf.getEmail());
+                        new ProgressTask_Back().execute();
                     }
                     //Log.v(TAG, "RECEIVED: "+list);
                     break;
@@ -582,11 +580,12 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this,R.string.delete_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        public_list.clear();
-                        private_list.clear();
-                        adapter.notifyDataSetChanged();
+                        //public_list.clear();
+                        //private_list.clear();
+                        //adapter.notifyDataSetChanged();
                         Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
-                        getAll_ShoppingLists(usr_inf.getEmail());
+                        //getAll_ShoppingLists(usr_inf.getEmail());
+                        new ProgressTask_Back().execute();
                     }
                     break;
                 case "Token":
@@ -661,9 +660,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
             Log.d(TAG,"Sharing shopping");
             Intent mail_intent = new Intent(Intent.ACTION_SEND);
-            mail_intent.setType("text/plain");
+            mail_intent.setType("message/rfc822");
             // Body of mail
-            mail_intent.putExtra(Intent.EXTRA_SUBJECT,R.string.mail_subject);
+            mail_intent.putExtra(Intent.EXTRA_SUBJECT,"Try Need More Cookies!");
             mail_intent.putExtra(Intent.EXTRA_TEXT,"I invite you to try this awesome app! You will be able to write and share shopping lists " +
                     "with your friends! \nDownload it here: test.com \nYour friend: " + usr_inf.getName());
             Intent final_intent = Intent.createChooser(mail_intent,"Choose mail client");
@@ -732,11 +731,13 @@ public class MainActivity extends AppCompatActivity
 
                         break;
                 }
-                public_list.clear();
-                private_list.clear();
-                adapter.notifyDataSetChanged();
-                if (usr_inf.getOffline_mode())
+                if (usr_inf.getOffline_mode()){
+                    public_list.clear();
+                    private_list.clear();
+                    adapter.notifyDataSetChanged();
                     read_from_internal_DB();
+                }
+
             }
         }
     }
@@ -825,7 +826,6 @@ public class MainActivity extends AppCompatActivity
             adapter.notifyDataSetChanged();
             Log.v(TAG,"UPDATE_USR");
             JSONObject json_obj = new JSONObject(result);
-            //Log.v(TAG, "length: " + json_obj.length());
             Iterator<String> keys = json_obj.keys();
             List<String> c = new ArrayList<>();
             while (keys.hasNext()) {
@@ -839,10 +839,6 @@ public class MainActivity extends AppCompatActivity
                 //Get timestamp
                 String timestamp = list1.getString("Timestamp");
 
-                //Variables to store the list name, type and code
-                //List<String> shopping_list_private = new ArrayList<>();
-                //List<String> shopping_list_public = new ArrayList<>();
-
                 int type = list1.getInt("TypeList");
                 //Check type of shopping list and store them in the User_Info class
                 //The format is the following: [[List_name, Type, Code, Timestamp], [List_name2, Type, Code, Timestamp],...]
@@ -850,17 +846,6 @@ public class MainActivity extends AppCompatActivity
                 Log.v(TAG,"List name: " + list_name);
                 switch (type) {
                     case 0:
-                  /*      shopping_list_public.add(list_name);
-                        shopping_list_public.add("0");
-                        shopping_list_public.add(code);
-                        shopping_list_public.add(timestamp);
-                        if (!public_list.contains(list_name)) {
-                            temp = new HashMap<String, String>();
-                            temp.put(FIRST_COLUMN, list_name);
-                            temp.put(SECOND_COLUMN, timestamp);
-                            public_list.add(temp);
-
-                        }*/
                         print_db();
                        // If server timestamp is newer than ours update name
                         if (db.read_shopping_list(0,code).equals("Error")) {
@@ -875,16 +860,7 @@ public class MainActivity extends AppCompatActivity
                         //reload_ui(Boolean.TRUE);
                         break;
                     case 1:
-                        /*shopping_list_private.add(list_name);
-                        shopping_list_private.add("1");
-                        shopping_list_private.add(code);
-                        shopping_list_private.add(timestamp);
-                        if (!private_list.contains(list_name)) {
-                            temp = new HashMap<String, String>();
-                            temp.put(FIRST_COLUMN, list_name);
-                            temp.put(SECOND_COLUMN, timestamp);
-                            private_list.add(temp);
-                        }*/
+
                         // If list not in DB insert it (might be added by someone else)
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             Log.v(TAG,"Item not found. Adding to DB");
@@ -988,6 +964,37 @@ public class MainActivity extends AppCompatActivity
         if (deleted_flag)
             Toast.makeText(MainActivity.this,R.string.external_delete,Toast.LENGTH_SHORT).show();
         print_db();
+    }
+
+    class ProgressTask_Back extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            loading.setVisibility(View.VISIBLE);
+            listview.setVisibility(View.GONE);
+            public_list.clear();
+            private_list.clear();
+            adapter.notifyDataSetChanged();
+
+        }
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            if (!usr_inf.getOffline_mode()) {
+                while (!server_service.return_response_status());
+                getAll_ShoppingLists(usr_inf.getEmail());
+            }
+            else
+                read_from_internal_DB();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            loading.setVisibility(View.GONE);
+            final Animation fadein = new AlphaAnimation(0, 1);
+            fadein.setDuration(1000);
+            listview.setVisibility(View.VISIBLE);
+            listview.setAnimation(fadein);
+
+        }
     }
 
     //Create the loading and get all the shopping lists when finished
@@ -1233,6 +1240,7 @@ public class MainActivity extends AppCompatActivity
                         db.set_list_flag(code, 0);
                         Log.v(TAG,"Changing list name");
                         send_request_server(list_name, list_type, "change_list_name", code, input.getText().toString());
+                        new ProgressTask_Back().execute();
                     }
                     else {
                         db.set_list_flag(code, 1);

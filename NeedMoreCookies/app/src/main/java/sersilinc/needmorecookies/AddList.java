@@ -34,7 +34,8 @@ public class AddList extends AppCompatActivity
 
     //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
-
+    // DB
+    DB_Helper db;
     //UI elements
     private Button add_friend;
     private ImageButton save;
@@ -80,7 +81,7 @@ public class AddList extends AppCompatActivity
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         /**[END GoogleApiClient]**/
-
+        db = new DB_Helper(getApplicationContext());
         /**[START onCLickListeners]**/
         // If save is clicked save data to server and return it
         save.setOnClickListener(new View.OnClickListener() {
@@ -88,7 +89,11 @@ public class AddList extends AppCompatActivity
         public void onClick(View v) {
             // Save list name, and if its public or private
             if (!list_name.getText().toString().equals("")) {
-                if (pub.isChecked() || priv.isChecked()) {
+                if (!db.read_code(list_name.getText().toString()).equals("Error")) {
+                    Log.v("AddList","Llist EXISTEIX");
+                    Toast.makeText(AddList.this, R.string.list_name_error, Toast.LENGTH_SHORT).show();
+                }
+                else if (pub.isChecked() || priv.isChecked()) {
                     Log.v("AddList: ", "Returning data");
                     Intent result_data = new Intent();
                     result_data.putExtra("List_Name", list_name.getText().toString());

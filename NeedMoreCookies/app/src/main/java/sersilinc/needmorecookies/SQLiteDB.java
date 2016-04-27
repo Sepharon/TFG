@@ -117,7 +117,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         values.put(KEY_PUBLIC,Public);
         values.put(KEY_CHANGE_TYPE,"new_list");
         // Insert values
+        db.beginTransaction();
         long newRowID = db.insert(Shopping_list_table_name,null,values);
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
         values.clear();
         return newRowID;
@@ -131,13 +134,14 @@ public class SQLiteDB extends SQLiteOpenHelper{
         // New name might be empty, meaning we just want to update timestamp
 
         values.put(key_value[0], key_value[1]);
-
+        db.beginTransaction();
         int count = db.update(
                 Shopping_list_table_name,
                 values,
                 KEY_CODE+" = ?",
                 new String[]{code});
-
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
         values.clear();
         Log.v(TAG,"count: " + count);
@@ -148,20 +152,29 @@ public class SQLiteDB extends SQLiteOpenHelper{
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Erasing list at " + update_time);
         SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
         db.delete(Shopping_list_table_name,
                 KEY_CODE + "= ?",
                 new String[]{code});
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
 
     }
     // Reads the values from shopping list table
     public String read_shopping_lists(String query){
+        String result;
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(query,null);
         if (cursor == null) return null;
         cursor.moveToFirst();
-        String result = cursor.getString(0);
-        cursor.close();
+        try {
+        result = cursor.getString(0);
+        } catch(android.database.CursorIndexOutOfBoundsException e){
+            return null;
+        } finally {
+            cursor.close();
+        }
         return result;
     }
 
@@ -183,7 +196,6 @@ public class SQLiteDB extends SQLiteOpenHelper{
 
         values.put(KEY_CODE, UUID.randomUUID().toString().replaceAll("-", ""));
 
-
         values.put(KEY_PRODUCT,Product);
         values.put(KEY_TYPE,Type);
         values.put(KEY_QUANTITY,Quantity);
@@ -197,8 +209,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         else
             values.put(KEY_FLAG,0);
         values.put(KEY_CHANGE_TYPE,"new_item");
+        db.beginTransaction();
         newRowID = db.insert(Items_table_name,null,values);
-
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
         values.clear();
 
@@ -212,12 +226,13 @@ public class SQLiteDB extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         Log.v(TAG,"Updating " + key_value[0] + " with " + key_value[1]);
         values.put(key_value[0],key_value[1]);
-
+        db.beginTransaction();
         int count = db.update(Items_table_name,
                 values,
                 KEY_CODE + "=?",
                 new String[]{code});
-
+        db.setTransactionSuccessful();
+        db.endTransaction();
         values.clear();
         db.close();
         // Number of affected rows
@@ -228,9 +243,12 @@ public class SQLiteDB extends SQLiteOpenHelper{
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Erasing item at " + update_time);
         SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
         db.delete(Items_table_name,
                 KEY_CODE + "= ?",
                 new String[]{code});
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
     }
 
@@ -239,21 +257,30 @@ public class SQLiteDB extends SQLiteOpenHelper{
         long update_time = System.currentTimeMillis();
         Log.v(TAG,"Erasing item at " + update_time);
         SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
         db.delete(Items_table_name,
                 KEY_CODE_LIST + "= ?",
                 new String[]{code_list});
+        db.setTransactionSuccessful();
+        db.endTransaction();
         db.close();
     }
 
 
     // Reads the values from item table
     public String read_item(String query){
+        String result;
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(query,null);
         if (cursor == null) return null;
         cursor.moveToFirst();
-        String result = cursor.getString(0);
-        cursor.close();
+        try {
+            result = cursor.getString(0);
+        } catch(android.database.CursorIndexOutOfBoundsException e){
+            return null;
+        } finally {
+            cursor.close();
+        }
         return result;
     }
 
