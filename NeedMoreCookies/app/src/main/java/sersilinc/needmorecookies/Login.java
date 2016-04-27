@@ -2,35 +2,23 @@ package sersilinc.needmorecookies;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
@@ -89,6 +77,7 @@ public class Login extends AppCompatActivity implements
 
         /**[START customize_button]**/
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        assert signInButton != null;
         signInButton.setSize(SignInButton.SIZE_WIDE);
         signInButton.setScopes(gso.getScopeArray());
         /**[END customize_button]**/
@@ -105,7 +94,6 @@ public class Login extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
         if (!is_network_available()){
-            Log.v(TAG,"Network4");
             final AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.offline_alert);
             alert.setMessage(R.string.offline_question);
@@ -162,7 +150,6 @@ public class Login extends AppCompatActivity implements
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (!is_network_available()){
-            Log.v(TAG,"Network3");
             final AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.offline_alert);
             alert.setMessage(R.string.offline_question);
@@ -181,25 +168,6 @@ public class Login extends AppCompatActivity implements
             alert.show();
         }
         if (result.isSuccess()) {
-            /*if (!is_network_available()) {
-                Log.v(TAG,"Network2");
-                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle(R.string.offline_alert);
-                alert.setMessage(R.string.offline_question);
-                alert.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        usr_inf.setOffline_mode(true);
-                        launch_next_activity();
-                    }
-                });
-                alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                alert.show();
-            }*/
             // acct stores data from the user (email,name...)
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.v(TAG, "" + acct.getDisplayName() + "" + acct.getEmail());
@@ -207,7 +175,6 @@ public class Login extends AppCompatActivity implements
             usr_inf.setOffline_mode(false);
             usr_inf.setEmail(acct.getEmail());
             usr_inf.setName(acct.getDisplayName());
-            //usr_inf.setmAPIClient(mGoogleApiClient);
             launch_next_activity();
         } else {
             // Signed out, show unauthenticated UI.

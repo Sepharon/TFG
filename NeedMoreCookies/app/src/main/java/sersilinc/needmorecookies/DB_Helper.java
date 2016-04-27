@@ -2,16 +2,15 @@ package sersilinc.needmorecookies;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Created by sergi on 19/04/16.
  * The aim of this class is to help other classes deal with the DB by offering more high end functions
  * rather than the low end functions found in the SQLiteDB class
  */
@@ -23,7 +22,7 @@ public class DB_Helper {
     private static SQLiteDB DataBase;
 
     public DB_Helper(Context context) {
-        Log.v(TAG,"Initializing DB_Helper");
+        Log.d(TAG,"Initializing DB_Helper");
         DataBase = new SQLiteDB(context);
     }
 
@@ -32,7 +31,7 @@ public class DB_Helper {
     }
 
     public String add_new_list(String new_list,int type){
-        Log.v(TAG,"added new list with name: "+new_list);
+        Log.d(TAG,"added new list with name: "+new_list);
         DataBase.add_new_list(new_list,type);
         return get_code_last_list();
     }
@@ -72,13 +71,14 @@ public class DB_Helper {
     }
 
     public boolean update_timestamp_android(String code){
-        String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-        Log.v(TAG,"Changing list name at " + timeStamp);
+        String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+        Log.d(TAG,"Changing list name at " + timeStamp);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(timeStamp)},code);
         return result!=0;
     }
+
     public boolean update_timestamp_server(String code,String time){
-        Log.v(TAG,"Changing list name at " + time);
+        Log.d(TAG,"Changing list name at " + time);
         int result = DataBase.update_list(new String[] {DataBase.KEY_UPDATE,String.valueOf(time)},code);
         return result!=0;
     }
@@ -90,12 +90,10 @@ public class DB_Helper {
     }
 
     public void delete_list(String code){
-        String ID_List = read_shopping_list(0,code);
-        if (ID_List.equals("Error"))
-            ID_List = "-1";
+        Log.d(TAG,"Deleting Shopping List");
         DataBase.delete_list(code);
-        DataBase.delete_list_relation(Integer.parseInt(ID_List));
     }
+
     public String get_code_last_list(){
         String query = "SELECT " + DataBase.KEY_CODE + " FROM " +DataBase.Shopping_list_table_name +
                 " WHERE ID_List=(SELECT MAX(ID_List) FROM " + DataBase.Shopping_list_table_name +")";
@@ -105,15 +103,13 @@ public class DB_Helper {
     public String read_code(String list_name){
         String query = "SELECT " + DataBase.KEY_CODE + " FROM " + DataBase.Shopping_list_table_name
                 + " WHERE " + DataBase.KEY_LIST_NAME + String.format("='%s'",list_name);
-
         String result = DataBase.read_shopping_lists(query);
         if (result == null) return "Error";
         return result;
-
-
     }
+
     public String read_shopping_list(int value,String code){
-        String table_name = SQLiteDB.Shopping_list_table_name;
+        String table_name = DataBase.Shopping_list_table_name;
         String key,query,result;
         switch(value) {
             case 0:
@@ -143,8 +139,9 @@ public class DB_Helper {
         if (result == null) return "Error";
         return result;
     }
+
     public List<String[]> read_all_lists(){
-        String table_name = SQLiteDB.Shopping_list_table_name;
+        String table_name = DataBase.Shopping_list_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
 
@@ -169,8 +166,9 @@ public class DB_Helper {
         result.close();
         return r;
     }
+
     public List<String[]> read_all_with_flag_set_list(){
-        String table_name = SQLiteDB.Shopping_list_table_name;
+        String table_name = DataBase.Shopping_list_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
 
@@ -187,88 +185,76 @@ public class DB_Helper {
             } while (result.moveToNext());
         } catch (android.database.CursorIndexOutOfBoundsException e){
             e.printStackTrace();
-            Log.w(TAG,"Empty DB");
+            Log.d(TAG,"Empty DB");
         }
-        Log.v(TAG,"read_all_flag " + r.toString());
+        Log.d(TAG,"read_all_flag " + r.toString());
         result.close();
         return r;
     }
-    // Afegeix un item nou i retorna el codi de aquest. Tambe afegeix una relacio entre llista i item
+    // Adds a new item to the database
     public String add_new_item(String Product, String Type, String Quantity, String Price,String shopping_list_code,String user){
-        //String ID_List,ID_Item;
-
-        //ID_List = read_shopping_list(0,shopping_list_code);
-        //if (ID_List.equals("Error")) return "Error";
         // Add new item
-        long result = DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user);
-
-        //ID_Item = DataBase.read_item("SELECT " + DataBase.KEY_ID_ITEM + " FROM " + SQLiteDB.Items_table_name +" ORDER BY column DESC LIMIT 1");
-        // Update timestamp
+        DataBase.add_new_item(Product, Type, Quantity, Price, shopping_list_code, user);
         update_timestamp_android(shopping_list_code);
-        //add_new_relation(Integer.parseInt(ID_List),Integer.parseInt(ID_Item));
         return get_code_last_item();
     }
 
-    /*
-    public boolean update_list_change(String new_change,String code){
-        Log.d(TAG,"Updating list change type to: " + new_change);
-        int result  = DataBase.update_list(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code);
-        int result2 = DataBase.update_list(new String[]{DataBase.KEY_FLAG,"1"},code);
-        return (result&result2)!=0;
-    }
-     */
     public boolean update_item_change(String new_change, String code_item){
         int result  = DataBase.update_item(new String[]{DataBase.KEY_CHANGE_TYPE, new_change},code_item);
         int result2 = DataBase.update_item(new String[]{DataBase.KEY_FLAG,"1"},code_item);
         return (result&result2)!=0;
     }
 
-    /* Edita el nom, preu i quantitat de un item. Si el item te la sync flag activa i el ultim change type
-     es new_item nomes canvia el nom,preu i quantitat */
+    // Edits an item, if the item has the sync flag set and the change type is set to new item,
+    // then we do not update the change type
     public boolean update_item_value(String product, String quantity, String price,String code_item){
         String key;
         String change_type="update_item";
-
         // If sync flag is active do not change type
         if (read_item(5,code_item).equals("1") && read_item(6,code_item).equals("new_item")) change_type = "new_item";
-        // set values
+        // Set values
         key= DataBase.KEY_PRODUCT;
         int result1 = DataBase.update_item(new String[]{key,product},code_item);
+
         key= DataBase.KEY_PRICE;
         int result2 = DataBase.update_item(new String[]{key,price},code_item);
+
         key= DataBase.KEY_QUANTITY;
         int result3 = DataBase.update_item(new String[]{key,quantity},code_item);
-        // change type
+
+        // Change type
         int result4 = DataBase.update_item(new String[]{DataBase.KEY_CHANGE_TYPE,change_type},code_item);
         return ((result1 > 0) && (result2 > 0)&& (result3 > 0)&& (result4 > 0));
     }
 
-    // Canvia el codi de un item
+    // Change the code of an item
     public boolean update_item_itemcode(String new_code,String code){
         Log.d(TAG,"Updating code");
         int result = DataBase.update_item(new String[]{DataBase.KEY_CODE, new_code},code);
         return result!=0;
     }
-    // canvia la flag de sincronitzacio del item
+
+    // Set the sync flag to 1 or 0
     public boolean set_item_flag(String code, int flag){
         int result = DataBase.update_item(new String[]{DataBase.KEY_FLAG,"" + flag},code);
         return result!=0;
     }
 
-    // Agafa el codi del ultim item que s'ha afegit
-    // Quant afegeixes un item nou ja et retorna el codi
+    // Returns the code from the last item that has been added
     public String get_code_last_item(){
         String query = "SELECT " + DataBase.KEY_CODE + " FROM " +DataBase.Items_table_name +
                 " WHERE ID_Item=(SELECT MAX(ID_Item) FROM " + DataBase.Items_table_name +")";
         return DataBase.read_item(query);
     }
-    // Esborra un item
+
+    // Deletes an item
     public void delete_item(String code){
         DataBase.delete_item(code);
     }
-    //Llegeix un item
+
+    // Reads an item
     public String read_item(int value,String code){
-        String table_name = SQLiteDB.Items_table_name;
+        String table_name = DataBase.Items_table_name;
         String key,query,result;
 
         switch (value){
@@ -294,22 +280,21 @@ public class DB_Helper {
                 key = DataBase.KEY_CHANGE_TYPE;
                 break;
             default:
-                Log.v(TAG,"unknown value in read_item");
+                Log.d(TAG,"unknown value in read_item");
                 return null;
         }
         query = "SELECT " + key + " FROM " + table_name + " WHERE " + DataBase.KEY_CODE + String.format("='%s'",code);
-
         result = DataBase.read_item(query);
         if (result == null) return "Error";
         return result;
     }
 
-    // Llegeix tots els items
+    // Reads all the items
     public List<String[]> read_all_items(String code){
-        String table_name = SQLiteDB.Items_table_name;
+        String table_name = DataBase.Items_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
-        Log.v(TAG,"COde: " + code);
+        Log.d(TAG,"COde: " + code);
         Cursor result;
         query = "SELECT * FROM " + table_name+" WHERE "+DataBase.KEY_CODE_LIST+String.format("='%s'",code);
         result = DataBase.read_multiple_entries(query);
@@ -326,13 +311,14 @@ public class DB_Helper {
             } while (result.moveToNext());
         } catch (android.database.CursorIndexOutOfBoundsException e){
             e.printStackTrace();
-            Log.w(TAG,"Empty DB");
+            Log.d(TAG,"Empty DB");
         }
         return r;
     }
-    // Llegeix tots els items amb la flag de sync activa
+
+    // Reads all items with the sync flag set
     public List<String[]> read_all_with_flag_set_item(){
-        String table_name = SQLiteDB.Items_table_name;
+        String table_name = DataBase.Items_table_name;
         String query;
         List<String[]> r = new ArrayList<>();
 
@@ -351,18 +337,10 @@ public class DB_Helper {
             e.printStackTrace();
             Log.w(TAG, "Empty DB");
         }
-        Log.v(TAG,"read_all " + r.toString());
+        Log.d(TAG,"read_all " + r.toString());
         return r;
 
     }
-    /*
-    public boolean add_new_relation(int ID_List,int ID_Item){
-        return DataBase.new_list(ID_List,ID_Item) != -1;
-    }
-
-    public void delete_relation(int ID_Item){
-        DataBase.delete_list_relation(ID_Item);
-    }*/
 
     public void delete_all_items_of_one_list(String code_list){
         DataBase.delete_all_items(code_list);

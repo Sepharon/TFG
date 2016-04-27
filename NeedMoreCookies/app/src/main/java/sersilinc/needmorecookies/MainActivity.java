@@ -32,7 +32,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -59,14 +58,8 @@ import com.google.android.gms.common.api.Status;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.Timestamp;
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,14 +79,12 @@ public class MainActivity extends AppCompatActivity
     private boolean is_bound_server = false;
 
     //Receiver
-    private String GoogleAccount;
     private String request_type;
     private String list;
     private String main;
     private String update_product;
     public MyReceiver receiver;
     private IntentFilter filter;
-    private boolean received = false;
 
     // UI elements
     private Button private_lists;
@@ -106,14 +97,12 @@ public class MainActivity extends AppCompatActivity
     private View third_layout;
 
     //Lists
-    private List<List<String>> private_l;
-    private List<List<String>> public_l;
     private String old_codes;
 
     // ListView
     private ListView listview;
     // Private and public list names
-    private ArrayList<HashMap<String, String>> private_list = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> private_list = new ArrayList<>();
     private ArrayList<HashMap<String, String>> public_list = new ArrayList<HashMap<String, String>>();
     HashMap<String, String> temp;
     //Columns
@@ -132,7 +121,7 @@ public class MainActivity extends AppCompatActivity
     //Timer
     private CountDownTimer timer,timer2;
     // Selected private or public tab
-    private boolean is_private_serlected = true;
+    private boolean is_private_selected = true;
     //Selected shopping list
     private int currentSelection;
 
@@ -143,7 +132,6 @@ public class MainActivity extends AppCompatActivity
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private boolean isReceiverRegistered;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
 
     @Override
     protected void onCreate(Bundle saveInstanceState) {
@@ -165,7 +153,6 @@ public class MainActivity extends AppCompatActivity
         bindService(in, mConnection2, Context.BIND_AUTO_CREATE);
         /**[END Bind service Update Server]**/
 
-
         /**[START UI elements]**/
         private_lists = (Button) findViewById(R.id.private_lists);
         public_lists = (Button) findViewById(R.id.public_lists);
@@ -174,8 +161,8 @@ public class MainActivity extends AppCompatActivity
         listview = (ListView) findViewById(R.id.list);
         welcome = (TextView) findViewById(R.id.welcome_text);
         loading = (ProgressBar) findViewById(R.id.progressBar);
-        first_layout = (View) findViewById(R.id.firstLayout);
-        third_layout = (View) findViewById(R.id.thirdLayout);
+        first_layout = findViewById(R.id.firstLayout);
+        third_layout = findViewById(R.id.thirdLayout);
         /**[END UI elements]**/
 
         /**[START DataBase]**/
@@ -185,22 +172,22 @@ public class MainActivity extends AppCompatActivity
         /**[START List view]**/
         adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
 
-        //listview.setAdapter(adapter);
         listview.setAdapter(adapter);
-        //registerForContextMenu(listview);
         /**[END List view]**/
 
         /**[START Navigation]**/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            assert toolbar != null;
             toolbar.setElevation(25);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        assert drawer != null;
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -220,7 +207,6 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 1);
             }
         });
-
         /**[END AddList call]**/
 
         /**[START GoogleApiClient]**/
@@ -238,21 +224,14 @@ public class MainActivity extends AppCompatActivity
         private_lists.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Do things here
-                if (separator1.getVisibility() != View.VISIBLE) {
-                    // Set Adapted for private lists
-                    reload_ui(true);
-                }
+                if (separator1.getVisibility() != View.VISIBLE) reload_ui(true);
+
             }
         });
         public_lists.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Do things here
-                if (separator2.getVisibility() != View.VISIBLE) {
-                    // Set Adapted for private lists
-                    reload_ui(false);
-                }
+                if (separator2.getVisibility() != View.VISIBLE) reload_ui(false);
             }
         });
 
@@ -276,7 +255,6 @@ public class MainActivity extends AppCompatActivity
                         bundle.putString("code_list", db.read_code(selected));
                         bundle.putString("GoogleAccount", usr_inf.getEmail());
                         msg.setData(bundle);
-
                         //Send message
                         try {
                             mService.send(msg);
@@ -299,7 +277,6 @@ public class MainActivity extends AppCompatActivity
         listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                //Log.v(TAG, "OnItemLongClickListener");
                 System.out.println("Long click");
                 currentSelection = position;
                 startActionMode(modeCallBack);
@@ -319,7 +296,6 @@ public class MainActivity extends AppCompatActivity
         timer = new CountDownTimer(120000, 1000) { //2min
             public void onTick(long millisUntilFinished) {}
             public void onFinish() {
-                //Log.v(TAG, "timer");
                 if (!usr_inf.getOffline_mode())
                     getAll_ShoppingLists(usr_inf.getEmail());
                 start();
@@ -351,12 +327,11 @@ public class MainActivity extends AppCompatActivity
                         });
                         alert.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(DialogInterface dialog, int which){
                                 timer2.cancel();
                             }
                         });
                         alert.show();
-
                     }
                     else {
                         Log.d(TAG, "Internet back");
@@ -369,21 +344,17 @@ public class MainActivity extends AppCompatActivity
         }
         /**[END Counter]**/
 
-
         //GCM
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 SharedPreferences sharedPreferences =
                         PreferenceManager.getDefaultSharedPreferences(context);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                sharedPreferences.getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
             }
         };
-
         // Registering BroadcastReceiver
         registerReceiver();
-
         if (checkPlayServices()) {
             // Start IntentService to register this application with GCM.
             Intent intent2 = new Intent(this, RegistrationIntentService.class);
@@ -394,7 +365,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        reload_ui(is_private_serlected);
+        reload_ui(is_private_selected);
     }
 
     protected void onStart() {
@@ -410,24 +381,21 @@ public class MainActivity extends AppCompatActivity
         if (timer2 != null) timer2.cancel();
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         //Restart timer
         timer.start();
-        if (timer2 != null) timer2.start();
+        if (timer2 != null && usr_inf.getOffline_mode()) timer2.start();
         //Register receiver
         registerReceiver(receiver, filter);
         registerReceiver();
         db = new DB_Helper(getApplicationContext());
         //Get shopping lists
-        //new ProgressTask().execute();
         if (!usr_inf.getOffline_mode())
             getAll_ShoppingLists(usr_inf.getEmail());
-        reload_ui(is_private_serlected);
+        reload_ui(is_private_selected);
     }
-
 
     @Override
     protected void onPause() {
@@ -435,6 +403,7 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
         isReceiverRegistered = false;
     }
+
     private void registerReceiver(){
         if(!isReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
@@ -457,8 +426,6 @@ public class MainActivity extends AppCompatActivity
             is_bound_server = false;
         }
 
-        //Unregister receiver
-        //unregisterReceiver(receiver);
         db.destroy_class();
         timer.cancel();
         if (timer2 != null) timer2.cancel();
@@ -472,7 +439,6 @@ public class MainActivity extends AppCompatActivity
             Log.v(TAG, "Binding service");
             mService = new Messenger(service);
             is_bound = true;
-
             //Get the shopping lists and displaying a loading progress circle
             new ProgressTask().execute();
         }
@@ -503,15 +469,12 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-
-
     //Receiver from Services
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             request_type = intent.getStringExtra("Request");
             main = intent.getStringExtra("Main");
-            GoogleAccount = intent.getStringExtra("GoogleAccount");
             Log.v(TAG,"Request: "+ request_type);
             //Check type of request
             switch(request_type){
@@ -536,7 +499,6 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        received = true;
                         Log.v(TAG,"adding new code: " + main);
                         Log.v(TAG,"old_code: " + old_codes);
                         db.update_list_code(main,old_codes);
@@ -547,10 +509,8 @@ public class MainActivity extends AppCompatActivity
                         }
                         db.set_list_flag(main,0);
                         print_db();
-
-                        //getAll_ShoppingLists(usr_inf.getEmail());
                         new ProgressTask_Back().execute();
-                        reload_ui(is_private_serlected);
+                        reload_ui(is_private_selected);
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
                     break;
@@ -570,24 +530,15 @@ public class MainActivity extends AppCompatActivity
                     } else{
                         Log.v(TAG,"Shared list");
                         Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
-                        //public_list.clear();
-                        //private_list.clear();
-                        //adapter.notifyDataSetChanged();
-                        //getAll_ShoppingLists(usr_inf.getEmail());
                         new ProgressTask_Back().execute();
                     }
-                    //Log.v(TAG, "RECEIVED: "+list);
                     break;
                 case "delete_list":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this,R.string.delete_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        //public_list.clear();
-                        //private_list.clear();
-                        //adapter.notifyDataSetChanged();
                         Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
-                        //getAll_ShoppingLists(usr_inf.getEmail());
                         new ProgressTask_Back().execute();
                     }
                     break;
@@ -603,6 +554,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        assert drawer != null;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -635,17 +587,16 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(getBaseContext(), R.string.offline_update, Toast.LENGTH_SHORT).show();
                     Toast.makeText(getBaseContext(),R.string.offline_update_warning,Toast.LENGTH_SHORT).show();
                     read_from_internal_DB();
-                    reload_ui(is_private_serlected);
+                    reload_ui(is_private_selected);
                 }
                 return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
-
     }
+
     //Navigation
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -676,12 +627,11 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_logout) {
             signOut();
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     //Sign Out from Google Account
     private void signOut() {
@@ -699,39 +649,29 @@ public class MainActivity extends AppCompatActivity
     //Get result from AddList activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        //Log.v(TAG, "Received result");
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
                 //Check which type of list the user wants to add
                 switch (Type){
                     // private
                     case "true":
-                        //temp = new HashMap<String, String>();
-                        //temp.put(FIRST_COLUMN, list_name);
                         if (usr_inf.getOffline_mode())
                             old_codes =db.add_new_list(list_name,1);
-                        //private_list.add(temp);
                         Log.v(TAG,"name: " + list_name);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "1", "new_list", "", "");
-
                         reload_ui(true);
                         break;
                     // public
                     case "false":
-                        //temp = new HashMap<String, String>();
-                        //temp.put(FIRST_COLUMN, list_name);
                         if (usr_inf.getOffline_mode())
                             old_codes = db.add_new_list(list_name,0);
                         reload_ui(false);
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "0", "new_list","", "");
-
                         break;
                 }
                 if (usr_inf.getOffline_mode()){
@@ -740,7 +680,6 @@ public class MainActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     read_from_internal_DB();
                 }
-
             }
         }
     }
@@ -771,14 +710,14 @@ public class MainActivity extends AppCompatActivity
     //Change the UI either private or public shopping lists
     private void reload_ui(Boolean type){
         if (type){
-            is_private_serlected = true;
+            is_private_selected = true;
             list_type="1";
             adapter = new ListViewAdapters(this, private_list, "MainActivity", list_type);
             separator1.setVisibility(View.VISIBLE);
             separator2.setVisibility(View.INVISIBLE);
         }
         else {
-            is_private_serlected = false;
+            is_private_selected = false;
             list_type="0";
             adapter = new ListViewAdapters(this, public_list, "MainActivity", list_type);
             separator2.setVisibility(View.VISIBLE);
@@ -787,7 +726,6 @@ public class MainActivity extends AppCompatActivity
         // Create listview
         listview.setAdapter(adapter);
     }
-
 
     //When a shopping lists is pressed, change to Items activity and send the items
     private void changeActivity(String main, String list){
@@ -802,13 +740,11 @@ public class MainActivity extends AppCompatActivity
     private void getAll_ShoppingLists(String GoogleAccount){
         if (is_bound) {
             // Create and send a message to the service, using a supported 'what' value
-            //Log.v(TAG, "Getting ready");
             Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
             Bundle bundle = new Bundle();
             bundle.putString("request", "all");
             bundle.putString("GoogleAccount", GoogleAccount);
             msg.setData(bundle);
-
             //Send message
             try {
                 mService.send(msg);
@@ -817,13 +753,13 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
-        //else Log.v(TAG,"NOT BOUND");
     }
+
     //Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
             boolean name_change_flag = false;
-            int i = 0;
+
             public_list.clear();
             private_list.clear();
             adapter.notifyDataSetChanged();
@@ -835,13 +771,10 @@ public class MainActivity extends AppCompatActivity
                 //Get list name
                 String list_name = String.valueOf(keys.next());
                 JSONObject list1 = json_obj.getJSONObject(list_name);
-
                 //Get the code
                 String code = list1.getString("Code");
-
                 //Get timestamp
                 String timestamp = list1.getString("Timestamp");
-
                 int type = list1.getInt("TypeList");
                 //Check type of shopping list and store them in the User_Info class
                 //The format is the following: [[List_name, Type, Code, Timestamp], [List_name2, Type, Code, Timestamp],...]
@@ -859,11 +792,8 @@ public class MainActivity extends AppCompatActivity
                             db.update_list_code(code,old_code);
                         }
                         print_db();
-                        //usr_inf.setPublic_lists(shopping_list_public);
-                        //reload_ui(Boolean.TRUE);
                         break;
                     case 1:
-
                         // If list not in DB insert it (might be added by someone else)
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             Log.v(TAG,"Item not found. Adding to DB");
@@ -872,8 +802,6 @@ public class MainActivity extends AppCompatActivity
                             db.set_list_flag(code,0);
                             db.update_list_code(code,old_code);
                         }
-                        //usr_inf.setPrivate_lists(shopping_list_private);
-                        //reload_ui(Boolean.TRUE);
                         break;
                 }
                 if (!db.read_shopping_list(1,code).equals(list_name)) {
@@ -882,7 +810,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 db.update_timestamp_server(code, timestamp);
                 db.set_list_flag(code,0);
-                i++;
             }
             if (name_change_flag)
                 Toast.makeText(MainActivity.this,R.string.external_name_change,Toast.LENGTH_SHORT).show();
@@ -892,7 +819,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
         read_from_internal_DB();
-        reload_ui(is_private_serlected);
+        reload_ui(is_private_selected);
     }
 
     private void read_from_internal_DB(){
@@ -903,11 +830,6 @@ public class MainActivity extends AppCompatActivity
         if (a!=null) {
             for (int i = 0; i < a.size(); i++) {
                 String[] b = a.get(i);
-                /*Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(Long.parseLong(b[1]));
-                int mYear = calendar.get(Calendar.YEAR);
-                int mMonth = calendar.get(Calendar.MONTH);
-                int mDay = calendar.get(Calendar.DAY_OF_MONTH);*/
                 if (a.get(i)[3].equals("1")) {
                     shopping_list_private.add(b[0]); // listname
                     shopping_list_private.add(b[3]); // Private
@@ -920,7 +842,6 @@ public class MainActivity extends AppCompatActivity
                         private_list.add(temp);
                     }
                     Log.v(TAG,"Lists: " + String.valueOf(private_list));
-                    usr_inf.setPrivate_lists(shopping_list_private);
                 } else {
                     shopping_list_public.add(b[0]); // listname
                     shopping_list_public.add(b[3]); // Private
@@ -932,12 +853,12 @@ public class MainActivity extends AppCompatActivity
                         temp.put(SECOND_COLUMN, b[1]);
                         public_list.add(temp);
                     }
-                    usr_inf.setPublic_lists(shopping_list_public);
                 }
             }
         }
     }
-    // removes unused lists.
+
+    // Removes unused lists.
     private void remove_deleted_SL(List<String> c){
         int i;
         boolean deleted_flag = false;
@@ -982,6 +903,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... arg0) {
             if (!usr_inf.getOffline_mode()) {
+                //noinspection StatementWithEmptyBody
                 while (!server_service.return_response_status());
                 getAll_ShoppingLists(usr_inf.getEmail());
             }
@@ -996,11 +918,10 @@ public class MainActivity extends AppCompatActivity
             fadein.setDuration(1000);
             listview.setVisibility(View.VISIBLE);
             listview.setAnimation(fadein);
-
         }
     }
 
-    //Create the loading and get all the shopping lists when finished
+    // Create the loading and get all the shopping lists when finished
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -1022,7 +943,6 @@ public class MainActivity extends AppCompatActivity
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             return null;
         }
 
@@ -1039,12 +959,11 @@ public class MainActivity extends AppCompatActivity
             welcome.setVisibility(View.VISIBLE);
             welcome.setAnimation(fadein);
             welcome.setAnimation(fadeOut);
-            reload_ui(is_private_serlected);
+            reload_ui(is_private_selected);
             fadeOut.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                 }
-
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     welcome.setVisibility(View.GONE);
@@ -1056,7 +975,6 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setAnimation(fadein);
                     if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", usr_inf.getName());
                 }
-
                 @Override
                 public void onAnimationRepeat(Animation animation) {
                 }
@@ -1064,13 +982,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
     //On long pressed in a shopping list, display options
     private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            //mode.setTitle("Options");
             mode.getMenuInflater().inflate(R.menu.menu_list, menu);
             return true;
         }
@@ -1086,14 +1001,12 @@ public class MainActivity extends AppCompatActivity
             switch (id) {
                 case R.id.delete: {
                     delete_shoppingList();
-                    //adapter.remove(adapter.getItem(currentSelection));
                     mode.finish();
                     break;
                 }
                 case R.id.edit: {
                     edit_shoppingList();
                     mode.finish();
-                    //System.out.println(" edit ");
                     break;
                 }
                 case R.id.share:{
@@ -1102,7 +1015,6 @@ public class MainActivity extends AppCompatActivity
                     else
                         Toast.makeText(MainActivity.this,R.string.offline_share, Toast.LENGTH_LONG).show();
                     mode.finish();
-                    //System.out.println(" share ");
                     break;
                 }
                 default:
@@ -1115,7 +1027,6 @@ public class MainActivity extends AppCompatActivity
         public void onDestroyActionMode(ActionMode mode) {
         }
     };
-
 
     private void share_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -1143,7 +1054,7 @@ public class MainActivity extends AppCompatActivity
                         Object shop_list = adapter.getItem(currentSelection);
                         String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
 
-                        String tmp_code = "";
+                        String tmp_code;
                         tmp_code = db.read_code(list_name);
                         db.update_list_public(0,tmp_code);
                         send_request_server(list_name, list_type,
@@ -1152,14 +1063,11 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
-
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
-
         alert.show();
-
     }
 
     private boolean validateEmail(String email) {
@@ -1180,14 +1088,12 @@ public class MainActivity extends AppCompatActivity
         alert.setTitle(R.string.delete_list_alert);
         alert.setMessage(R.string.delete_list_msg);
 
-
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String code_list;
                 String status="";
                 Object shop_list = adapter.getItem(currentSelection);
                 String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
-
                 code_list = db.read_code(list_name);
                 // fake delete until synchronize
                 if (!usr_inf.getOffline_mode()) {
@@ -1202,7 +1108,7 @@ public class MainActivity extends AppCompatActivity
                     private_list.clear();
                     adapter.notifyDataSetChanged();
                     read_from_internal_DB();
-                    reload_ui(is_private_serlected);
+                    reload_ui(is_private_selected);
                 }
             }
         });
@@ -1211,10 +1117,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
-
         alert.show();
-
-
     }
 
     private void edit_shoppingList(){
@@ -1222,7 +1125,6 @@ public class MainActivity extends AppCompatActivity
 
         alert.setTitle(R.string.change_name_list);
         alert.setMessage(R.string.set_new_name_msg);
-
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -1234,7 +1136,6 @@ public class MainActivity extends AppCompatActivity
                     String code="";
                     Object shop_list = adapter.getItem(currentSelection);
                     String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
-
                     print_db();
                     code = db.read_code(list_name);
                     db.update_list_name(input.getText().toString(),code);
@@ -1251,7 +1152,7 @@ public class MainActivity extends AppCompatActivity
                         private_list.clear();
                         adapter.notifyDataSetChanged();
                         read_from_internal_DB();
-                        reload_ui(is_private_serlected);
+                        reload_ui(is_private_selected);
                     }
                 }
             }
@@ -1261,7 +1162,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
-
         alert.show();
     }
 
@@ -1277,10 +1177,7 @@ public class MainActivity extends AppCompatActivity
         for (int i = 0; i< entries.size(); i++){
             entry = entries.get(i);
             Log.d(TAG,"entry: " + Arrays.toString(entry));
-            // listname, is_private,objective,code,set_value
             db.set_list_flag(entry[1],0);
-            Log.v(TAG,"COntents: " + entry[2]);
-            Log.v(TAG,"Change type: " + entry[3]);
             if (entry[3].equals("new_list")) old_codes = entry[1];
             if (entry[3].equals("change_list_name"))
                 send_request_server("_",entry[2],entry[3],entry[1],entry[0]);
@@ -1295,7 +1192,6 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
-
         print_db();
         return true;
     }
@@ -1335,7 +1231,6 @@ public class MainActivity extends AppCompatActivity
         }
         return true;
     }
-
 
     /**
      * Helper method to determine if the device has an extra-large screen. For

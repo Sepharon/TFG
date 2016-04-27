@@ -58,7 +58,6 @@ public class Update_Android extends Service {
     //Incoming messages handler
     private Messenger msg = new Messenger(new IncomingHandler());
 
-
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "Binding");
@@ -68,14 +67,12 @@ public class Update_Android extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //Log.v(TAG, "Created");
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //return super.onStartCommand(intent, flags, startId);
         Log.v(TAG, "StartCommand");
         return START_STICKY;
     }
@@ -85,7 +82,6 @@ public class Update_Android extends Service {
         JSONObject mainJSON = json_obj.getJSONObject("main");
         Intent broadcast = new Intent();
         broadcast.setAction("broadcast_service");
-
         broadcast.putExtra("Main", mainJSON.toString());
 
         //Process type of request and broadcast it
@@ -104,7 +100,6 @@ public class Update_Android extends Service {
                         broadcast.putExtra("Update_Products", "False");
                         break;
                 }
-
                 broadcast.putExtra("One_list", listJSON.toString());
                 break;
         }
@@ -112,10 +107,7 @@ public class Update_Android extends Service {
         sendBroadcast(broadcast);
     }
 
-
     private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String Friend, final String source) {
-        //Log.v(TAG, "full url = " + url);
-
         // Create new thread so not to block URL
         Thread t = new Thread(new Runnable() {
             @Override
@@ -123,7 +115,6 @@ public class Update_Android extends Service {
                 try {
                     String result;
                     JSONObject json_obj = new JSONObject();
-
                     //Process type of request. Depending on the value, we create a different JSON object.
                     switch (request) {
                         case "all":
@@ -142,13 +133,10 @@ public class Update_Android extends Service {
                     JSONObject mainObj = new JSONObject();
                     mainObj.put("main", json_obj);
 
-                    //Log.v(TAG, mainObj.toString());
-
                     URL link_url = new URL(url);
                     urlConnection = (HttpsURLConnection) link_url.openConnection();
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "application/json");
-                    //urlConnection.setRequestProperty("Accept", "application/json");
                     urlConnection.setReadTimeout(5000);
                     urlConnection.connect();
                     Log.v(TAG, "Connected");
@@ -164,15 +152,11 @@ public class Update_Android extends Service {
 
                     //Read
                     InputStream stream = urlConnection.getInputStream();
-
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-
                     String line;
                     StringBuilder sb = new StringBuilder();
 
-                    while ((line = bufferedReader.readLine()) != null) {
-                        sb.append(line);
-                    }
+                    while ((line = bufferedReader.readLine()) != null) sb.append(line);
 
                     bufferedReader.close();
                     result = sb.toString();
@@ -184,7 +168,6 @@ public class Update_Android extends Service {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
 
                 } catch (MalformedURLException e) {
                     Log.v(TAG, "Malformed");
@@ -229,6 +212,7 @@ public class Update_Android extends Service {
                         Log.v("Service:", request);
                         try {
                             //Process type of request and send POST request
+                            assert request != null;
                             switch (request) {
                                 case "one_list":
                                     String source = msg.getData().getString("Activity");

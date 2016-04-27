@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.design.widget.NavigationView;
@@ -25,7 +24,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -61,7 +59,6 @@ public class MapsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener {
 
-
     //TAG for Logs
     private final String TAG = "MapsActivity: ";
 
@@ -79,7 +76,6 @@ public class MapsActivity extends AppCompatActivity
 
     // Might be null if Google Play services APK is not available.
     private GoogleMap mMap;
-
 
     //Places
     private Marker[] placeMarkers;
@@ -101,10 +97,12 @@ public class MapsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout3);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        assert drawer != null;
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view3);
+        assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         /**[END NAVIGATION MENU]**/
 
@@ -124,14 +122,12 @@ public class MapsActivity extends AppCompatActivity
 
         /**[END SIGN OUT]**/
 
-
         //Places
         placeMarkers = new Marker[MAX_PLACES];
         userIcon = R.drawable.yellow_point;
         foodIcon = R.drawable.red_point;
         storeIcon = R.drawable.blue_point;
         shopIcon = R.drawable.green_point;
-
 
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -142,7 +138,6 @@ public class MapsActivity extends AppCompatActivity
         if (User_Info.getInstance().getOffline_mode())
             Toast.makeText(MapsActivity.this,R.string.no_connection_maps,Toast.LENGTH_SHORT).show();
     }
-
 
     /**
      * Manipulates the map once available.
@@ -166,7 +161,6 @@ public class MapsActivity extends AppCompatActivity
         super.onResume();
     }
 
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -180,7 +174,6 @@ public class MapsActivity extends AppCompatActivity
         // Start next activity
         startActivity(intent);
     }
-
 
     //Navigation
     @Override
@@ -217,10 +210,10 @@ public class MapsActivity extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout3);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     //Sign Out from Google Account
     private void signOut() {
@@ -235,7 +228,6 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -248,9 +240,7 @@ public class MapsActivity extends AppCompatActivity
         super.onStop();
     }
 
-
     //Location
-
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
@@ -264,14 +254,11 @@ public class MapsActivity extends AppCompatActivity
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-
         }
     }
 
     @Override
     public boolean onMyLocationButtonClick() {
-        // Toast.makeText(this, R.string.location_enable, Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -281,7 +268,6 @@ public class MapsActivity extends AppCompatActivity
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else if (mMap != null) {
             locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
             try {
                 Location lastLoc = locMan.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 double lat = lastLoc.getLatitude();
@@ -309,7 +295,6 @@ public class MapsActivity extends AppCompatActivity
         if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             return;
         }
-
         if (PermissionUtils.isPermissionGranted(permissions, grantResults,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
             // Enable the my location layer if the permission has been granted.
@@ -367,7 +352,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-
     private class GetPlaces extends AsyncTask<String, Void, String> {
         //fetch and parse place data
         @Override
@@ -392,15 +376,9 @@ public class MapsActivity extends AppCompatActivity
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 
                     String line;
-
-
-                    while ((line = bufferedReader.readLine()) != null) {
-                        sb.append(line);
-                    }
-
+                    while ((line = bufferedReader.readLine()) != null) sb.append(line);
                     bufferedReader.close();
                     String result = sb.toString();
-                    Log.v(TAG, "Result: " + result);
 
                 } catch (MalformedURLException e) {
                     Log.v(TAG, "Malformed");
@@ -426,11 +404,9 @@ public class MapsActivity extends AppCompatActivity
             int currIcon = foodIcon;
             //parse place data returned from Google Places
             if (placeMarkers != null) {
-                for (int pm = 0; pm < placeMarkers.length; pm++) {
-                    if (placeMarkers[pm] != null)
-                        placeMarkers[pm].remove();
+                for (int pm = 0; pm < placeMarkers.length; pm++)
+                    if (placeMarkers[pm] != null) placeMarkers[pm].remove();
 
-                }
                 try {
                     //parse JSON
                     JSONObject resultObject = new JSONObject(result);
@@ -471,7 +447,8 @@ public class MapsActivity extends AppCompatActivity
                             missingValue=true;
                             jse.printStackTrace();
                         }
-                        if(missingValue)    places[p]=null;
+
+                        if(missingValue) places[p]=null;
                         else
                             places[p]=new MarkerOptions()
                                     .position(placeLL)
@@ -493,7 +470,5 @@ public class MapsActivity extends AppCompatActivity
             }
         }
     }
-
-
 }
 

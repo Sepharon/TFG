@@ -16,8 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
@@ -37,7 +35,6 @@ public class AddList extends AppCompatActivity
     // DB
     DB_Helper db;
     //UI elements
-    private Button add_friend;
     private ImageButton save;
     private EditText list_name;
     private Switch pub, priv;
@@ -54,7 +51,6 @@ public class AddList extends AppCompatActivity
         list_name = (EditText) findViewById(R.id.list_name);
         priv = (Switch) findViewById(R.id.private_switch);
         pub = (Switch) findViewById(R.id.public_switch);
-        //add_friend = (Button) findViewById(R.id.add_friends);
         save = (ImageButton) findViewById(R.id.save);
         /**[END UI elements]**/
 
@@ -65,10 +61,12 @@ public class AddList extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        assert drawer != null;
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_list);
+        assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         /**[END Navigation]**/
 
@@ -89,12 +87,11 @@ public class AddList extends AppCompatActivity
         public void onClick(View v) {
             // Save list name, and if its public or private
             if (!list_name.getText().toString().equals("")) {
-                if (!db.read_code(list_name.getText().toString()).equals("Error")) {
-                    Log.v("AddList","Llist EXISTEIX");
+                if (!db.read_code(list_name.getText().toString()).equals("Error"))
                     Toast.makeText(AddList.this, R.string.list_name_error, Toast.LENGTH_SHORT).show();
-                }
+
                 else if (pub.isChecked() || priv.isChecked()) {
-                    Log.v("AddList: ", "Returning data");
+                    Log.d("AddList: ", "Returning data");
                     Intent result_data = new Intent();
                     result_data.putExtra("List_Name", list_name.getText().toString());
                     result_data.putExtra("Type", "" + priv.isChecked());
@@ -141,17 +138,15 @@ public class AddList extends AppCompatActivity
         }
     }
 
-
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
-
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
+        assert drawer != null;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -195,6 +190,7 @@ public class AddList extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

@@ -13,14 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -47,9 +44,6 @@ public class AddItem extends AppCompatActivity
     //Flags
     private boolean product_added = false;
     private boolean quantity_added = false;
-    private boolean product_changed = false;
-    private boolean quantity_changed = false;
-    private boolean price_changed = false;
 
     //Strings
     private String edit;
@@ -70,10 +64,12 @@ public class AddItem extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        assert drawer != null;
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_item);
+        assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         /**[END Navigation]**/
 
@@ -100,6 +96,7 @@ public class AddItem extends AppCompatActivity
         //Get JSON Strings from the MainActivity
         try {
             edit = extras.getString("Edit");
+            assert edit != null;
             if (edit.equals("True")) {
                 Product_name = extras.getString("Product");
                 Quantity_prod = extras.getString("Quantity");
@@ -137,16 +134,11 @@ public class AddItem extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent result_data = new Intent();
-                //Log.v("additem",Price.getText().toString());
                 if (edit.equals("True")) {
                     result_data.putExtra("product", Product.getText().toString());
                     result_data.putExtra("quantity", Quantity.getText().toString());
                     result_data.putExtra("price", Price.getText().toString());
                     result_data.putExtra("type", type.getSelectedItem().toString());
-
-                    //result_data.putExtra("product_changed", product_changed);
-                    //result_data.putExtra("quantity_changed", quantity_changed);
-                    //result_data.putExtra("price_changed", price_changed);
                 } else {
                     result_data.putExtra("product", Product.getText().toString());
                     result_data.putExtra("quantity", Quantity.getText().toString());
@@ -171,7 +163,6 @@ public class AddItem extends AppCompatActivity
         Product.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                product_changed = false;
             }
 
             @Override
@@ -192,14 +183,12 @@ public class AddItem extends AppCompatActivity
 
             @Override
             public void afterTextChanged(Editable s) {
-                product_changed = true;
             }
         });
 
         Quantity.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                quantity_changed = false;
             }
 
             @Override
@@ -221,36 +210,16 @@ public class AddItem extends AppCompatActivity
 
             @Override
             public void afterTextChanged(Editable s) {
-                quantity_changed = true;
             }
         });
 
-        Price.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                price_changed = false;
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                price_changed = true;
-            }
-        });
         /**[END TextChangedListener]**/
-
 
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-
-
     }
 
     protected void onStart() {
@@ -258,10 +227,10 @@ public class AddItem extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
+        assert drawer != null;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -305,10 +274,10 @@ public class AddItem extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
+        assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     //Sign Out from Google Account
     private void signOut() {

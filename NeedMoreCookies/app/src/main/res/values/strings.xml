@@ -86,7 +86,7 @@
     <string name="title_activity_contact_us"><b>"Contact us"</b></string>
     <string name="contact">If you want to contact us, you can send an email pressing the button below</string>
     <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)
-        \n\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roomates...
+        \n\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roommates…
     </string>
     <string name="title_activity_add_list"><b>"Add Shopping List"</b></string>
     <string name="title_activity_add_item"><b>"Add Product"</b></string>
@@ -158,7 +158,7 @@
     <string name="mail_subject">Join me in Need More Cookies!</string>
     <string name="mail_text">I invite you to try this awesome app! You will be able to write and share shopping lists
     with your friends! \n Download it here: test.com \n Your friend: </string>
-    <string name="choose_mail">Send mail with...</string>
+    <string name="choose_mail">Send mail with…</string>
 
 
 </resources>

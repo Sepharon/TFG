@@ -4,10 +4,8 @@ package sersilinc.needmorecookies;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -21,14 +19,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
-
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 
 import java.util.List;
 
@@ -180,16 +171,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || ContactPreferenceFragment.class.getName().equals(fragmentName);
     }
 
-    /*
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Intent intent = new Intent(SettingsActivity.this,MainActivity.class);
-        // Start next activity
-        startActivity(intent);
-    }/*
-
-
     /**
      * This fragment shows general preferences only. It is used when the
      * activity is showing a two-pane settings UI.
@@ -207,7 +188,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("currency_list"));
-            //bindPreferenceSummaryToValue(findPreference("size_text"));
         }
 
         @Override
@@ -251,7 +231,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     }
 
-
     /**
      * This fragment shows help.
      */
@@ -284,14 +263,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("example_text"));
-            //bindPreferenceSummaryToValue(findPreference("contact"));
-            //bindPreferenceSummaryToValue(findPreference("about"));
         }
 
         @Override
