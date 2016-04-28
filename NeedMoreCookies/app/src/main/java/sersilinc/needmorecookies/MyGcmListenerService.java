@@ -21,7 +21,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -56,12 +55,6 @@ public class MyGcmListenerService extends GcmListenerService {
         String title = data.getString("title");
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
-
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
-        }
 
         /**[START Preferences]**/
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
