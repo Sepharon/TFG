@@ -104,7 +104,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         if (notifications) {
             notificationBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                    .setSmallIcon(R.drawable.cookie_icon2_notifications)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setAutoCancel(true)
@@ -114,7 +114,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 notificationBuilder.setSound(defaultSoundUri);
             }
             if (vibrate) {
-                notificationBuilder.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+                notificationBuilder.setVibrate(new long[]{500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,500});
             }
 
             NotificationManager notificationManager =
