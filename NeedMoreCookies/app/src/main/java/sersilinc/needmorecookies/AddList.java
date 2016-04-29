@@ -30,13 +30,19 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+/**
+ * This class is used to give the user an UI to add a new Shopping List, the Shopping List and the name
+ * are given back the the MainActivity class to process
+ */
 public class AddList extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
+
     // DB
     DB_Helper db;
+
     //UI elements
     private ImageButton save;
     private EditText list_name;
@@ -49,7 +55,9 @@ public class AddList extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_list);
+        // Make the Activity start with the software keyboard hidden
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         /**[START UI elements]**/
         list_name = (EditText) findViewById(R.id.list_name);
         priv = (Switch) findViewById(R.id.private_switch);
@@ -89,15 +97,21 @@ public class AddList extends AppCompatActivity
         public void onClick(View v) {
             // Save list name, and if its public or private
             if (!list_name.getText().toString().equals("")) {
+                // Check if a Shopping List with this name already exists
                 if (!db.read_code(list_name.getText().toString()).equals("Error"))
                     Toast.makeText(AddList.this, R.string.list_name_error, Toast.LENGTH_SHORT).show();
-
+                // Check that wither pub or piv is checked
                 else if (pub.isChecked() || priv.isChecked()) {
                     Log.d("AddList: ", "Returning data");
+                    // Return data to the MainActivity.java
                     Intent result_data = new Intent();
+                    // Send the name of the Shopping List
                     result_data.putExtra("List_Name", list_name.getText().toString());
+                    // And the type (Public or Private)
                     result_data.putExtra("Type", "" + priv.isChecked());
+                    // Send result
                     setResult(MainActivity.RESULT_OK, result_data);
+                    // Finish activity
                     finish();
                 } else
                     Toast.makeText(AddList.this, "You must choose a public or private list", Toast.LENGTH_LONG).show();
@@ -106,19 +120,23 @@ public class AddList extends AppCompatActivity
         }
         });
 
+        // Public toggle button
         pub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // If the pub toggle is not set nor is the priv toggle, make the save button invisible
                 if (!pub.isChecked() && !priv.isChecked()){
                     first_time = true;
                     save.setVisibility(View.GONE);
                 }
+                // If the last time both toggles were not set and pub is toggled, play an animation
                 if (pub.isChecked() && first_time) start_animation();
+                // If pub is checked and priv is checked, toggle the value of priv
                 if (pub.isChecked() && priv.isChecked()) priv.toggle();
 
             }
         });
-
+        // Private toggle button
         priv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -139,29 +157,27 @@ public class AddList extends AppCompatActivity
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
-
+    // This function is called when the app starts, after the onCreate method
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+    // This method is called when the back button is pressed
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
         assert drawer != null;
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
+        else super.onBackPressed();
+
     }
 
-    //Navigation
+    // Navigation drawer listener, is called when an item from the navigation drawer is clicked
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_locations) {
             Intent intent = new Intent(AddList.this,MapsActivity.class);
             // Start next activity
@@ -187,9 +203,7 @@ public class AddList extends AppCompatActivity
             // Start Mail chooser
             startActivity(final_intent);
 
-        } else if (id == R.id.nav_logout) {
-            signOut();
-        }
+        } else if (id == R.id.nav_logout) signOut();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
         assert drawer != null;
@@ -197,6 +211,7 @@ public class AddList extends AppCompatActivity
         return true;
     }
 
+    // Start the fade in in animation
     private void start_animation(){
         first_time = false;
         Animation fadein = new AlphaAnimation(0,1);
@@ -204,7 +219,6 @@ public class AddList extends AppCompatActivity
         save.setVisibility(View.VISIBLE);
         save.setAnimation(fadein);
     }
-
 
     //Sign Out from Google Account
     private void signOut() {

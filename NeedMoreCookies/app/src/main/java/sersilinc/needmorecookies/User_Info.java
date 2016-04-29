@@ -1,7 +1,8 @@
 package sersilinc.needmorecookies;
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * This class contains information about the user and the current session
+ */
 
 // Shows name, email and other info
 public class User_Info {
@@ -10,18 +11,18 @@ public class User_Info {
     // Name,email
     private String name;
     private String email;
-
+    // Offline mode
     private boolean offline_mode;
 
     //Instantiate
     private static User_Info user_info = new User_Info();
-
     public static User_Info getInstance(){
         return user_info;
     }
 
     // Dummy class init
     public User_Info(){}
+
     // Actual class init
     public User_Info(String name,String email){
         super();

@@ -12,10 +12,16 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * The aim of this class is to create the internal DB and to implement some method to help
+ * working with it.
+ */
+
 public class SQLiteDB extends SQLiteOpenHelper{
 
     private final String TAG = "SQLiteDB";
 
+    // DataBase information
     private static int DATABASE_VERSION = 1;
     private static String DATABASE_NAME = "Shopping_Lists";
 
@@ -48,7 +54,8 @@ public class SQLiteDB extends SQLiteOpenHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-
+    // Database classes are special, this onCreate method will only be called if there is no
+    // database in the device instead of being called every time the app starts
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG,"Creating DB");
@@ -80,6 +87,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         db.execSQL(ITEMS_TABLE);
     }
 
+    // This method is called when we wish to upgrade the DB
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(TAG,"THIS WILL DELETE THE CONTENTS OF THE DB");
@@ -89,6 +97,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         DATABASE_VERSION = newVersion;
     }
 
+    // This method is called every time we open the DB, it allows to use the delete cascade keyword
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
@@ -104,10 +113,10 @@ public class SQLiteDB extends SQLiteOpenHelper{
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
         Log.d(TAG,"Creating new list at " + timeStamp);
         Log.d(TAG,"With name: " + list_name);
-
+        // Create a DB connection
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-
+        // Put the values
         values.put(KEY_LIST_NAME,list_name);
         values.put(KEY_UPDATE,timeStamp);
         if (User_Info.getInstance().getOffline_mode()) {
@@ -134,7 +143,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return newRowID;
     }
 
-    // Update list name
+    // Update list name, the key_value array contains the key and the value to update from the DB
     public int update_list(String[] key_value,String code){
         Log.d(TAG,"Updating list: " + code);
 
@@ -153,6 +162,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         db.close();
         values.clear();
         Log.d(TAG,"count: " + count);
+        // Return the number of row affected
         return count;
     }
 
@@ -179,23 +189,28 @@ public class SQLiteDB extends SQLiteOpenHelper{
         if (cursor == null) return null;
         cursor.moveToFirst();
         try {
+            // Get the result
         result = cursor.getString(0);
         } catch(android.database.CursorIndexOutOfBoundsException e){
+            // If the item does not exist return null
             return null;
         } finally {
+            // Finally close the cursor
             cursor.close();
+            db.close();
         }
         return result;
     }
 
+    // Read multiple values from the DB, return a cursor which contains all the values.
     public Cursor read_multiple_entries(String query){
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(query,null);
-
         if (cursor == null) return null;
         return cursor;
     }
 
+    // Add a new item to the DB
     public long add_new_item(String Product, String Type, String Quantity, String Price, String Code_list, String user){
         long newRowID;
 
@@ -226,6 +241,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return newRowID;
     }
 
+    // Update an item
     public int update_item(String[] key_value,String code){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -244,7 +260,7 @@ public class SQLiteDB extends SQLiteOpenHelper{
         return count;
     }
 
-    // Delete item
+    // Delete an item
     public void delete_item(String code){
         SQLiteDatabase db = this.getWritableDatabase();
 

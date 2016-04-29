@@ -48,9 +48,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -70,6 +68,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This is the main class for the App, this class acts as the main UI interface as well as
+ * a connection to most of the other classes, processing the SHopping List, establishing connection
+ * to the server and working with the internal DB to synchronize entries.
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -106,10 +109,12 @@ public class MainActivity extends AppCompatActivity
 
     // ListView
     private ListView listview;
+
     // Private and public list names
     private ArrayList<HashMap<String, String>> private_list = new ArrayList<>();
     private ArrayList<HashMap<String, String>> public_list = new ArrayList<>();
     HashMap<String, String> temp;
+
     //Columns
     private static final String FIRST_COLUMN = "First";
     private static final String SECOND_COLUMN = "Second";
@@ -122,19 +127,19 @@ public class MainActivity extends AppCompatActivity
 
     //User info
     private User_Info usr_inf;
+
     private String list_type = "";
     //Timer
     private CountDownTimer timer,timer2;
+
     // Selected private or public tab
     private boolean is_private_selected = true;
+
     //Selected shopping list
     private int currentSelection;
 
     //Database
     DB_Helper db;
-
-    // Ads
-    private InterstitialAd mInterstitialAd;
 
     //GCM
     private BroadcastReceiver mRegistrationBroadcastReceiver;
@@ -358,7 +363,7 @@ public class MainActivity extends AppCompatActivity
         }
         /**[END Counter]**/
 
-        //GCM
+        /**[START Google Notification Token Registration]**/
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -374,19 +379,26 @@ public class MainActivity extends AppCompatActivity
             Intent intent2 = new Intent(this, RegistrationIntentService.class);
             startService(intent2);
         }
+        /**[END Google Notification Token Registration]**/
+
+        /**[START Screen Orientation]**/
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+        /**[END Screen Orientation]**/
+
         reload_ui(is_private_selected);
     }
 
+    // This function is called when the app starts, after the onCreate method
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+    // This function is called when the app stops
     @Override
     protected void onStop() {
         super.onStop();
@@ -395,10 +407,11 @@ public class MainActivity extends AppCompatActivity
         if (timer2 != null) timer2.cancel();
     }
 
+    // This function is called when the app "comes back"
     @Override
     protected void onResume() {
         super.onResume();
-        //Restart timer
+        //Restart timers
         timer.start();
         if (timer2 != null && usr_inf.getOffline_mode()) timer2.start();
         //Register receiver
@@ -408,9 +421,10 @@ public class MainActivity extends AppCompatActivity
         //Get shopping lists
         if (!usr_inf.getOffline_mode())
             getAll_ShoppingLists(usr_inf.getEmail());
+        // reload user interface
         reload_ui(is_private_selected);
     }
-
+    // Equivalent of onResume method
     @Override
     protected void onPause() {
         super.onPause();
@@ -418,6 +432,7 @@ public class MainActivity extends AppCompatActivity
         isReceiverRegistered = false;
     }
 
+    // Receiver registration
     private void registerReceiver(){
         if(!isReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
@@ -426,10 +441,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // This function is called when the app is closed or killed
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         // Unbind from the services
         if (is_bound) {
             unbindService(mConnection);
@@ -439,8 +454,9 @@ public class MainActivity extends AppCompatActivity
             unbindService(mConnection2);
             is_bound_server = false;
         }
-
+        // Unload DB from memory
         db.destroy_class();
+        // Stops timers
         timer.cancel();
         if (timer2 != null) timer2.cancel();
     }
@@ -474,6 +490,7 @@ public class MainActivity extends AppCompatActivity
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
             is_bound_server = true;
+            // Synchronize internal DB entries with server entries
             if (!usr_inf.getOffline_mode())
                 send_unsynced_entries();
         }
@@ -492,6 +509,7 @@ public class MainActivity extends AppCompatActivity
             Log.v(TAG,"Request: "+ request_type);
             //Check type of request
             switch(request_type){
+                // Get one Shopping List from the server
                 case "one_list":
                     update_product = intent.getStringExtra("Update_Products");
                     if (!update_product.equals("True")) {
@@ -500,6 +518,7 @@ public class MainActivity extends AppCompatActivity
                         changeActivity(main, list);
                     }
                     break;
+                // Get all Shopping List from the server
                 case "all":
                     Log.v(TAG,"Getting lists");
                     list = intent.getStringExtra("all");
@@ -508,6 +527,7 @@ public class MainActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     update_Users_data(list);
                     break;
+                // New Shopping List added in the server, returns the list code
                 case "new_list":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this, R.string.add_list_error,Toast.LENGTH_SHORT)
@@ -515,47 +535,55 @@ public class MainActivity extends AppCompatActivity
                     else {
                         Log.v(TAG,"adding new code: " + main);
                         Log.v(TAG,"old_code: " + old_codes);
+                        // Change the code from the internal DB for the code from the server
                         db.update_list_code(main,old_codes);
+                        // Security measure
                         try {
                             db.delete_list(old_codes);
                         } catch (android.database.CursorIndexOutOfBoundsException e){
                             e.printStackTrace();
                         }
+                        // Disable sync flag
                         db.set_list_flag(main,0);
                         print_db();
+                        // Reload the UI
                         new ProgressTask_Back().execute();
                         reload_ui(is_private_selected);
                         Log.v(TAG, "Added new Shopping List correctly");
                     }
                     break;
+                // Name changed for a Shopping List, return True if name changed correctly
                 case "change_list_name":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this, R.string.change_list_name_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        Toast.makeText(MainActivity.this, "Shopping List name changed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.sl_name_change_ok, Toast.LENGTH_SHORT).show();
                         new ProgressTask_Back().execute();
                         Log.v(TAG, "Name changed correctly");
                     }
                     break;
+                // Share a Shopping List
                 case "add_usr_to_list":
                     if (main.equals("False")){
-                        Toast.makeText(MainActivity.this, "The email you have entered does not belong to an existing user", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.error_share_sl, Toast.LENGTH_SHORT).show();
                     } else{
                         Log.v(TAG,"Shared list");
-                        Toast.makeText(MainActivity.this, "Shopping list shared", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.share_sl_ok, Toast.LENGTH_SHORT).show();
                         new ProgressTask_Back().execute();
                     }
                     break;
+                // Shopping List deleted
                 case "delete_list":
                     if (main.equals("False"))
                         Toast.makeText(MainActivity.this,R.string.delete_list_error,Toast.LENGTH_SHORT)
                                 .show();
                     else {
-                        Toast.makeText(MainActivity.this, "Shopping list deleted", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.delete_sl_ok, Toast.LENGTH_SHORT).show();
                         new ProgressTask_Back().execute();
                     }
                     break;
+                // Token for notifications added
                 case "Token":
                     String token = intent.getStringExtra("Token");
                     send_request_server("_", "_", "add_token", "_", token);
@@ -565,19 +593,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // This method is called when the back button is pressed
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;
+        // If the navigation drawer is open, close it
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            // Else, finish the activity
             finish();
             super.onBackPressed();
         }
 
     }
 
+    // Creates the options menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -585,13 +617,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // This method is called when an option from the menu is clicked
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Clear lists
         public_list.clear();
         private_list.clear();
         adapter.notifyDataSetChanged();
         switch (item.getItemId()) {
+            // If the update button was clicked..
             case R.id.action_update:
+                // Check if we are offline or online and update the shopping lists from the server
+                // or from the internal DB
                 if (!usr_inf.getOffline_mode()) {
                     Log.v(TAG,"update online");
                     Log.v(TAG,"" + usr_inf.getOffline_mode());
@@ -613,22 +650,27 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Navigation
+    // Navigation drawer listener, is called when an item from the navigation drawer is clicked
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        // Supermarkets Item selected
         if (id == R.id.nav_locations) {
             Intent intent = new Intent(MainActivity.this,MapsActivity.class);
             // Start next activity
             startActivity(intent);
-        } else if (id == R.id.nav_manage) {
+        }
+        // Settings Item selected
+        else if (id == R.id.nav_manage) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
-        } else if (id == R.id.nav_share) {
+        }
+        // Share App Item selected
+        else if (id == R.id.nav_share) {
             Log.d(TAG,"Sharing shopping");
+            // Create a template for an email and let the user choose which mail client to use
             Intent mail_intent = new Intent(Intent.ACTION_SEND);
             mail_intent.setType("message/rfc822");
             // Body of mail
@@ -639,10 +681,10 @@ public class MainActivity extends AppCompatActivity
             final_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             // Start Mail chooser
             startActivity(final_intent);
-
-        } else if (id == R.id.nav_logout) {
-            signOut();
         }
+        // Logout from the system
+        else if (id == R.id.nav_logout) signOut();
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
@@ -662,26 +704,30 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    //Get result from AddList activity
+    // Get result from AddList activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Request code is always 1 if it comes from the AddList activity
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
+                // Get the name of the list and the Type (Private or Public)
                 String list_name = data.getStringExtra("List_Name");
                 String Type = data.getStringExtra("Type");
                 //Check which type of list the user wants to add
                 switch (Type){
-                    // private
+                    // Private
                     case "true":
+                        // If we are in offline mode, add the new list to the internal DB
                         if (usr_inf.getOffline_mode())
                             old_codes =db.add_new_list(list_name,1);
                         Log.v(TAG,"name: " + list_name);
+                        // Else, send a request to the server to add the new list
                         if (!usr_inf.getOffline_mode())
                             send_request_server(list_name, "1", "new_list", "", "");
                         reload_ui(true);
                         break;
-                    // public
+                    // Public
                     case "false":
                         if (usr_inf.getOffline_mode())
                             old_codes = db.add_new_list(list_name,0);
@@ -690,6 +736,7 @@ public class MainActivity extends AppCompatActivity
                             send_request_server(list_name, "0", "new_list","", "");
                         break;
                 }
+                // If we are in offline mode, reload de UI with the new Shopping List
                 if (usr_inf.getOffline_mode()){
                     public_list.clear();
                     private_list.clear();
@@ -700,19 +747,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Send request to Update Server service
+    // Send request to Update Server service
     private void send_request_server(String list_name,String is_private, final String Objective, String code, String set_value){
         Log.v(TAG,"objective: " + server_service.get_objective(Objective));
+        // Set the values for the JSON object
         server_service.set_values(server_service.get_objective(Objective), code, list_name, "True", is_private);
         server_service.set_items("_", "_", set_value, "_", "_");
+        // Create a new Thread to send and wait for a response
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+                // Send the request
                 server_service.send_request();
+                // Wait for the server to give an answer back
                 //noinspection StatementWithEmptyBody
                 while (!server_service.return_response_status());
+                // Read response
                 String response = server_service.return_result();
                 Log.v("Thread", response);
+                // Give the response to the UI Thread to process
                 Intent intent = new Intent();
                 intent.setAction("broadcast_service");
                 intent.putExtra("Main", response);
@@ -753,6 +806,7 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    // Send a request to the server to give us all the Shopping Lists that belong to a user.
     private void getAll_ShoppingLists(String GoogleAccount){
         if (is_bound) {
             // Create and send a message to the service, using a supported 'what' value
@@ -771,11 +825,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Update the UI with all the shopping lists
+    // Update the UI with all the shopping lists
     private void update_Users_data(String result){
         try {
             boolean name_change_flag = false;
-
+            // Clear the lists
             public_list.clear();
             private_list.clear();
             adapter.notifyDataSetChanged();
@@ -783,11 +837,12 @@ public class MainActivity extends AppCompatActivity
             JSONObject json_obj = new JSONObject(result);
             Iterator<String> keys = json_obj.keys();
             List<String> c = new ArrayList<>();
+            // Get the Shopping Lists
             while (keys.hasNext()) {
                 //Get list name
                 String list_name = String.valueOf(keys.next());
                 JSONObject list1 = json_obj.getJSONObject(list_name);
-                //Get the code
+                //Get the Shopping List code
                 String code = list1.getString("Code");
                 //Get timestamp
                 String timestamp = list1.getString("Timestamp");
@@ -799,7 +854,7 @@ public class MainActivity extends AppCompatActivity
                 switch (type) {
                     case 0:
                         print_db();
-                       // If server timestamp is newer than ours update name
+                       // If the Shopping Lists code is not in the internal DB, add it.
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             Log.v(TAG,"Item not found. Adding to DB");
                             Log.v(TAG,"List name: " + list_name);
@@ -810,7 +865,6 @@ public class MainActivity extends AppCompatActivity
                         print_db();
                         break;
                     case 1:
-                        // If list not in DB insert it (might be added by someone else)
                         if (db.read_shopping_list(0,code).equals("Error")) {
                             Log.v(TAG,"Item not found. Adding to DB");
                             Log.v(TAG,"List name: " + list_name);
@@ -820,49 +874,50 @@ public class MainActivity extends AppCompatActivity
                         }
                         break;
                 }
+                // If the code is there but the list name is not the same from the server
+                // update the lists name in the internal DB
                 if (!db.read_shopping_list(1,code).equals(list_name)) {
                     db.update_list_name(list_name, code);
                     name_change_flag = true;
                 }
+                // Update the timestamp with the timestamp from the server
                 db.update_timestamp_server(code, timestamp);
+                // Set the sync flag to 0
                 db.set_list_flag(code,0);
             }
+            // If the name has changed show a small message
             if (name_change_flag)
                 Toast.makeText(MainActivity.this,R.string.external_name_change,Toast.LENGTH_SHORT).show();
+            // Removes the lists from the internal DB that have been erased from the server.
             remove_deleted_SL(c);
 
         } catch (JSONException e){
             e.printStackTrace();
         }
+        // Since the DB is as updated as the server, read entries from the DB and display them in the UI
         read_from_internal_DB();
         reload_ui(is_private_selected);
     }
 
+    // This function reads the entries from the internal DB and displays them in the UI
     private void read_from_internal_DB(){
         Log.d(TAG,"Reading from internal DB");
-        List<String> shopping_list_private = new ArrayList<>();
-        List<String> shopping_list_public = new ArrayList<>();
+        // Read entries from the DB
         List<String[]> a = db.read_all_lists();
         if (a!=null) {
+            // Go through them
             for (int i = 0; i < a.size(); i++) {
                 String[] b = a.get(i);
+                // Check if they are private or public Shopping Lists
                 if (a.get(i)[3].equals("1")) {
-                    shopping_list_private.add(b[0]); // listname
-                    shopping_list_private.add(b[3]); // Private
-                    shopping_list_private.add(b[2]); // code
-                    shopping_list_private.add(b[1]); // timestamp
                     if (!private_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
                         temp.put(SECOND_COLUMN,b[1]);
+                        // Add them to the list view (UI)
                         private_list.add(temp);
                     }
-                    Log.v(TAG,"Lists: " + String.valueOf(private_list));
                 } else {
-                    shopping_list_public.add(b[0]); // listname
-                    shopping_list_public.add(b[3]); // Private
-                    shopping_list_public.add(b[2]); // code
-                    shopping_list_private.add(b[1]); // timestamp
                     if (!public_list.contains(b[0])) {
                         temp = new HashMap<>();
                         temp.put(FIRST_COLUMN, b[0]);
@@ -880,18 +935,21 @@ public class MainActivity extends AppCompatActivity
         boolean deleted_flag = false;
         Log.v(TAG,"Removing lists");
         List<String[]> internal_db_lists;
+        // Codes from the internal DB
         List<String> internal_codes = new ArrayList<>();
-        // Grab all entries from DB
         print_db();
+        // Grab all entries from DB
         internal_db_lists = db.read_all_lists();
         // Add all codes from entries into a list
         for (i = 0;i < internal_db_lists.size();i++)
             internal_codes.add(internal_db_lists.get(i)[2]);
         // If one of the received codes is inside the DB remove it form the list
         for (i = 0;i < c.size(); i++){
-            Log.d(TAG,"received lists: " + c.get(i));
-            if (internal_codes.contains(c.get(i)))
+            // Compare the codes from the internal DB with the ones from the server
+            if (internal_codes.contains(c.get(i))) {
+                // If the code is in the internal DB delete it from the list
                 internal_codes.remove(c.get(i));
+            }
         }
         // In case there are still codes in the DB that are not on the server remove them from the DB
         if (internal_codes.size() > 0){
@@ -901,14 +959,18 @@ public class MainActivity extends AppCompatActivity
                 db.delete_list(internal_codes.get(i));
             }
         }
+        // If an item was deleted show a message saying so
         if (deleted_flag)
             Toast.makeText(MainActivity.this,R.string.external_delete,Toast.LENGTH_SHORT).show();
         print_db();
     }
 
+    // This class allows to create an synchronous task (it runs in its own thread)
+    // that we will use to load the Shopping Lists in the UI as well as show a loading spinner
     class ProgressTask_Back extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
+            // Clear the lists and set the loading spinner visible and the UI invisible
             loading.setVisibility(View.VISIBLE);
             listview.setVisibility(View.GONE);
             public_list.clear();
@@ -918,18 +980,22 @@ public class MainActivity extends AppCompatActivity
         }
         @Override
         protected Void doInBackground(Void... arg0) {
+            // This gets executed in its own thread
             if (!usr_inf.getOffline_mode()) {
-                //noinspection StatementWithEmptyBody
-                while (!server_service.return_response_status());
+                // Get the shopping lists from the server
                 getAll_ShoppingLists(usr_inf.getEmail());
             }
-            else
+            else {
+                // Or read them from the internal DB
                 read_from_internal_DB();
+            }
             return null;
         }
         @Override
         protected void onPostExecute(Void result) {
+            // Set the loading spinner invisible
             loading.setVisibility(View.GONE);
+            // Make the UI visible again with a fade in animation
             final Animation fadein = new AlphaAnimation(0, 1);
             fadein.setDuration(1000);
             listview.setVisibility(View.VISIBLE);
@@ -937,7 +1003,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // Create the loading and get all the shopping lists when finished
+    // This class is similar to the previous one, but this one gets called when the app first starts
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -972,12 +1038,14 @@ public class MainActivity extends AppCompatActivity
             Animation fadeOut = new AlphaAnimation(1, 0);
             fadeOut.setStartOffset(2000);
             fadeOut.setDuration(1000);
+            // Show the Welcome back text
             if (usr_inf.getOffline_mode()) welcome.setText(R.string.offline_explanation);
             else welcome.setText(String.format("\n\nWelcome back\n %s !", usr_inf.getName()));
             welcome.setVisibility(View.VISIBLE);
             welcome.setAnimation(fadein);
             welcome.setAnimation(fadeOut);
             reload_ui(is_private_selected);
+            // Make the welcome text fade out and the UI fade in
             fadeOut.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -993,6 +1061,8 @@ public class MainActivity extends AppCompatActivity
                     third_layout.setAnimation(fadein);
                     mAdView.setVisibility(View.VISIBLE);
                     mAdView.setAnimation(fadein);
+                    // Add the user to the DB, this usually will return false unless is the users
+                    // first time ever loging in
                     if (!usr_inf.getOffline_mode()) send_request_server("_", "_", "add_user", "_", usr_inf.getName());
                 }
                 @Override
@@ -1002,7 +1072,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //On long pressed in a shopping list, display options
+    // When long pressing a shopping list, display options
     private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1018,25 +1088,29 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             int id = item.getItemId();
+            // Get which Item was clicked
             switch (id) {
-                case R.id.delete: {
+                case R.id.delete:
+                    // Delete the Shopping List
                     delete_shoppingList();
                     mode.finish();
                     break;
-                }
-                case R.id.edit: {
+
+                case R.id.edit:
+                    // Edit the name of the Shopping List
                     edit_shoppingList();
                     mode.finish();
                     break;
-                }
-                case R.id.share:{
+
+                case R.id.share:
+                    // Share the Shopping List
                     if (!usr_inf.getOffline_mode())
                         share_shoppingList();
                     else
                         Toast.makeText(MainActivity.this,R.string.offline_share, Toast.LENGTH_LONG).show();
                     mode.finish();
                     break;
-                }
+
                 default:
                     return false;
             }
@@ -1048,9 +1122,10 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    // This function is called when the user wants to share a Shopping List
     private void share_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
+        // Create an alert asking the user to write the email of the user he want to share it with
         alert.setTitle(R.string.share_list_msg);
         alert.setMessage(R.string.write_email_msg);
 
@@ -1058,9 +1133,10 @@ public class MainActivity extends AppCompatActivity
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS);
         alert.setView(input);
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        // When the user click the Done button this function is called
+        alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                // Validate the input as an email
                 Boolean valid = validateEmail(input.getText().toString());
                 if (!valid) {
                     Context context = getApplicationContext();
@@ -1070,6 +1146,7 @@ public class MainActivity extends AppCompatActivity
                     toast.show();
                     share_shoppingList();
                 } else {
+                    // Send a request to the server to add the new user to the selected list
                     if (is_bound_server) {
                         Object shop_list = adapter.getItem(currentSelection);
                         String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
@@ -1090,21 +1167,20 @@ public class MainActivity extends AppCompatActivity
         alert.show();
     }
 
+    // This function verifies that the input string has the format of a email account
     private boolean validateEmail(String email) {
-
         Pattern pattern;
         Matcher matcher;
         String EMAIL_PATTERN = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
         pattern = Pattern.compile(EMAIL_PATTERN);
         matcher = pattern.matcher(email);
         return matcher.matches();
-
     }
 
-
+    // This function deletes a Shopping List
     private void delete_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
+        // Ask the user if he wants to delete the list
         alert.setTitle(R.string.delete_list_alert);
         alert.setMessage(R.string.delete_list_msg);
 
@@ -1112,17 +1188,20 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int whichButton) {
                 String code_list;
                 String status="";
+                // Get the name of the shopping list
                 Object shop_list = adapter.getItem(currentSelection);
                 String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
+                // Get the code for the shopping list
                 code_list = db.read_code(list_name);
-                // fake delete until synchronize
                 if (!usr_inf.getOffline_mode()) {
+                    // Delete the Shopping List
                     send_request_server(list_name, status, "delete_list", code_list, "_");
                     Log.v(TAG,"code_list: " + code_list);
                     print_db();
                     db.delete_list(code_list);
                 }
                 else {
+                    // Fake delete until synchronize
                     db.update_list_change("delete_list",code_list);
                     public_list.clear();
                     private_list.clear();
@@ -1140,9 +1219,10 @@ public class MainActivity extends AppCompatActivity
         alert.show();
     }
 
+    // This method changes the name of a Shopping List
     private void edit_shoppingList(){
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
+        // Ask the user to input the new name
         alert.setTitle(R.string.change_name_list);
         alert.setMessage(R.string.set_new_name_msg);
         // Set an EditText view to get user input
@@ -1153,20 +1233,22 @@ public class MainActivity extends AppCompatActivity
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 if (is_bound) {
-                    String code="";
+                    String code;
                     Object shop_list = adapter.getItem(currentSelection);
                     String list_name = ((HashMap) shop_list).get(FIRST_COLUMN).toString();
                     print_db();
                     code = db.read_code(list_name);
+                    // Change the name of the list in the internal DB
                     db.update_list_name(input.getText().toString(),code);
                     print_db();
                     if (!usr_inf.getOffline_mode()) {
                         db.set_list_flag(code, 0);
                         Log.v(TAG,"Changing list name");
+                        // Send a request to change the name to the server
                         send_request_server(list_name, list_type, "change_list_name", code, input.getText().toString());
-                        new ProgressTask_Back().execute();
                     }
                     else {
+                        // Set the sync flag to 1 if in offline mode
                         db.set_list_flag(code, 1);
                         public_list.clear();
                         private_list.clear();
@@ -1185,25 +1267,33 @@ public class MainActivity extends AppCompatActivity
         alert.show();
     }
 
+    // Send all the unsynchronized entries from the DB to the server.
+    // This method gets called when the app first starts
     private boolean send_unsynced_entries(){
         Log.d(TAG,"We are online");
         Log.d(TAG,"Synchronizing entries from DB");
         // Get all items with sync flag set
         List<String[]> entries = db.read_all_with_flag_set_list();
         print_db();
+        // If there are no entries to synchronize we are done
         if (entries == null) return true;
         String entry[];
-        Log.v(TAG,"Size: "+entries.size());
+        // Go through all the entries
         for (int i = 0; i< entries.size(); i++){
             entry = entries.get(i);
             Log.d(TAG,"entry: " + Arrays.toString(entry));
+            // Set the sync flag to 0
             db.set_list_flag(entry[1],0);
+            // If the Chane Type field is "new_list", save the old code because we are going to
+            // need to change it when we get the new one from the server
             if (entry[3].equals("new_list")) old_codes = entry[1];
+            // Send a request to the server to change the name if the Change Type field was "change_list_name"
             if (entry[3].equals("change_list_name"))
                 send_request_server("_",entry[2],entry[3],entry[1],entry[0]);
+            // If its not one of the others, it means its delete the Shopping List.
             else
                 send_request_server(entry[0],entry[2],entry[3],entry[1],"_");
-            // delete list really.
+            // Delete list really.
             if (entry[2].equals("delete_list")) db.delete_list(entry[1]);
             // wait
             try {
@@ -1216,15 +1306,17 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // Prints the contents from the Shopping List table from the internal DB
     private void print_db(){
         List<String[]> entries = db.read_all_lists();
         Log.v(TAG,"STARTING THE PRINT DB");
-        for (int i=0; i<entries.size();i++){
+        for (int i=0; i<entries.size();i++)
             Log.v(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[2] +" " + entries.get(i)[4]);
-        }
         Log.v(TAG,"END");
     }
 
+    // Checks if there is network connection available
+    /** http://developer.android.com/training/monitoring-device-state/connectivity-monitoring.html **/
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

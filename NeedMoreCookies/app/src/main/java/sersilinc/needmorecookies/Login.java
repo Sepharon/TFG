@@ -49,14 +49,15 @@ public class Login extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        /**[START User Interface]**/
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
-
-        // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
+        /**[END User Interface]**/
 
-        // Get User Info class
+        /**[START User Info class]**/
         usr_inf = User_Info.getInstance();
+        /**[END User Info class]**/
 
         /**[START configure_signin]**/
         // Configure sign-in to request the user's ID, email address, and basic
@@ -90,6 +91,8 @@ public class Login extends AppCompatActivity implements
 
     }
 
+    // Called after onCreate, checks if there is internet connection, if not asks the user if
+    // he wants to use Offline Mode
     @Override
     public void onStart() {
         super.onStart();
@@ -135,7 +138,7 @@ public class Login extends AppCompatActivity implements
         }
     }
 
-
+    // Checks if the sign in is successful
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -147,8 +150,10 @@ public class Login extends AppCompatActivity implements
         }
     }
 
+    // Handles the signin result
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        // If there is no connection ask the user if he wants to enter offline mode
         if (!is_network_available()){
             final AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.offline_alert);
@@ -167,6 +172,7 @@ public class Login extends AppCompatActivity implements
             });
             alert.show();
         }
+        // If it was successful go the next activity
         if (result.isSuccess()) {
             // acct stores data from the user (email,name...)
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -182,20 +188,21 @@ public class Login extends AppCompatActivity implements
         }
     }
 
-
+    // Start activity to sign in
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-
+    // An unresolvable error has occurred and Google APIs (including Sign-In) will not
+    // be available.
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
+
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
+    // Shows progress spinner
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -206,12 +213,14 @@ public class Login extends AppCompatActivity implements
         mProgressDialog.show();
     }
 
+    // Hides progress spinner
     private void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
     }
 
+    // Updates User Interface by setting the sign in button visible or invisible
     private void updateUI(boolean signedIn) {
         if (signedIn) {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
@@ -220,6 +229,7 @@ public class Login extends AppCompatActivity implements
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
         }
     }
+
     //Check if network available
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
@@ -227,7 +237,8 @@ public class Login extends AppCompatActivity implements
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-    // Binding Update Server
+
+    // Checks which button has been clicked
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -240,6 +251,7 @@ public class Login extends AppCompatActivity implements
         }
     }
 
+    // Start next activity
     private void launch_next_activity(){
         // Start new activity
         final Intent intent = new Intent(Login.this,MainActivity.class);

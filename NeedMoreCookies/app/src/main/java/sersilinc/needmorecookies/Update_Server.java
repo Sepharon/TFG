@@ -22,6 +22,11 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+/**
+ * The aim of this class is to offer a service to send request to our server. It also
+ * implements a class to help create JSON objects
+ */
+
 public class Update_Server extends Service {
 
     //URL
@@ -45,6 +50,7 @@ public class Update_Server extends Service {
     //Flag
     private boolean got_response = false;
 
+    // Binder initializer
     public class LocalBinder extends Binder {
         Update_Server getService() {
             // Return this instance of LocalService so clients can call public methods
@@ -52,6 +58,7 @@ public class Update_Server extends Service {
         }
     }
 
+    // This function gets called when the service gets binded
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, " Binding");
@@ -64,27 +71,33 @@ public class Update_Server extends Service {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        //Filter and my receiver
+        /**[START Intent-filter for receiving Broadcast]**/
         IntentFilter filter = new IntentFilter("Update_Server_Thread");
         receiver = new MyReceiver();
         this.registerReceiver(receiver, filter);
+        /**[END Intent-filter for receiving Broadcast]**/
 
+        /**[START JSON Encoder Class]**/
         jsonEncoderClass.create_template();
+        /**[END JSON Encoder Class]**/
     }
 
+    // Called when the service dies
     @Override
     public void onDestroy(){
         super.onDestroy();
+        // Unregister the receiver
         unregisterReceiver(receiver);
     }
 
+    // Called when the service is ready
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, " Update Server started");
         return START_STICKY;
     }
 
-    // Sets the values for the values array
+    // Sets the values for the JSON object
     public boolean set_values(int objective_code,String list_code,String list_name,String update,String status){
         if (objective_code > 9) return false;
         values[0] = objectives[objective_code];
@@ -93,24 +106,26 @@ public class Update_Server extends Service {
         values[3] = update;
         values[4] = User_Info.getInstance().getEmail();
         values[5] = status;
-
+        // Create JSON from the values
         set_json(keys,values, 0);
         Log.v(TAG, String.valueOf(jsonEncoderClass.return_json()));
         return true;
     }
 
-    // Sets values for the item array
+    // Sets items for the JSON object
     public void set_items(String Type, String Product_name, String Price, String Quantity, String Code){
         items[0] = Type;
         items[1] = Product_name;
         items[2] = Price;
         items[3] = Quantity;
         items[4] = Code;
-
+        // Create JSON from items
         set_json(keys,items,1);
     }
 
+    // Send a request to the server
     public void send_request (){
+        // Check if internet is available
         if (is_network_available()) {
             got_response = false;
             Log.v(TAG, "JSON TO SEND: " + jsonEncoderClass.return_json());
@@ -118,6 +133,7 @@ public class Update_Server extends Service {
         }
     }
 
+    // Given an objective returns the position of it
     public int get_objective(String objec){
         for (int i = 0; i < objectives.length; i++) {
             if (objectives[i].equals(objec)) {
@@ -127,7 +143,7 @@ public class Update_Server extends Service {
         return -1;
     }
 
-    // Creates the apropiate JSON based if the values need to go in the main or in Values
+    // Creates the appropriate JSON based if the values need to go in the main or in Values
     private boolean set_json(String [] key, String[] value,int update_main){
         if (jsonEncoderClass.return_json() == null) return false;
         if (update_main == 0) {
@@ -138,13 +154,14 @@ public class Update_Server extends Service {
         return true;
     }
 
+    // Send a request to the server
     private void send_post_request(final JSONObject o){
-
-        // Create new thread so not to block URL
+        // Create new thread so not to block the UI
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 String response = "";
+                // Create an HTTPS request
                 HttpsURLConnection connection = null;
                 try {
                     URL link_url = new URL(url);
@@ -158,6 +175,7 @@ public class Update_Server extends Service {
                     writer.write(o.toString());
                     writer.flush();
                     writer.close();
+                    // Read the input from the server
                     Reader in = new InputStreamReader(connection.getInputStream(), "UTF-8");
                     Log.v("Thread", "Sended");
                     StringBuilder sb = new StringBuilder();
@@ -170,6 +188,7 @@ public class Update_Server extends Service {
                     e.printStackTrace();
                 }
                 finally {
+                    // End connection
                     if (connection != null) connection.disconnect();
                     Intent intent = new Intent();
                     intent.putExtra("message",response);
@@ -182,10 +201,12 @@ public class Update_Server extends Service {
         t.start();
     }
 
+    // Returns the result from the connection (server response)
     public String return_result(){
         return request_result;
     }
 
+    // Returns true if we got an answer from the server
     public boolean return_response_status() {return got_response;}
 
     //Check if network available
@@ -215,7 +236,7 @@ public class Update_Server extends Service {
         }
     }
 
-    //Receiver
+    // Receiver
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -226,11 +247,12 @@ public class Update_Server extends Service {
         }
     }
 
-    //JSONEncoder class
+    // JSONEncoder class
     private class JSONEncoder{
         String TAG = "JSONEncoder";
         JSONObject obj;
 
+        // Create a templeate for the JSON
         public JSONObject create_template(){
             Log.v(TAG, " Started");
             try {
@@ -241,6 +263,7 @@ public class Update_Server extends Service {
             return obj;
         }
 
+        // Put values inside the JSON
         public void set_values(String key [], String value [],int update_main){
             switch (update_main){
                 case 0:
@@ -270,7 +293,7 @@ public class Update_Server extends Service {
                     break;
             }
         }
-
+        // Return the JSON object
         public JSONObject return_json(){
             return obj;
         }

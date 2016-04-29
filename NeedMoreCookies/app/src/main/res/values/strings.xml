@@ -144,6 +144,10 @@
     <string name="external_delete">A list has been deleted externally</string>
     <string name="external_delete_item">A product has been deleted externally</string>
     <string name="external_name_change">The name of a shopping list has been updated</string>
+    <string name="sl_name_change_ok">Shopping List name changed</string>
+    <string name="error_share_sl">The email you have entered does not belong to an existing user</string>
+    <string name="share_sl_ok">Shopping list shared</string>
+    <string name="delete_sl_ok">Shopping list deleted</string>
 
     <!-- Share APP -->
     <string name="offline_mail">Unable to send an invitation while in offline mode</string>
