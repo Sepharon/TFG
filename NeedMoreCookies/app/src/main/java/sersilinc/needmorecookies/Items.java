@@ -137,11 +137,11 @@ public class Items extends AppCompatActivity
     private String old_codes;
 
     // Info
-    String main = null;
-    String code;
-    String list;
-    String list_type;
-    int current_tab = 1;
+    private String main = null;
+    private String code;
+    private String list;
+    private String list_type;
+    private int current_tab = 1;
 
     //Selected Item
     private int currentSelection;
@@ -654,7 +654,7 @@ public class Items extends AppCompatActivity
     /**
      * Sign Out from Google Account
      */
-    public void signOut() {
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
