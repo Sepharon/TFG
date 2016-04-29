@@ -50,11 +50,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * This class shows the products from a concrete Shopping List, as well as their quantity, price and type.
+ */
 
 public class Items extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -65,6 +67,7 @@ public class Items extends AppCompatActivity
     //GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
 
+
     //UI elements
     private Button all_items;
     private Button meat_items;
@@ -73,7 +76,6 @@ public class Items extends AppCompatActivity
     private Button dairy_items;
     private Button sweet_items;
     private Button others_items;
-
     private View separator1;
     private View separator2;
     private View separator3;
@@ -91,23 +93,20 @@ public class Items extends AppCompatActivity
      * [START ListView]
      **/
     //Header
-    private ListView listview_header;
-    private ArrayList<HashMap<String, String>> l_header = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> l_header = new ArrayList<>();
     //Content
     private ListView listview_items;
     // Lists
-    private ArrayList<HashMap<String, String>> all_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> meat_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> vegetables_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> cereals_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> dairy_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> sweet_items_l = new ArrayList<HashMap<String, String>>();
-    private ArrayList<HashMap<String, String>> others_items_l = new ArrayList<HashMap<String, String>>();
-    private List<List<String>> items_l;
+    private ArrayList<HashMap<String, String>> all_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> meat_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> vegetables_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> cereals_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> dairy_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> sweet_items_l = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> others_items_l = new ArrayList<>();
 
     // Adapter
     private ListViewAdapters adapter;
-    private ListViewAdapters adapter_header;
 
     //Columns
     private static final String FIRST_COLUMN = "First";
@@ -121,7 +120,6 @@ public class Items extends AppCompatActivity
      * [END ListView]
      **/
     //Preferences
-    private SharedPreferences prefs;
     private String currency;
 
     // Service
@@ -131,10 +129,6 @@ public class Items extends AppCompatActivity
     private Messenger mService = null;
 
     //Receiver
-    private String request_type;
-    private String list_items;
-    private String main_receiver;
-    private String update_product;
     public MyReceiver receiver_items;
     private IntentFilter filter;
 
@@ -155,6 +149,10 @@ public class Items extends AppCompatActivity
     //User info instance
     private User_Info usr_inf;
 
+    /**
+     * Override onCreate method
+     * @param savedInstanceState Saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,7 +182,7 @@ public class Items extends AppCompatActivity
 
         listview_items = (ListView) findViewById(R.id.list_item);
 
-        listview_header = (ListView) findViewById(R.id.list_header);
+        ListView listview_header = (ListView) findViewById(R.id.list_header);
         /**[END UI elements]**/
 
         /**[START Intent-filter for receiving Broadcast]**/
@@ -200,14 +198,14 @@ public class Items extends AppCompatActivity
         temp.put(THIRD_COLUMN, "Price");
         l_header.add(temp);
         //Custom adapter
-        adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
+        ListViewAdapters adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
         listview_header.setAdapter(adapter_header);
         adapter = new ListViewAdapters(this, all_items_l, "Content", list_type);
         listview_items.setAdapter(adapter);
         /**[END List View]**/
 
         /**[START Preferences]**/
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Get currency User's preference
         currency = prefs.getString("currency_list", "€");
@@ -247,8 +245,8 @@ public class Items extends AppCompatActivity
         usr_inf = User_Info.getInstance();
         /**[END User_Info]**/
 
+        /**[START Get intent extras]**/
         if (!usr_inf.getOffline_mode()) {
-            /**[START Get intent extras]**/
             Bundle extras = getIntent().getExtras();
             //Get JSON Strings from the MainActivity
             try {
@@ -377,6 +375,7 @@ public class Items extends AppCompatActivity
         });
         /**[END onClickListeners]**/
 
+        //Set portrait for phones and landscape for tablets
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
@@ -436,11 +435,16 @@ public class Items extends AppCompatActivity
                 }
             }.start();
         }
+        /**[END Counter]**/
+
+        //Reload UI to all products view
         reload_ui(1);
     }
 
 
-    // Binding Update Android
+    /**
+     * Binding Update Android
+     */
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
@@ -449,6 +453,7 @@ public class Items extends AppCompatActivity
             mService = new Messenger(service);
             is_bound = true;
 
+            //Execute asynchronous task
             new ProgressTask().execute();
 
         }
@@ -460,7 +465,9 @@ public class Items extends AppCompatActivity
         }
     };
 
-    // Binding Update Server
+    /**
+     * Binding Update Server
+     */
     private ServiceConnection mConnection2 = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
@@ -470,6 +477,7 @@ public class Items extends AppCompatActivity
             Update_Server.LocalBinder binder = (Update_Server.LocalBinder) service;
             server_service = binder.getService();
             is_bound_server = true;
+            //If we are online, synchronize the server with the internal database
             if (!usr_inf.getOffline_mode())
                 send_unsynced_entries();
         }
@@ -480,6 +488,9 @@ public class Items extends AppCompatActivity
         }
     };
 
+    /**
+     * Override onDestroy method
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -496,6 +507,9 @@ public class Items extends AppCompatActivity
         timer.cancel();
     }
 
+    /**
+     * Override onResume method
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -508,6 +522,11 @@ public class Items extends AppCompatActivity
         reload_ui(1);
     }
 
+    /**
+     * Override onCreateOptionsMenu method
+     * @param menu Menu
+     * @return Menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -515,10 +534,16 @@ public class Items extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Override onOptionsItemsSelected method
+     * @param item MenuItem
+     * @return Return true
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_update_items:
+                //If we are online, get products from server, else get from the internal database
                 if (!usr_inf.getOffline_mode()) {
                     usr_inf.setOffline_mode(false);
                     getAll_products();
@@ -526,7 +551,15 @@ public class Items extends AppCompatActivity
                 }
                 else {
                     Toast.makeText(getBaseContext(), R.string.offline_update, Toast.LENGTH_SHORT).show();
+                    all_items_l.clear();
+                    meat_items_l.clear();
+                    vegetables_items_l.clear();
+                    cereals_items_l.clear();
+                    dairy_items_l.clear();
+                    sweet_items_l.clear();
+                    others_items_l.clear();
                     read_from_internal_DB();
+                    adapter.notifyDataSetChanged();
                     reload_ui(1);
                 }
                 return true;
@@ -539,11 +572,19 @@ public class Items extends AppCompatActivity
         }
     }
 
+
+    /**
+     * Override onStart method
+     */
+    @Override
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+    /**
+     * Override onStop method
+     */
     @Override
     protected void onStop() {
         super.onStop();
@@ -551,10 +592,14 @@ public class Items extends AppCompatActivity
         unregisterReceiver(receiver_items);
     }
 
+    /**
+     * Override onBackPressed method.
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout2);
         assert drawer != null;
+        //If the navigation menu is opened, closed it
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -562,7 +607,11 @@ public class Items extends AppCompatActivity
         }
     }
 
-    //Navigation
+    /**
+     * Override onNavigationItemSelected method
+     * @param item Item
+     * @return Return true
+     */
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -602,7 +651,9 @@ public class Items extends AppCompatActivity
         return true;
     }
 
-    //Sign Out from Google Account
+    /**
+     * Sign Out from Google Account
+     */
     public void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
@@ -615,6 +666,10 @@ public class Items extends AppCompatActivity
         });
     }
 
+    /**
+     * Reload UI
+     * @param type Type of products to show
+     */
     private void reload_ui(int type) {
         separator1.setVisibility(View.INVISIBLE);
         separator2.setVisibility(View.INVISIBLE);
@@ -656,11 +711,13 @@ public class Items extends AppCompatActivity
         listview_items.setAdapter(adapter);
     }
 
-    //Put the items in the correct section
+    /**
+     * Add products to the internal database
+     * @param list List of products
+     */
     private void update_ShoppingList(String list) {
         try {
             int i = 0;
-            List<String> c = new ArrayList<>();
             JSONObject json_obj = new JSONObject(list);
             Iterator<String> keys = json_obj.keys();
             print_db();
@@ -670,15 +727,6 @@ public class Items extends AppCompatActivity
             while (keys.hasNext()) {
                 String type = String.valueOf(keys.next());
                 switch (type) {
-                    case "Everything":
-                        JSONArray products = json_obj.getJSONArray(type);
-                        while (i < products.length()) {
-                            JSONArray rec = products.getJSONArray(i);
-                            i++;
-                            c.add(rec.getString(3));
-                        }
-                        i = 0;
-                        break;
                     case "Meat and Fish":
                         JSONArray products2 = json_obj.getJSONArray(type);
                         while (i < products2.length()) {
@@ -771,7 +819,6 @@ public class Items extends AppCompatActivity
                         break;
                 }
             }
-            //remove_deleted_products(c);
         } catch (JSONException e) {
             Log.d(TAG, "Error JSON");
             e.printStackTrace();
@@ -780,7 +827,12 @@ public class Items extends AppCompatActivity
         reload_ui(1);
     }
 
-    //Get results from the AddItem activity
+    /**
+     * Override onActivityResult method. Get results from the AddItem activity
+     * @param requestCode Request Code
+     * @param resultCode Result Code
+     * @param data Data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -840,8 +892,6 @@ public class Items extends AppCompatActivity
                 String type = data.getStringExtra("type");
                 Log.d(TAG, product + quantity + price + type);
 
-                //Get unique Code
-                String code_item = "";
                 Object item = adapter.getItem(currentSelection);
                 String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
                 String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
@@ -850,9 +900,12 @@ public class Items extends AppCompatActivity
                 if (Price.equals("-") | Price.equals("")) {
                     Price = "null";
                 }
+
+                //Get type of product
                 String type_prod = get_Product_Type(adapter.getItem(currentSelection).toString());
 
-                code_item = db.read_code_items(Product, Quantity, Price, type_prod);
+                //Get unique code
+                String code_item = db.read_code_items(Product, Quantity, Price, type_prod);
 
                 if (!usr_inf.getOffline_mode())
                     send_request_server("update_item", list_type, code, type, product, price, quantity, code_item);
@@ -876,9 +929,18 @@ public class Items extends AppCompatActivity
         }
     }
 
-    //Send request to Update Server service
+    /**
+     * Send request to Update Server service
+     * @param Objective Objective
+     * @param status Type of shopping list
+     * @param code Code of shopping list
+     * @param type type of product
+     * @param product product name
+     * @param price price
+     * @param quantity quantity
+     * @param code_item code of the product
+     */
     private void send_request_server(final String Objective, String status, String code, String type, String product, String price, String quantity, String code_item) {
-        Log.d(TAG, "objective: "+Objective+" Product: "+product);
         server_service.set_values(server_service.get_objective(Objective), code, "_", "True", status);
         server_service.set_items(type, product, price, quantity, code_item);
         Thread t = new Thread(new Runnable() {
@@ -898,7 +960,9 @@ public class Items extends AppCompatActivity
         t.start();
     }
 
-    //On long pressed in a shopping list, display options
+    /**
+     * On long pressed in a shopping list, display options
+     */
     private ActionMode.Callback modeCallBack = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -921,7 +985,7 @@ public class Items extends AppCompatActivity
                     break;
                 }
                 case R.id.edit_item: {
-                    edit_shoppingList();
+                    edit_item();
                     mode.finish();
                     break;
                 }
@@ -936,7 +1000,9 @@ public class Items extends AppCompatActivity
         }
     };
 
-    //Delete selected item
+    /**
+     * Delete selected item
+     */
     private void delete_item() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -958,6 +1024,7 @@ public class Items extends AppCompatActivity
                 String code_item = db.read_code_items(Product, Quantity, Price, type);
 
 
+                //If we are online, send post request, else add a change type of removal to the product
                 if (!usr_inf.getOffline_mode()) {
                     send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
                     print_db();
@@ -988,6 +1055,11 @@ public class Items extends AppCompatActivity
         alert.show();
     }
 
+    /**
+     * Get the type of the product
+     * @param selection Selection
+     * @return Type
+     */
     private String get_Product_Type(String selection) {
         String type = "";
         for (int i = 0; i < meat_items_l.size(); i++) {
@@ -1011,6 +1083,9 @@ public class Items extends AppCompatActivity
         return type;
     }
 
+    /**
+     * Send a essage to the Update_Android service using a Messenger.
+     */
     private void getAll_products() {
         if (is_bound) {
             Message msg = Message.obtain(null, Update_Android.MSG_GET_DATA);
@@ -1029,22 +1104,21 @@ public class Items extends AppCompatActivity
         }
     }
 
-    //Receiver from Services
+    /**
+     * BroadcastReceiver class
+     */
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "INTENT: "+intent.getStringExtra("Main"));
-            main_receiver=null;
-            request_type = intent.getStringExtra("Request");
-            main_receiver = intent.getStringExtra("Main");
+            String request_type = intent.getStringExtra("Request");
+            String main_receiver = intent.getStringExtra("Main");
 
-            Log.d(TAG, "REQUEST TYPE: "+request_type);
             //Check type of request
             switch(request_type){
                 case "one_list":
-                    update_product = intent.getStringExtra("Update_Products");
+                    String update_product = intent.getStringExtra("Update_Products");
                     if (update_product.equals("True")) {
-                        list_items = intent.getStringExtra("One_list");
+                        String list_items = intent.getStringExtra("One_list");
                         all_items_l.clear();
                         meat_items_l.clear();
                         vegetables_items_l.clear();
@@ -1122,7 +1196,10 @@ public class Items extends AppCompatActivity
         }
     }
 
-    private void edit_shoppingList(){
+    /**
+     * Edit the product
+     */
+    private void edit_item(){
         Object item = adapter.getItem(currentSelection);
         String Product = ((HashMap) item).get(FIRST_COLUMN).toString();
         String Quantity = ((HashMap) item).get(SECOND_COLUMN).toString();
@@ -1141,13 +1218,15 @@ public class Items extends AppCompatActivity
         startActivityForResult(intent, 2);
     }
 
-    // Prints DB entries
+    /**
+     * Prints DB entries
+     */
     private void print_db(){
         // Product, Quantity, Price, Type, Last_User, Code_item
         List<String[]> entries = db.read_all_items(code);
-        Log.d(TAG,"STARTING THE PRINT DB");
+        Log.d(TAG, "STARTING THE PRINT DB");
         for (int i=0; i<entries.size();i++)
-            Log.d(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[1] +" " + entries.get(i)[2]+" " + entries.get(i)[3]+ " "+entries.get(i)[5]);
+            Log.d(TAG,"Entries: " + entries.get(i)[0] +" " + entries.get(i)[1] +" " + entries.get(i)[2]+" " + entries.get(i)[3] + " " + entries.get(i)[5]);
         Log.d(TAG,"END");
     }
 
@@ -1174,6 +1253,9 @@ public class Items extends AppCompatActivity
         }
     }
 
+    /**
+     * Read entries from the internal database and build the listview
+     */
     private void read_from_internal_DB() {
         Log.d(TAG, "Reading from internal DB");
         // Product, Quantity, Price, Type, Last_User, Code_item
@@ -1298,9 +1380,11 @@ public class Items extends AppCompatActivity
         }
     }
 
+    /**
+     * Method to synchronize the server with the internal database
+     * @return Return true
+     */
     private boolean send_unsynced_entries(){
-        Log.d(TAG,"We are online");
-        Log.d(TAG,"Synchronizing entries from DB");
         // Get all items with sync flag set
         List<String[]> entries = db.read_all_with_flag_set_item();
         print_db();
@@ -1310,20 +1394,12 @@ public class Items extends AppCompatActivity
             final String entry[] = entries.get(i);
             //If it is from this shopping list
             if (code.equals(entry[7])) {
-                Log.d(TAG, "entry: " + Arrays.toString(entry));
                 db.set_item_flag(entry[5], 0);
-                Log.d(TAG, "Contents: " + entry[0] + entry[1] + entry[2]);
-                Log.d(TAG, "Change type: " + entry[6]);
                 // Product, Quantity, Price, Type, Last_User, Code_item, change type, code_list
                 if (entry[6].equals("new_item"))
                     old_codes = entry[5];
                 if (entry[6].equals("new_item")){
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], usr_inf.getName());
-                        }
-                    }); t.start();
+                    send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], usr_inf.getName());
                 }
                 else{
                     send_request_server(entry[6], list_type, code, entry[3], entry[0], entry[2], entry[1], entry[5]);
@@ -1342,40 +1418,10 @@ public class Items extends AppCompatActivity
         return true;
     }
 
-    // removes unused lists.
-    private void remove_deleted_products(List<String> c){
-        int i;
-        boolean deleted_flag = false;
-        Log.d(TAG,"Removing items");
-        List<String[]> internal_db_lists;
-        List<String> internal_codes = new ArrayList<>();
-        // Grab all entries from DB
-        print_db();
-        internal_db_lists = db.read_all_items(code);
-        // Add all codes from entries into a list
-        for (i = 0;i < internal_db_lists.size();i++)
-            internal_codes.add(internal_db_lists.get(i)[5]);
-        // If one of the received codes is inside the DB remove it form the list
-        for (i = 0;i < c.size(); i++){
-            Log.d(TAG,"received items: " + c.get(i));
-            if (internal_codes.contains(c.get(i))) {
-                internal_codes.remove(c.get(i));
-            }
-        }
-        // In case there are still codes in the DB that are not on the server remove them from the DB
-        if (internal_codes.size() > 0){
-            for (i = 0;i < internal_codes.size(); i++){
-                deleted_flag = true;
-                Log.d(TAG,"Removing items: " + internal_codes.get(i));
-                db.delete_item(internal_codes.get(i));
-            }
-        }
-        if (deleted_flag)
-            Toast.makeText(Items.this,R.string.external_delete_item,Toast.LENGTH_SHORT).show();
-        print_db();
-    }
 
-    //Create the loading and get all the shopping lists when finished
+    /**
+     * Asynchronous task to get all the products either by the server or the internal database
+     */
     class ProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -1412,6 +1458,10 @@ public class Items extends AppCompatActivity
         }
     }
 
+    /**
+     * Method to check if there is internet connecion
+     * @return Return true if there is internet connection
+     */
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.StrictMode;
@@ -29,6 +28,14 @@ import android.os.Message;
 
 import javax.net.ssl.HttpsURLConnection;
 
+/**
+ * This class is a service responsible for sending two types of requests to the server and receive an answer back.
+ * The service is a Bind service, which means that if the Android application dies, so does this service.
+ * The two requests ara:
+ * All: Get all the shopping lists of a user.
+ * One_list: Get all the products of one shopping list.
+ */
+
 
 public class Update_Android extends Service {
 
@@ -46,24 +53,23 @@ public class Update_Android extends Service {
     //TAG for Logs
     private final String TAG = "Update_Android ";
 
-    //Bind service
-    private final IBinder mBinder = new LocalBinder();
-    public class LocalBinder extends Binder {
-        Update_Android getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return Update_Android.this;
-        }
-    }
-
     //Incoming messages handler
     private Messenger msg = new Messenger(new IncomingHandler());
 
+    /**
+     * Override onBind method
+     * @param intent Intent
+     * @return Return binder
+     */
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "Binding");
         return msg.getBinder();
     }
 
+    /**
+     * Override onCreate method
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -71,13 +77,26 @@ public class Update_Android extends Service {
         StrictMode.setThreadPolicy(policy);
     }
 
+    /**
+     * Override onStartCommand method.
+     * @param intent Intent
+     * @param flags Flags
+     * @param startId ID
+     * @return Return START_STICKY
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, "StartCommand");
         return START_STICKY;
     }
 
-    //It gets the JSON data from the API
+    /**
+     * It gets the JSON data from the API
+     * @param json_obj JSONObject
+     * @param request Request
+     * @param source Source
+     * @throws JSONException
+     */
     private void get_data_json(JSONObject json_obj, String request, String source) throws JSONException{
         JSONObject mainJSON = json_obj.getJSONObject("main");
         Intent broadcast = new Intent();
@@ -107,7 +126,14 @@ public class Update_Android extends Service {
         sendBroadcast(broadcast);
     }
 
-    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String Friend, final String source) {
+    /**
+     * Send post request to the server
+     * @param request Request
+     * @param GoogleAccount User's Google account
+     * @param code_name Code or name of the Shopping List
+     * @param source Source
+     */
+    private void send_post_request(final String request, final String GoogleAccount, final String code_name, final String source) {
         // Create new thread so not to block URL
         Thread t = new Thread(new Runnable() {
             @Override
@@ -189,7 +215,10 @@ public class Update_Android extends Service {
         t.start();
     }
 
-    //Check if network available
+    /**
+     * Check if network available
+     * @return Return true if there is internet connection
+     */
     private boolean is_network_available(){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -197,7 +226,9 @@ public class Update_Android extends Service {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    //It handles incoming messages
+    /**
+     * This class handles incoming messages send through a Messenger.
+     */
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -217,10 +248,10 @@ public class Update_Android extends Service {
                                 case "one_list":
                                     String source = msg.getData().getString("Activity");
                                     String code_list = msg.getData().getString("code_list");
-                                    send_post_request(request, GoogleAccount, code_list, "", source);
+                                    send_post_request(request, GoogleAccount, code_list, source);
                                     break;
                                 case "all":
-                                    send_post_request(request, GoogleAccount, null, "", null);
+                                    send_post_request(request, GoogleAccount, null, null);
                                     break;
                             }
                         } catch (NullPointerException e) {

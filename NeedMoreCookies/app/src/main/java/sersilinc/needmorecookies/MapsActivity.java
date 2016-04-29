@@ -53,7 +53,11 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 
-//REFERENCE: http://code.tutsplus.com/tutorials/android-sdk-working-with-google-maps-displaying-places-of-interest--mobile-16145
+/**
+ * This class shows the current location of the user, as well as nearby stores.
+ * REFERENCE: http://code.tutsplus.com/tutorials/android-sdk-working-with-google-maps-displaying-places-of-interest--mobile-16145
+ */
+
 
 public class MapsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -71,21 +75,24 @@ public class MapsActivity extends AppCompatActivity
     //Flag indicating whether a requested permission has been denied after returning in
     private boolean mPermissionDenied = false;
 
-    private LocationManager locMan;
-    private Marker userMarker;
 
     // Might be null if Google Play services APK is not available.
     private GoogleMap mMap;
 
     //Places
+    private Marker userMarker;
     private Marker[] placeMarkers;
-    private final int MAX_PLACES = 20;
     private MarkerOptions[] places;
     boolean missingValue=false;
     private int userIcon, foodIcon, storeIcon, shopIcon;
 
+    //URLconnection to send a HTTPS get request
     private static HttpsURLConnection urlConnection;
 
+    /**
+     * Override onCreate method.
+     * @param savedInstanceState Saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,19 +129,23 @@ public class MapsActivity extends AppCompatActivity
 
         /**[END SIGN OUT]**/
 
+        /**[START GooglePlaces Api]**/
         //Places
-        placeMarkers = new Marker[MAX_PLACES];
+        placeMarkers = new Marker[20];
         userIcon = R.drawable.yellow_point;
         foodIcon = R.drawable.red_point;
         storeIcon = R.drawable.blue_point;
         shopIcon = R.drawable.green_point;
+        /**[END GooglePlaces Api]**/
 
+        //Set portrait for phones and landscape for tablets
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
 
+        //If offline mode is active, it will not be possible to display nearby stores
         if (User_Info.getInstance().getOffline_mode())
             Toast.makeText(MapsActivity.this,R.string.no_connection_maps,Toast.LENGTH_SHORT).show();
     }
@@ -156,27 +167,38 @@ public class MapsActivity extends AppCompatActivity
         enableMyLocation();
     }
 
+    /**
+     * Override onResume method.
+     */
     @Override
     protected void onResume() {
         super.onResume();
     }
 
+    /**
+     * Override onBackPressed method.
+     */
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout3);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            finish();
-            super.onBackPressed();
+        try {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                finish();
+                super.onBackPressed();
+            }
+        } catch (NullPointerException e){
+            e.printStackTrace();
         }
-        /*Intent intent = new Intent(MapsActivity.this, MainActivity.class);
-        // Start next activity
-        startActivity(intent);*/
     }
 
-    //Navigation
+    /**
+     * Override onNavigationItemSelected method.
+     * @param item MenuItem
+     * @return True
+     */
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -216,7 +238,9 @@ public class MapsActivity extends AppCompatActivity
         return true;
     }
 
-    //Sign Out from Google Account
+    /**
+     * Sign out from Google Account and go to Login activity.
+     */
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
@@ -229,19 +253,24 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * Override onStart method.
+     */
     @Override
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+    /**
+     * Override onStop method.
+     */
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
 
-    //Location
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
@@ -258,6 +287,11 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Override onMyLocationButtonClick method. If the user presses the My Location button and Location is enabled
+     * it will show nearby stores as well as the current position of the user.
+     * @return False
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         // Return false so that we don't consume the event and the default behavior still occurs
@@ -268,7 +302,7 @@ public class MapsActivity extends AppCompatActivity
             PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else if (mMap != null) {
-            locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            LocationManager locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             try {
                 Location lastLoc = locMan.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 double lat = lastLoc.getLatitude();
@@ -281,6 +315,8 @@ public class MapsActivity extends AppCompatActivity
                         .icon(BitmapDescriptorFactory.fromResource(userIcon))
                         .snippet("Your last recorded location"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(lastLatLng), 3000, null);
+
+                //Send request to receive nearby stores
                 updatePlaces(lat, lng);
             } catch (NullPointerException e) {
                 Toast.makeText(MapsActivity.this, "Please, enable My Location button", Toast.LENGTH_SHORT).show();
@@ -290,6 +326,12 @@ public class MapsActivity extends AppCompatActivity
         return false;
     }
 
+    /**
+     * Override onRequestPermissionsResult method. Checks for permissions.
+     * @param requestCode Request Code
+     * @param permissions Permissions
+     * @param grantResults Grant Results
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -306,6 +348,9 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Override onResumeFragments method.
+     */
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
@@ -347,6 +392,11 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Prepare the request and executes an asynchronous task.
+     * @param lat latitude
+     * @param lng longitude
+     */
     private void updatePlaces(double lat, double lng) {
         String placesSearchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/" +
                 "json?location=" + lat + "," + lng +
@@ -357,6 +407,9 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
+    /**
+     * This class is an asynchronous task responsible to send the GET request and process the result.
+     */
     private class GetPlaces extends AsyncTask<String, Void, String> {
         //fetch and parse place data
         @Override
@@ -367,6 +420,7 @@ public class MapsActivity extends AppCompatActivity
             for (String placeSearchURL : placesURL) {
                 //execute search
                 try {
+                    //Send request
                     URL link_url = new URL(placeSearchURL);
                     urlConnection = (HttpsURLConnection) link_url.openConnection();
                     urlConnection.setRequestMethod("GET");
@@ -383,7 +437,6 @@ public class MapsActivity extends AppCompatActivity
                     String line;
                     while ((line = bufferedReader.readLine()) != null) sb.append(line);
                     bufferedReader.close();
-                    String result = sb.toString();
 
                 } catch (MalformedURLException e) {
                     Log.v(TAG, "Malformed");
@@ -428,7 +481,7 @@ public class MapsActivity extends AppCompatActivity
                                     Double.valueOf(loc.getString("lat")),
                                     Double.valueOf(loc.getString("lng")));
                             JSONArray types = placeObject.getJSONArray("types");
-                            //food|bakery|store|city_hall|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store"
+                            //food|bakery|store|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store"
                             for(int t=0; t<types.length(); t++){
                                 //what type is it
                                 String thisType=types.get(t).toString();

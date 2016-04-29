@@ -89,7 +89,7 @@ public class ListViewAdapters extends BaseAdapter{
 
         if(convertView == null){
 
-            //Check if the List View is the header or the content from the Items layour or its from the MainActivity layout.
+            //Check if the List View is the header or the content from the Items layout or its from the MainActivity layout.
             switch(source){
                 case "Content":
                     convertView = inflater.inflate(R.layout.row_view, null);

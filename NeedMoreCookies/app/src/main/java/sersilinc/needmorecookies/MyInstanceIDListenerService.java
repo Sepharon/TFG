@@ -21,7 +21,7 @@ import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
  * This class was extracted directly from the Google Cloud Messaging Github repository.
- * SOURCE: https://github.com/googlesamples/google-services/tree/master/android/gcm
+ * Extracted from: https://github.com/googlesamples/google-services/tree/master/android/gcm
  */
 
 public class MyInstanceIDListenerService extends InstanceIDListenerService {

@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 /**
  * Utility class for access to runtime permissions.
+ * Extracted directly from https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/PermissionUtils.java
  */
 public abstract class PermissionUtils {
 
@@ -91,6 +92,11 @@ public abstract class PermissionUtils {
             return dialog;
         }
 
+        /**
+         * Override onCreateDialog method.
+         * @param savedInstanceState Saved instance state
+         * @return Return dialog
+         */
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             mFinishActivity = getArguments().getBoolean(ARGUMENT_FINISH_ACTIVITY);
@@ -101,6 +107,10 @@ public abstract class PermissionUtils {
                     .create();
         }
 
+        /**
+         * Override onDismiss method
+         * @param dialog Dialog
+         */
         @Override
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);
@@ -149,6 +159,11 @@ public abstract class PermissionUtils {
             return dialog;
         }
 
+        /**
+         * Override onCreateDialog method.
+         * @param savedInstanceState Saved instance state
+         * @return Return Dialog
+         */
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Bundle arguments = getArguments();
@@ -172,6 +187,10 @@ public abstract class PermissionUtils {
                     .create();
         }
 
+        /**
+         * Override onDismiss method.
+         * @param dialog Dialog
+         */
         @Override
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);
