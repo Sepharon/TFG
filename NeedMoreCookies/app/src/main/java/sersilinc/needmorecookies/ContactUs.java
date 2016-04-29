@@ -51,6 +51,10 @@ public class ContactUs extends AppCompatActivity {
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
+    /**
+     * Override onConfigurationChanged method to configure the orientation of the screen
+     * @param newConfig
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);

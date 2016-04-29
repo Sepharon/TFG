@@ -30,6 +30,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+/**
+ * This class has two functions: one is to add products to a concrete list and another is to edit an existing product.
+ */
+
 public class AddItem extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -49,11 +53,12 @@ public class AddItem extends AppCompatActivity
 
     //Strings
     private String edit;
-    private String Product_name;
-    private String Quantity_prod;
-    private String Price_prod;
     private String type_prod;
 
+    /**
+     * Override onCreate method.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,15 +100,15 @@ public class AddItem extends AppCompatActivity
 
 
         /**[START Get intent extras]**/
-        Bundle extras = getIntent().getExtras();
         //Get JSON Strings from the MainActivity
+        Bundle extras = getIntent().getExtras();
         try {
             edit = extras.getString("Edit");
             assert edit != null;
             if (edit.equals("True")) {
-                Product_name = extras.getString("Product");
-                Quantity_prod = extras.getString("Quantity");
-                Price_prod = extras.getString("Price");
+                String Product_name = extras.getString("Product");
+                String Quantity_prod = extras.getString("Quantity");
+                String Price_prod = extras.getString("Price");
                 type_prod = extras.getString("Type");
                 Product.setText(Product_name);
                 Quantity.setText(Quantity_prod);
@@ -124,6 +129,7 @@ public class AddItem extends AppCompatActivity
         // Apply the adapter to the spinner
         type.setAdapter(adapter);
 
+        //In case that we are in edit mode, fix the type of the product
         if (edit.equals("True")) {
             int pos = adapter.getPosition(type_prod);
             type.setSelection(pos);
@@ -137,22 +143,16 @@ public class AddItem extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent result_data = new Intent();
-                if (edit.equals("True")) {
-                    result_data.putExtra("product", Product.getText().toString());
-                    result_data.putExtra("quantity", Quantity.getText().toString());
-                    result_data.putExtra("price", Price.getText().toString());
-                    result_data.putExtra("type", type.getSelectedItem().toString());
-                } else {
-                    result_data.putExtra("product", Product.getText().toString());
-                    result_data.putExtra("quantity", Quantity.getText().toString());
-                    result_data.putExtra("price", Price.getText().toString());
-                    result_data.putExtra("type", type.getSelectedItem().toString());
-                }
+                result_data.putExtra("product", Product.getText().toString());
+                result_data.putExtra("quantity", Quantity.getText().toString());
+                result_data.putExtra("price", Price.getText().toString());
+                result_data.putExtra("type", type.getSelectedItem().toString());
                 setResult(Items.RESULT_OK, result_data);
                 finish();
             }
         });
 
+        //If we are on edit mode, enable the save button from the begining, else disabled it
         if (edit.equals("True")) {
             Save.setEnabled(true);
             Save.setVisibility(View.VISIBLE);
@@ -170,6 +170,7 @@ public class AddItem extends AppCompatActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //If we are not in edit mode, enable save button if product and price are filled in
                 if (!edit.equals("True")) {
                     if (Product.getText().toString().equals("")) {
                         product_added = false;
@@ -196,6 +197,7 @@ public class AddItem extends AppCompatActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //If we are on edit mode, enable save button if product and quantity are filled in
                 if (!edit.equals("True")) {
                     if (Quantity.getText().toString().equals("")) {
                         quantity_added = false;
@@ -218,6 +220,7 @@ public class AddItem extends AppCompatActivity
 
         /**[END TextChangedListener]**/
 
+        //Set portrait orientation for phones and landscape for tablets
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
@@ -225,11 +228,20 @@ public class AddItem extends AppCompatActivity
         }
     }
 
+
+    /**
+     * Override method onStart. It connects the GoogleApiClient.
+     */
+    @Override
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+
+    /**
+     * Override method onBackPressed. If the navigation menu is open, closed it.
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
@@ -241,7 +253,9 @@ public class AddItem extends AppCompatActivity
         }
     }
 
-    //Navigation
+    /**
+     * Override method onNavigationItemSelected. Depeding on what the user chooses, start one activity or another.
+     */
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -282,7 +296,10 @@ public class AddItem extends AppCompatActivity
         return true;
     }
 
-    //Sign Out from Google Account
+    /**
+     * Sign out from the Google Account and go to Login activity.
+     */
+
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
@@ -295,6 +312,9 @@ public class AddItem extends AppCompatActivity
         });
     }
 
+    /**
+     * Start animation to display the save button
+     */
     private void start_animation(){
         Animation fadein = new AlphaAnimation(0,1);
         fadein.setDuration(1000);
@@ -313,6 +333,11 @@ public class AddItem extends AppCompatActivity
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
+
+    /**
+     * Override onConfigurationChanged method to configure the orientation of the screen
+     * @param newConfig
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
