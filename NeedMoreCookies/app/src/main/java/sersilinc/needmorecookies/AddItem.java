@@ -75,12 +75,6 @@ public class AddItem extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         /**[END Navigation]**/
 
-        /** [START Advertisements] **/
-        AdView mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        /** [END Advertisements] **/
 
         /**[START GoogleApiClient]**/
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

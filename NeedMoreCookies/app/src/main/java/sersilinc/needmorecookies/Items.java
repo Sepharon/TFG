@@ -810,18 +810,18 @@ public class Items extends AppCompatActivity
                 }
 
                 if (usr_inf.getOffline_mode()) {
-                    read_from_internal_DB();
                     old_codes = db.add_new_item(product, type, quantity, price, code, usr_inf.getName());
+                    adapter.notifyDataSetChanged();
+                    all_items_l.clear();
+                    meat_items_l.clear();
+                    vegetables_items_l.clear();
+                    cereals_items_l.clear();
+                    dairy_items_l.clear();
+                    sweet_items_l.clear();
+                    others_items_l.clear();
+                    read_from_internal_DB();
                 }
                 reload_ui(1);
-                adapter.notifyDataSetChanged();
-                all_items_l.clear();
-                meat_items_l.clear();
-                vegetables_items_l.clear();
-                cereals_items_l.clear();
-                dairy_items_l.clear();
-                sweet_items_l.clear();
-                others_items_l.clear();
                 // New item added
                 print_db();
                 Log.d(TAG,"Adding new Item");
@@ -852,12 +852,7 @@ public class Items extends AppCompatActivity
                 }
                 String type_prod = get_Product_Type(adapter.getItem(currentSelection).toString());
 
-                items_l = usr_inf.getItems_lists();
-                for (int i = 0; i < items_l.size(); i++) {
-                    if (items_l.get(i).get(0).equals(Product) & items_l.get(i).get(1).equals(Quantity) & items_l.get(i).get(2).equals(Price) & items_l.get(i).get(3).equals(type_prod))
-                        code_item = items_l.get(i).get(4);
-
-                }
+                code_item = db.read_code_items(Product, Quantity, Price, type_prod);
 
                 if (!usr_inf.getOffline_mode())
                     send_request_server("update_item", list_type, code, type, product, price, quantity, code_item);
@@ -960,12 +955,8 @@ public class Items extends AppCompatActivity
 
                 Log.d(TAG, "DELETE: "+Product+Quantity+Price+type);
 
-                String code_item = "";
-                items_l = usr_inf.getItems_lists();
-                for (int i = 0; i < items_l.size(); i++) {
-                    if (items_l.get(i).get(0).equals(Product) & items_l.get(i).get(1).equals(Quantity) & items_l.get(i).get(2).equals(Price) & items_l.get(i).get(3).equals(type))
-                        code_item = items_l.get(i).get(4);
-                }
+                String code_item = db.read_code_items(Product, Quantity, Price, type);
+
 
                 if (!usr_inf.getOffline_mode()) {
                     send_request_server("delete_item", list_type, code, type, Product, Price, Quantity, code_item);
@@ -1214,16 +1205,7 @@ public class Items extends AppCompatActivity
 
                         meat_items_l.add(temp);
 
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp = new ArrayList<>();
-                        item_list_temp.add(b[0]);
-                        item_list_temp.add(b[1]);
-                        item_list_temp.add(b[2]);
-                        item_list_temp.add(b[3]);
-                        item_list_temp.add(b[5]);
-                        item_list_temp.add(b[4]);
 
-                        usr_inf.setItems_lists(item_list_temp);
                         break;
                     case "Vegetables":
                         temp = new HashMap<>();
@@ -1241,16 +1223,6 @@ public class Items extends AppCompatActivity
 
                         vegetables_items_l.add(temp);
 
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp2 = new ArrayList<>();
-                        item_list_temp2.add(b[0]);
-                        item_list_temp2.add(b[1]);
-                        item_list_temp2.add(b[2]);
-                        item_list_temp2.add(b[3]);
-                        item_list_temp2.add(b[5]);
-                        item_list_temp2.add(b[4]);
-
-                        usr_inf.setItems_lists(item_list_temp2);
                         break;
                     case "Cereal":
                         temp = new HashMap<>();
@@ -1266,16 +1238,7 @@ public class Items extends AppCompatActivity
                             temp.put(FOURTH_COLUMN, a.get(i)[4]);
 
                         cereals_items_l.add(temp);
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp3 = new ArrayList<>();
-                        item_list_temp3.add(b[0]);
-                        item_list_temp3.add(b[1]);
-                        item_list_temp3.add(b[2]);
-                        item_list_temp3.add(b[3]);
-                        item_list_temp3.add(b[5]);
-                        item_list_temp3.add(b[4]);
 
-                        usr_inf.setItems_lists(item_list_temp3);
                         break;
                     case "Dairy":
                         temp = new HashMap<>();
@@ -1292,16 +1255,7 @@ public class Items extends AppCompatActivity
 
                         dairy_items_l.add(temp);
 
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp4 = new ArrayList<>();
-                        item_list_temp4.add(b[0]);
-                        item_list_temp4.add(b[1]);
-                        item_list_temp4.add(b[2]);
-                        item_list_temp4.add(b[3]);
-                        item_list_temp4.add(b[5]);
-                        item_list_temp4.add(b[4]);
 
-                        usr_inf.setItems_lists(item_list_temp4);
                         break;
                     case "Sweet":
                         temp = new HashMap<>();
@@ -1318,16 +1272,6 @@ public class Items extends AppCompatActivity
 
                         sweet_items_l.add(temp);
 
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp5 = new ArrayList<>();
-                        item_list_temp5.add(b[0]);
-                        item_list_temp5.add(b[1]);
-                        item_list_temp5.add(b[2]);
-                        item_list_temp5.add(b[3]);
-                        item_list_temp5.add(b[5]);
-                        item_list_temp5.add(b[4]);
-
-                        usr_inf.setItems_lists(item_list_temp5);
                         break;
                     case "Others":
                         temp = new HashMap<>();
@@ -1344,16 +1288,6 @@ public class Items extends AppCompatActivity
 
                         others_items_l.add(temp);
 
-                        //Variables to store the product name, quantity, price, type, code and last_user
-                        List<String> item_list_temp6 = new ArrayList<>();
-                        item_list_temp6.add(b[0]);
-                        item_list_temp6.add(b[1]);
-                        item_list_temp6.add(b[2]);
-                        item_list_temp6.add(b[3]);
-                        item_list_temp6.add(b[5]);
-                        item_list_temp6.add(b[4]);
-
-                        usr_inf.setItems_lists(item_list_temp6);
                         break;
                 }
             }

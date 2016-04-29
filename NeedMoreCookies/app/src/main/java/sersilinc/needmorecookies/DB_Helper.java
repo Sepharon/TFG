@@ -185,7 +185,7 @@ public class DB_Helper {
             } while (result.moveToNext());
         } catch (android.database.CursorIndexOutOfBoundsException e){
             e.printStackTrace();
-            Log.d(TAG,"Empty DB");
+            Log.d(TAG, "Empty DB");
         }
         Log.d(TAG,"read_all_flag " + r.toString());
         result.close();
@@ -344,5 +344,13 @@ public class DB_Helper {
 
     public void delete_all_items_of_one_list(String code_list){
         DataBase.delete_all_items(code_list);
+    }
+
+    public String read_code_items(String productName, String quantity, String price, String type){
+        String query = "SELECT " + DataBase.KEY_CODE + " FROM " + DataBase.Items_table_name
+                + " WHERE " + DataBase.KEY_PRODUCT + String.format("='%s'",productName) + " AND "+DataBase.KEY_QUANTITY + String.format("='%s'",quantity) + " AND " + DataBase.KEY_PRICE + String.format("='%s'",price) + " AND " + DataBase.KEY_TYPE + String.format("='%s'",type);
+        String result = DataBase.read_item(query);
+        if (result == null) return "Error";
+        return result;
     }
 }

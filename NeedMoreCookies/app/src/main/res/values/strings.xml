@@ -32,19 +32,6 @@
         <item>$</item>
     </string-array>
 
-    <!--<string-array name="size_text_array">
-        <item>8</item>
-        <item>10</item>
-        <item>12</item>
-        <item>14</item>
-    </string-array>
-    <string-array name="size_text_array_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>-->
-
     <string name="pref_header_notifications">Notifications</string>
 
     <string name="pref_title_new_message_notifications">Notifications</string>
@@ -86,9 +73,12 @@
     <string name="title_activity_about"><b>"About"</b></string>
     <string name="title_activity_help"><b>"Help"</b></string>
     <string name="title_activity_contact_us"><b>"Contact us"</b></string>
-    <string name="contact">If you want to contact us, you can send an email pressing the button below</string>
-    <string name="about_us">This application was made for the Bachelor\'s Project by the students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)
-        \n\nThe purpose of this app is to create a shopping list that can be shareable between members of a family, roommates…
+    <string name="contact">If you want to contact us, you can send an email pressing the button below.\nA dialog showing options to send an email to a friend will be displayed.</string>
+    <string name="about_us">This application was made for the Bachelor\'s Project by the international students Sergi Carol (student number ID: 201501579) and Sílvia Roses (student number ID: 201501349)
+        \n\nThe purpose of this Android application is to create a shopping list that can be shareable between members of a family, roommates and so on. Each shopping list can be organized into two different groups: Private and Public.
+        Private lists are only accessible by the owner, while Public lists are accessible by the owner and the people who the owner has shared the list with.\nIn order to share a shopping list, it is necessary to provide the Google account
+        of the user who you want to share the shopping list with. This user must have the Android application installed and running. If this is not the case, there is an option to send an email to a friend with the Android application.\n\nTo show nearby stores, the user must have the location enabled on its device. Each place has different markers with different colours: Red for food and bakery, Blue for stores and Green for grocery, supermarkets and shopping mall.\n\nAn offline mode is included
+        in which the user can add and delete shopping lists, and add, delete and modify products. Share shopping lists is not permitted while in offline mode.
     </string>
     <string name="title_activity_add_list"><b>"Add Shopping List"</b></string>
     <string name="title_activity_add_item"><b>"Add Product"</b></string>

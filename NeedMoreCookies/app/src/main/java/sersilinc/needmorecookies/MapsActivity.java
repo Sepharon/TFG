@@ -168,11 +168,12 @@ public class MapsActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            finish();
             super.onBackPressed();
         }
-        Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+        /*Intent intent = new Intent(MapsActivity.this, MainActivity.class);
         // Start next activity
-        startActivity(intent);
+        startActivity(intent);*/
     }
 
     //Navigation
@@ -346,7 +347,7 @@ public class MapsActivity extends AppCompatActivity
         String placesSearchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/" +
                 "json?location=" + lat + "," + lng +
                 "&radius=1000&sensor=true" +
-                "&types=food|bakery|store|city_hall|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store" +
+                "&types=food|bakery|store|convenience_store|electronics_store|grocery_or_supermarket|liquor_store|shopping_mall|store" +
                 "&key=AIzaSyCluvWCx_dGHIXx0jd1pCEFrM6MkYKRAeA";
         new GetPlaces().execute(placesSearchStr);
 
@@ -435,7 +436,7 @@ public class MapsActivity extends AppCompatActivity
                                     currIcon = storeIcon;
                                     break;
                                 }
-                                else if(thisType.contains("grocery_or_supermarket") || thisType.contains("shopping_mall") || thisType.contains("city_hall")){
+                                else if(thisType.contains("grocery_or_supermarket") || thisType.contains("shopping_mall")){
                                     currIcon = shopIcon;
                                     break;
                                 }

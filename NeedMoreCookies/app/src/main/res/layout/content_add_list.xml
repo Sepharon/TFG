@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="@string/chose_public_priv"
             android:id="@+id/textView"
-            android:layout_marginTop="53dp"
+            android:layout_marginTop="20dp"
             android:textSize="18dp"
             android:layout_below="@+id/list_name"
             android:layout_alignParentLeft="true"
