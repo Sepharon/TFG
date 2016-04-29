@@ -21,9 +21,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,7 +28,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 /**
- * This class has two functions: one is to add products to a concrete list and another is to edit an existing product.
+ * This class has two modes: one is to add products to a concrete list and another is to edit an existing product.
  */
 
 public class AddItem extends AppCompatActivity
@@ -57,7 +54,7 @@ public class AddItem extends AppCompatActivity
 
     /**
      * Override onCreate method.
-     * @param savedInstanceState
+     * @param savedInstanceState Saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -336,7 +333,7 @@ public class AddItem extends AppCompatActivity
 
     /**
      * Override onConfigurationChanged method to configure the orientation of the screen
-     * @param newConfig
+     * @param newConfig New Configuration
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

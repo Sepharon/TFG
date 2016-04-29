@@ -17,12 +17,12 @@
 package sersilinc.needmorecookies;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
-import com.google.android.gms.iid.InstanceID;
 import com.google.android.gms.iid.InstanceIDListenerService;
+
+/**
+ * This class was extracted directly from the Google Cloud Messaging Github repository.
+ * SOURCE: https://github.com/googlesamples/google-services/tree/master/android/gcm
+ */
 
 public class MyInstanceIDListenerService extends InstanceIDListenerService {
 

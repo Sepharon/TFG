@@ -23,7 +23,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     /**
      * Override onCreate method.
-     * @param savedInstanceState
+     * @param savedInstanceState Saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     /**
      * Override method onPostCreate.
-     * @param savedInstanceState
+     * @param savedInstanceState Saved instance state
      */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     /**
      * Extract support action bar.
-     * @return
+     * @return Return support ActionBar
      */
     public ActionBar getSupportActionBar() {
         return getDelegate().getSupportActionBar();
@@ -52,7 +52,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     /**
      * Set support action bar.
-     * @param toolbar
+     * @param toolbar Toolbar
      */
     public void setSupportActionBar(@Nullable Toolbar toolbar) {
         getDelegate().setSupportActionBar(toolbar);
@@ -60,67 +60,110 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     /**
      * Override getMenuInflater method. Extract menu inflater.
-     * @return
+     * @return Return Menu inflater
      */
     @Override
     public MenuInflater getMenuInflater() {
         return getDelegate().getMenuInflater();
     }
 
+    /**
+     * Override setContentView method.
+     * @param layoutResID ID of layout
+     */
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         getDelegate().setContentView(layoutResID);
     }
 
+    /**
+     * Override setContentView method.
+     * @param view View
+     */
     @Override
     public void setContentView(View view) {
         getDelegate().setContentView(view);
     }
 
+    /**
+     * Override setContentView method.
+     * @param view View
+     * @param params parameters
+     */
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         getDelegate().setContentView(view, params);
     }
 
+    /**
+     * Override addContentView method.
+     * @param view View
+     * @param params parameters
+     */
     @Override
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         getDelegate().addContentView(view, params);
     }
 
+    /**
+     * Override onPostResume method.
+     */
     @Override
     protected void onPostResume() {
         super.onPostResume();
         getDelegate().onPostResume();
     }
 
+    /**
+     * Override onTitleChanged method.
+     * @param title title
+     * @param color color
+     */
     @Override
     protected void onTitleChanged(CharSequence title, int color) {
         super.onTitleChanged(title, color);
         getDelegate().setTitle(title);
     }
 
+    /**
+     * Override onConfigurationChanged method.
+     * @param newConfig New Configuration
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         getDelegate().onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Override onStop method.
+     */
     @Override
     protected void onStop() {
         super.onStop();
         getDelegate().onStop();
     }
 
+    /**
+     * Override onDestroy method.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         getDelegate().onDestroy();
     }
 
+    /**
+     * invalidateOptionsMenu method.
+     */
     public void invalidateOptionsMenu() {
         getDelegate().invalidateOptionsMenu();
     }
 
+    /**
+     * getDelegate method.
+     * @return Return Delegate
+     */
     private AppCompatDelegate getDelegate() {
         if (mDelegate == null) {
             mDelegate = AppCompatDelegate.create(this, null);

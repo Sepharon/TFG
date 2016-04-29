@@ -29,12 +29,16 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 
+/**
+ * This class was extracted directly from the Google Cloud Messaging Github repository.
+ * SOURCE: https://github.com/googlesamples/google-services/tree/master/android/gcm
+ */
+
 public class MyGcmListenerService extends GcmListenerService {
 
     private static final String TAG = "MyGcmListenerService";
 
     //Preferences
-    private SharedPreferences prefs;
     private Boolean notifications;
     private String silent;
     private Boolean vibrate;
@@ -57,7 +61,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG, "Message: " + message);
 
         /**[START Preferences]**/
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Get currency User's preference
         notifications = prefs.getBoolean("notifications_new_message", true);
@@ -94,7 +98,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 PendingIntent.FLAG_ONE_SHOT);
 
 
-
+        //If notifications are enabled
         if (notifications) {
             notificationBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.cookie_icon2_notifications)
@@ -102,10 +106,12 @@ public class MyGcmListenerService extends GcmListenerService {
                     .setContentText(message)
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent);
+            //If silence selected
             if (!silent.equals("")) {
                 Uri defaultSoundUri = Uri.parse(silent);
                 notificationBuilder.setSound(defaultSoundUri);
             }
+            //If vibrate activated
             if (vibrate) {
                 notificationBuilder.setVibrate(new long[]{500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,500});
             }

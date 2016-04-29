@@ -4,11 +4,8 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 /**
  * This class shows a textview with information about the Android application.
@@ -18,7 +15,7 @@ public class About extends AppCompatActivity {
 
     /**
      * Override onCreate method
-     * @param savedInstanceState
+     * @param savedInstanceState Saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +44,7 @@ public class About extends AppCompatActivity {
 
     /**
      * Override onConfigurationChanged method to configure the orientation of the screen
-     * @param newConfig
+     * @param newConfig New Configuration
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

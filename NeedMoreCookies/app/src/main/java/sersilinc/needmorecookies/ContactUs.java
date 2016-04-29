@@ -6,13 +6,20 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+/**
+ * This class shows information on how to contact with the developers of the project.
+ */
+
 public class ContactUs extends AppCompatActivity {
 
+    /**
+     * Override onCreate method.
+     * @param savedInstanceState Saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,6 +28,7 @@ public class ContactUs extends AppCompatActivity {
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_contact);
         assert fab != null;
+        //Send email
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -35,6 +43,7 @@ public class ContactUs extends AppCompatActivity {
             }
         });
 
+        //Set portrait orientation for phones and landscape for tablets.
         if (!isXLargeTablet(getApplicationContext())){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
@@ -53,7 +62,7 @@ public class ContactUs extends AppCompatActivity {
 
     /**
      * Override onConfigurationChanged method to configure the orientation of the screen
-     * @param newConfig
+     * @param newConfig New configuration
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

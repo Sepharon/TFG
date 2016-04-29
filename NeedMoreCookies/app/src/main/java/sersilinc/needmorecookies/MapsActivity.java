@@ -335,7 +335,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * Override onConfigurationChanged method to configure the orientation of the screen
-     * @param newConfig
+     * @param newConfig New configuration
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

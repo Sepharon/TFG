@@ -29,6 +29,11 @@ import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
 
+/**
+ * This class was extracted directly from the Google Cloud Messaging Github repository.
+ * SOURCE: https://github.com/googlesamples/google-services/tree/master/android/gcm
+ */
+
 public class RegistrationIntentService extends IntentService {
 
     private static final String TAG = "RegIntentService";
@@ -38,6 +43,10 @@ public class RegistrationIntentService extends IntentService {
         super(TAG);
     }
 
+    /**
+     * Override onHandleIntent.
+     * @param intent intent
+     */
     @Override
     protected void onHandleIntent(Intent intent) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -53,12 +62,8 @@ public class RegistrationIntentService extends IntentService {
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             // [END get_token]
-            Intent in = new Intent();
-            in.setAction("broadcast_login");
-            in.putExtra("Request", "Token");
-            in.putExtra("Token", token);
-            sendBroadcast(in);
 
+            //Send token
             Intent in2 = new Intent();
             in2.setAction("broadcast_service");
             in2.putExtra("Request", "Token");
@@ -66,7 +71,6 @@ public class RegistrationIntentService extends IntentService {
             sendBroadcast(in2);
             Log.i(TAG, "GCM Registration Token: " + token);
 
-            // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(token);
 
             // Subscribe to topic channels
