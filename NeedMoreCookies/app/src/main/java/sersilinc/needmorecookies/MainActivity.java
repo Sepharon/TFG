@@ -403,7 +403,6 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         timer.cancel();
-        unregisterReceiver(receiver);
         if (timer2 != null) timer2.cancel();
     }
 
@@ -459,6 +458,7 @@ public class MainActivity extends AppCompatActivity
         // Stops timers
         timer.cancel();
         if (timer2 != null) timer2.cancel();
+        unregisterReceiver(receiver);
     }
 
     // Binding Update Android
@@ -509,6 +509,9 @@ public class MainActivity extends AppCompatActivity
             Log.v(TAG,"Request: "+ request_type);
             //Check type of request
             switch(request_type){
+                case "finish_activity":
+                    finish();
+                    break;
                 // Get one Shopping List from the server
                 case "one_list":
                     update_product = intent.getStringExtra("Update_Products");
@@ -683,7 +686,10 @@ public class MainActivity extends AppCompatActivity
             startActivity(final_intent);
         }
         // Logout from the system
-        else if (id == R.id.nav_logout) signOut();
+        else if (id == R.id.nav_logout){
+            signOut();
+            finish();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;

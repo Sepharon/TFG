@@ -230,6 +230,11 @@ public class MapsActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_logout) {
             signOut();
+            Intent intent = new Intent();
+            intent.setAction("broadcast_service");
+            intent.putExtra("Request","finish_activity");
+            sendBroadcast(intent);
+            finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout3);

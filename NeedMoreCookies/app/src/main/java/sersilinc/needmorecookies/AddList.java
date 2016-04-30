@@ -182,15 +182,18 @@ public class AddList extends AppCompatActivity
             Intent intent = new Intent(AddList.this,MapsActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(AddList.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         }
         else if (id == R.id.nav_home) {
             Intent intent = new Intent(AddList.this,MainActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         } else if (id == R.id.nav_share) {
             Intent mail_intent = new Intent(Intent.ACTION_SEND);
             mail_intent.setType("message/rfc822");
@@ -202,8 +205,16 @@ public class AddList extends AppCompatActivity
             final_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             // Start Mail chooser
             startActivity(final_intent);
+            finish();
 
-        } else if (id == R.id.nav_logout) signOut();
+        } else if (id == R.id.nav_logout){
+            signOut();
+            Intent intent = new Intent();
+            intent.putExtra("Request","finish_activity");
+            intent.setAction("broadcast_service");
+            sendBroadcast(intent);
+            finish();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_list);
         assert drawer != null;

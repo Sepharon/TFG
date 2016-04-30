@@ -262,15 +262,18 @@ public class AddItem extends AppCompatActivity
             Intent intent = new Intent(AddItem.this,MapsActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(AddItem.this, SettingsActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         }
         else if (id == R.id.nav_home) {
             Intent intent = new Intent(AddItem.this,MainActivity.class);
             // Start next activity
             startActivity(intent);
+            finish();
         } else if (id == R.id.nav_share) {
             Intent mail_intent = new Intent(Intent.ACTION_SEND);
             mail_intent.setType("message/rfc822");
@@ -285,6 +288,11 @@ public class AddItem extends AppCompatActivity
 
         } else if (id == R.id.nav_logout) {
             signOut();
+            Intent intent = new Intent();
+            intent.putExtra("Request","finish_activity");
+            intent.setAction("broadcast_service");
+            sendBroadcast(intent);
+            finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_item);
