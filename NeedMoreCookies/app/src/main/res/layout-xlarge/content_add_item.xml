@@ -57,7 +57,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose category:"
+        android:text="@string/choose_category"
         android:id="@+id/category"
         android:layout_below="@+id/price"
         android:layout_marginTop="10dp"

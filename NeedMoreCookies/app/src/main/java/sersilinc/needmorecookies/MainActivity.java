@@ -1046,7 +1046,7 @@ public class MainActivity extends AppCompatActivity
             fadeOut.setDuration(1000);
             // Show the Welcome back text
             if (usr_inf.getOffline_mode()) welcome.setText(R.string.offline_explanation);
-            else welcome.setText(String.format("\n\nWelcome back\n %s !", usr_inf.getName()));
+            else welcome.setText(getResources().getString(R.string.welcome_display) + usr_inf.getName() + "!");
             welcome.setVisibility(View.VISIBLE);
             welcome.setAnimation(fadein);
             welcome.setAnimation(fadeOut);

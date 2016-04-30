@@ -48,7 +48,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="All"
+                        android:text="@string/all_string"
                         android:id="@+id/all"
                         android:background="@null"
                         android:textColor="#ffffff" />
@@ -72,7 +72,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Meat and Fish"
+                        android:text="@string/meat_fish"
                         android:id="@+id/meat"
                         android:background="@null"
                         android:textColor="#ffffff"
@@ -97,7 +97,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Vegetables"
+                        android:text="@string/vegetables"
                         android:id="@+id/vegetables"
                         android:background="@null"
                         android:textColor="#ffffff"
@@ -121,7 +121,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Cereals"
+                        android:text="@string/cereal"
                         android:id="@+id/cereals"
                         android:background="@null"
                         android:textColor="#ffffff" />
@@ -143,7 +143,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Dairy"
+                        android:text="@string/dairy"
                         android:id="@+id/dairy"
                         android:background="@null"
                         android:textColor="#ffffff" />
@@ -165,7 +165,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Sweet"
+                        android:text="@string/sweet"
                         android:id="@+id/sweet"
                         android:background="@null"
                         android:textColor="#ffffff" />
@@ -187,7 +187,7 @@
                         style="?android:attr/borderlessButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="Others"
+                        android:text="@string/others"
                         android:id="@+id/others"
                         android:background="@null"
                         android:textColor="#ffffff" />

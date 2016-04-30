@@ -37,7 +37,7 @@
         android:layout_height="20dp"
         android:layout_width="60dp"
         android:textSize="12sp"
-        android:text="Added by"
+        android:text="@string/Addedby"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="10dp"
         android:visibility="gone"/>

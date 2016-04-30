@@ -14,7 +14,7 @@
         android:layout_height="30dp"
         android:layout_width="90dp"
         android:textSize="12sp"
-        android:text="Last updated"
+        android:text="@string/lastUpdated"
         android:layout_below="@+id/shop_list"
         android:layout_marginLeft="10dp" />
     <TextView

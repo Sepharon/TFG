@@ -192,11 +192,6 @@ public class Items extends AppCompatActivity
         /**[END Intent-filter for receiving Broadcast]**/
 
         /**[START List View]**/
-        temp = new HashMap<>();
-        temp.put(FIRST_COLUMN, "Product");
-        temp.put(SECOND_COLUMN, "Quantity");
-        temp.put(THIRD_COLUMN, "Price");
-        l_header.add(temp);
         //Custom adapter
         ListViewAdapters adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
         listview_header.setAdapter(adapter_header);
