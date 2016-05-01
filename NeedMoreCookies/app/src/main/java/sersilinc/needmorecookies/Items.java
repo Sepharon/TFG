@@ -93,6 +93,7 @@ public class Items extends AppCompatActivity
      * [START ListView]
      **/
     //Header
+    private ListViewAdapters adapter_header;
     private ArrayList<HashMap<String, String>> l_header = new ArrayList<>();
     //Content
     private ListView listview_items;
@@ -193,10 +194,16 @@ public class Items extends AppCompatActivity
 
         /**[START List View]**/
         //Custom adapter
-        ListViewAdapters adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
+        adapter_header = new ListViewAdapters(this, l_header, "Header", "1");
         listview_header.setAdapter(adapter_header);
         adapter = new ListViewAdapters(this, all_items_l, "Content", list_type);
         listview_items.setAdapter(adapter);
+
+        temp = new HashMap<>();
+        temp.put(FIRST_COLUMN, getResources().getString(R.string.product_string));
+        temp.put(SECOND_COLUMN, getResources().getString(R.string.quantity_string));
+        temp.put(THIRD_COLUMN, getResources().getString(R.string.price_string));
+        l_header.add(temp);
         /**[END List View]**/
 
         /**[START Preferences]**/
