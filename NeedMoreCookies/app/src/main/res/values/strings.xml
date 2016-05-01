@@ -152,7 +152,7 @@
     <!-- Share APP -->
     <string name="offline_mail">Unable to send an invitation while in offline mode</string>
     <string name="mail_subject">Join me in Need More Cookies!</string>
-    <string name="mail_text">I invite you to try this awesome app! You will be able to write and share shopping lists
+    <string name="mail_text" translatable="false">I invite you to try this awesome app! You will be able to write and share shopping lists
     with your friends! \n Download it here: test.com \n Your friend: </string>
     <string name="choose_mail">Send mail with…</string>
     <string name="Addedby">Added by</string>

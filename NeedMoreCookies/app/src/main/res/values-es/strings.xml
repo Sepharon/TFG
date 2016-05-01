@@ -23,7 +23,7 @@
     <string name="currency_description">Escoge la moneda que deseas</string>
     <string name="dairy">Lácteos</string>
     <string name="delete_item_error">Un problema ha ocurrido al eliminar el producto</string>
-    <string name="delete_list_alert">Eliminar lista de la compra?</string>
+    <string name="delete_list_alert">¿Eliminar lista de la compra?</string>
     <string name="delete_list_error">Un problema ha ocurrido al eliminar la lista de la compra</string>
     <string name="delete_list_msg">Estás seguro de que quieres eliminar la lista de la compra?</string>
     <string name="delete_sl_ok">Lista de la compra eliminada</string>
