@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Need More Cookies!</string>
     <string name="Addedby">Afegit per</string>
     <string name="Request">Sol·licitud</string>
     <string name="Sign_Title">"Benvingut a \n Need More Cookies!"</string>
@@ -38,12 +37,12 @@
     <string name="hint_list_name">Nom de la llista de la compra aquí</string>
     <string name="home">Inici</string>
     <string name="invite_friends">Convidar amics</string>
-    <string name="lastUpdated">Ultim cop actualitzat</string>
+    <string name="lastUpdated">Últim cop actualitzat</string>
     <string name="list_name_error">Una llista de la compra amb aquest nom ja existeix</string>
     <string name="locationSuper">Localització de supermercats</string>
     <string name="location_enable">Si us plau, activeu la Localització</string>
     <string name="location_permission_denied">Aquesta aplicació requereix permís per activar la localització</string>
-    <string name="logout">Tencar sessió</string>
+    <string name="logout">Tancar sessió</string>
     <string name="mail_subject">Uneix-te a Need More Cookies!</string>
     <string name="mail_text">Et convido</string>
     <string name="meat_fish">Carn i peix</string>
@@ -108,4 +107,27 @@
     <string name="update_products">Actualitzant productes</string>
     <string name="vegetables">Verdures</string>
     <string name="welcome_display">"\n\nBenvigut de nou!\n"</string>
+    <string name="write_email_msg">Escriu un email:</string>
+
+    <string-array name="currency_array">
+        <item>€</item>
+        <item>DKK</item>
+        <item>£</item>
+        <item>$</item>
+    </string-array>
+    <string-array name="currency_array_values">
+        <item>€</item>
+        <item>DKK</item>
+        <item>£</item>
+        <item>$</item>
+    </string-array>
+
+    <string-array name="type_of_products">
+        <item>Carne y pescado</item>
+        <item>Hortalizas</item>
+        <item>Cereales</item>
+        <item>Lácteos</item>
+        <item>Dulces</item>
+        <item>Otros</item>
+    </string-array>
 </resources>
