@@ -425,6 +425,7 @@ public class MapsActivity extends AppCompatActivity
             for (String placeSearchURL : placesURL) {
                 //execute search
                 try {
+                    Log.v(TAG, "REQUEST: "+placeSearchURL);
                     //Send request
                     URL link_url = new URL(placeSearchURL);
                     urlConnection = (HttpsURLConnection) link_url.openConnection();
@@ -457,6 +458,7 @@ public class MapsActivity extends AppCompatActivity
                     }
                 }
             }
+            Log.v(TAG, "RESPONSE: "+sb.toString());
             return sb.toString();
         }
 
