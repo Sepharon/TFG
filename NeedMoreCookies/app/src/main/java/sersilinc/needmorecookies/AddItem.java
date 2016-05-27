@@ -143,7 +143,7 @@ public class AddItem extends AppCompatActivity
                 result_data.putExtra("product", Product.getText().toString());
                 result_data.putExtra("quantity", Quantity.getText().toString());
                 result_data.putExtra("price", Price.getText().toString());
-                result_data.putExtra("type", type.getSelectedItem().toString());
+                result_data.putExtra("type", get_english_version(type.getSelectedItemPosition()));
                 setResult(Items.RESULT_OK, result_data);
                 finish();
             }
@@ -351,6 +351,11 @@ public class AddItem extends AppCompatActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+    }
+
+    private String get_english_version(int product){
+        String[] types = new String[]{"Meat and Fish", "Vegetables", "Cereal", "Dairy", "Sweet", "Others"};
+        return types[product];
     }
 
 }
